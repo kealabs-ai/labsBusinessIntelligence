@@ -89,7 +89,7 @@ pipeline {
         
         stage('Deploy to PROD') {
             when {
-                branch 'main'
+                branch 'master'
             }
             steps {
                 input message: 'Deploy to production?', ok: 'Deploy'
