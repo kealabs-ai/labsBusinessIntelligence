@@ -129,7 +129,7 @@ pipeline {
                 script {
                     sh '''
                         # Scan for secrets
-                        grep -r "password\|secret\|key" --exclude-dir=.git --exclude="*.md" . || echo "Security scan completed"
+                        grep -r 'password\|secret\|key' --exclude-dir=.git --exclude='*.md' . || echo 'Security scan completed'
                         
                         # Docker image security scan
                         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -197,7 +197,7 @@ pipeline {
                         curl -f http://localhost:6000/ || echo "PROD deployment health check failed"
                         
                         # Notify deployment
-                        echo "🚀 LabsBusinessIntelligence deployed to PRODUCTION successfully!"
+                        echo 'LabsBusinessIntelligence deployed to PRODUCTION successfully!'
                     '''
                 }
             }
@@ -220,13 +220,13 @@ pipeline {
             cleanWs()
         }
         success {
-            echo '✅ Pipeline executado com sucesso!'
+            echo 'Pipeline executado com sucesso!'
             script {
                 sh 'echo "Build ${BUILD_NUMBER} completed successfully at $(date)"'
             }
         }
         failure {
-            echo '❌ Pipeline falhou!'
+            echo 'Pipeline falhou!'
             script {
                 sh 'echo "Build ${BUILD_NUMBER} failed at $(date)"'
             }
