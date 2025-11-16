@@ -165,6 +165,7 @@ pipeline {
                             --network labsbi_dev_network \
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
+                            -e MYSQL_ROOT_HOST=% \
                             -p 3306:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
@@ -180,7 +181,7 @@ pipeline {
                             -e MYSQL_USER=root \
                             -e MYSQL_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
-                            -p 6002:8000 \
+                            -p 0.0.0.0:6002:8000 \
                             ${BACKEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Wait for backend to start
@@ -193,8 +194,8 @@ pipeline {
                         # Start Frontend
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
-                            -e REACT_APP_API_URL=http://labsbi_backend_dev:8000 \
-                            -p 4002:5000 \
+                            -e REACT_APP_API_URL=http://$(hostname -I | awk '{print $1}'):6002 \
+                            -p 0.0.0.0:4002:5000 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Health check with retry
