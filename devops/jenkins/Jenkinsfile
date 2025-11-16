@@ -66,7 +66,7 @@ pipeline {
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_test \
                             -e MYSQL_ROOT_HOST=% \
-                            -p 0.0.0.0:3307:3306 \
+                            -p 0.0.0.0:3308:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
                         
@@ -171,7 +171,7 @@ pipeline {
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
                             -e MYSQL_ROOT_HOST=% \
-                            -p 0.0.0.0:3306:3306 \
+                            -p 0.0.0.0:3309:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
                         
@@ -224,7 +224,7 @@ pipeline {
                         echo "Frontend: http://$(hostname -I | awk '{print $1}'):4002"
                         echo "Backend API: http://$(hostname -I | awk '{print $1}'):6002"
                         echo "Backend Docs: http://$(hostname -I | awk '{print $1}'):6002/docs"
-                        echo "MySQL: $(hostname -I | awk '{print $1}'):3306"
+                        echo "MySQL: $(hostname -I | awk '{print $1}'):3309"
                         echo "======================================="
                     '''
                 }
