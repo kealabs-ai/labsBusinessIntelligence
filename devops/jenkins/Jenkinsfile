@@ -61,20 +61,26 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        # Clean up existing test containers
+                        docker stop mysql-test || true
+                        docker rm mysql-test || true
+                        
                         # Start MySQL container for testing with external access
                         docker run -d --name mysql-test \
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_test \
                             -e MYSQL_ROOT_HOST=% \
                             -p 0.0.0.0:3308:3306 \
-                            -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
                         
                         # Wait for MySQL to be ready
-                        sleep 90
+                        sleep 120
                         
-                        # Verify MySQL is running
-                        docker ps | grep mysql-test || echo "MySQL test container not running"
+                        # Verify MySQL is running and show logs if failed
+                        if ! docker ps | grep mysql-test; then
+                            echo "MySQL test container not running - checking logs:"
+                            docker logs mysql-test || true
+                        fi
                     '''
                 }
             }
@@ -205,6 +211,10 @@ pipeline {
                             -e REACT_APP_API_URL=http://$(hostname -I | awk '{print $1}'):6002 \
                             -p 0.0.0.0:4002:5000 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Show backend logs for debugging
+                        echo "Backend container logs:"
+                        docker logs labsbi_backend_dev | tail -10 || true
                         
                         # Health check with retry
                         for i in 1 2 3 4 5; do
