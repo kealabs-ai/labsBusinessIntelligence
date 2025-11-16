@@ -1,13 +1,5 @@
 pipeline {
-    agent {
-        any {
-            label 'master'
-        }
-    }
-    
-    options {
-        skipDefaultCheckout()
-    }
+    agent any
     
     environment {
         DOCKER_REGISTRY = 'kealabsai'
@@ -69,11 +61,12 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Start MySQL container for testing
+                        # Start MySQL container for testing with external access
                         docker run -d --name mysql-test \
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_test \
-                            -p 3307:3306 \
+                            -e MYSQL_ROOT_HOST=% \
+                            -p 0.0.0.0:3307:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
                         
@@ -161,12 +154,12 @@ pipeline {
                 script {
                     sh '''
                         # Stop existing containers
-                        sudo docker stop labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
-                        sudo docker rm labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
+                        docker stop labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
+                        docker rm labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
                         
                         # Remove and recreate network
-                        sudo docker network rm labsbi_dev_network || true
-                        sudo docker network create labsbi_dev_network
+                        docker network rm labsbi_dev_network || true
+                        docker network create labsbi_dev_network
                         
                         # Start MySQL
                         docker run -d --name labsbi_mysql_dev \
