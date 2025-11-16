@@ -141,9 +141,7 @@ pipeline {
                         docker network rm labsbi_dev_network || true
                         docker network create labsbi_dev_network
                         
-                        # Clean up any existing containers
-                        docker stop mysql_eden_jardins_labsbi_mysql || true
-                        docker rm mysql_eden_jardins_labsbi_mysql || true
+                        # Clean up completed - using external MySQL
                         
                         # Using external MySQL server - no container needed
                         echo "Using external MySQL server at 72.60.140.128:33060"
