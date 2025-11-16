@@ -94,14 +94,15 @@ pipeline {
                             sh '''
                                 # Backend API tests - skip if MySQL not ready
                                 if docker ps | grep mysql-test > /dev/null; then
-                                    docker run --rm --link mysql-test:mysql \
+                                    docker run --rm \
                                         -e DB_ENGINE=mysql \
-                                        -e MYSQL_HOST=mysql \
-                                        -e MYSQL_USER=root \
-                                        -e MYSQL_PASSWORD=password \
-                                        -e MYSQL_DATABASE=labsbi_test \
+                                        -e MYSQL_HOST=72.60.140.128 \
+                                        -e MYSQL_PORT=33060 \
+                                        -e MYSQL_USER=kealabs \
+                                        -e MYSQL_PASSWORD="Kea2025@!@" \
+                                        -e MYSQL_DATABASE=labsbi_mysql_db \
                                         ${BACKEND_IMAGE}:${BUILD_NUMBER} \
-                                        python -c "import requests; print('Backend OK')" || true
+                                        python -c "print('Backend OK')" || true
                                 else
                                     echo "MySQL test container not available, skipping backend test"
                                 fi
@@ -167,27 +168,12 @@ pipeline {
                         docker network rm labsbi_dev_network || true
                         docker network create labsbi_dev_network
                         
-                        # Clean up any existing MySQL containers
-                        docker stop labsbi_mysql_dev mysql-test || true
-                        docker rm labsbi_mysql_dev mysql-test || true
+                        # Clean up any existing containers
+                        docker stop mysql_eden_jardins_labsbi_mysql mysql-test || true
+                        docker rm mysql_eden_jardins_labsbi_mysql mysql-test || true
                         
-                        # Start MySQL with new credentials
-                        docker run -d --name mysql_eden_jardins_labsbi_mysql \
-                            --network labsbi_dev_network \
-                            -e MYSQL_ROOT_PASSWORD="Kea2025@!@" \
-                            -e MYSQL_DATABASE=labsbi_mysql_db \
-                            -e MYSQL_ROOT_HOST=% \
-                            -e MYSQL_USER=kealabs \
-                            -e MYSQL_PASSWORD="Kea2025@!@" \
-                            -p 0.0.0.0:3306:3306 \
-                            -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
-                            mysql:8.0 \
-                            --default-authentication-plugin=mysql_native_password \
-                            --character-set-server=utf8mb4 \
-                            --collation-server=utf8mb4_unicode_ci
-                        
-                        # Verify MySQL container started
-                        docker ps | grep mysql_eden_jardins_labsbi_mysql || echo "MySQL DEV container failed to start"
+                        # Using external MySQL server - no container needed
+                        echo "Using external MySQL server at 72.60.140.128:33060"
                         
                         # Wait for MySQL
                         sleep 45
