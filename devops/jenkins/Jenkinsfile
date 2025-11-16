@@ -149,8 +149,9 @@ pipeline {
                         docker stop labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
                         docker rm labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
                         
-                        # Create network if not exists
-                        docker network create labsbi_dev_network || true
+                        # Remove and recreate network
+                        docker network rm labsbi_dev_network || true
+                        docker network create labsbi_dev_network
                         
                         # Start MySQL
                         docker run -d --name labsbi_mysql_dev \
@@ -195,6 +196,16 @@ pipeline {
                                 sleep 10
                             fi
                         done || echo "DEV deployment health check failed"
+                        
+                        # Display access information
+                        echo "========================================"
+                        echo "DEV ENVIRONMENT ACCESS INFORMATION"
+                        echo "========================================"
+                        echo "Frontend: http://$(hostname -I | awk '{print $1}'):4002"
+                        echo "Backend API: http://$(hostname -I | awk '{print $1}'):6002"
+                        echo "Backend Docs: http://$(hostname -I | awk '{print $1}'):6002/docs"
+                        echo "MySQL: $(hostname -I | awk '{print $1}'):3306"
+                        echo "======================================="
                     '''
                 }
             }
