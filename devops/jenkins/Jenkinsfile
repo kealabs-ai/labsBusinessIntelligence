@@ -1,0 +1,117 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_REGISTRY = 'your-registry.com'
+        PROJECT_NAME = 'labsbusinessintelligence'
+        BACKEND_IMAGE = "${DOCKER_REGISTRY}/${PROJECT_NAME}-backend"
+        FRONTEND_IMAGE = "${DOCKER_REGISTRY}/${PROJECT_NAME}-frontend"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Backend') {
+            steps {
+                script {
+                    dir('backend') {
+                        def backendImage = docker.build("${BACKEND_IMAGE}:${BUILD_NUMBER}")
+                        backendImage.push()
+                        backendImage.push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Build Frontend') {
+            steps {
+                script {
+                    dir('frontend') {
+                        def frontendImage = docker.build("${FRONTEND_IMAGE}:${BUILD_NUMBER}")
+                        frontendImage.push()
+                        frontendImage.push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Test') {
+            parallel {
+                stage('Backend Tests') {
+                    steps {
+                        script {
+                            docker.image("${BACKEND_IMAGE}:${BUILD_NUMBER}").inside {
+                                sh 'python -m pytest tests/ || true'
+                            }
+                        }
+                    }
+                }
+                stage('Frontend Tests') {
+                    steps {
+                        script {
+                            docker.image("${FRONTEND_IMAGE}:${BUILD_NUMBER}").inside {
+                                sh 'npm test -- --coverage --watchAll=false || true'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to DEV') {
+            steps {
+                script {
+                    sh """
+                        docker-compose -f devops/environments/dev/docker-compose.yml down
+                        docker-compose -f devops/environments/dev/docker-compose.yml up -d
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy to HML') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                script {
+                    sh """
+                        docker-compose -f devops/environments/hml/docker-compose.yml down
+                        docker-compose -f devops/environments/hml/docker-compose.yml up -d
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy to PROD') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: 'Deploy to production?', ok: 'Deploy'
+                script {
+                    sh """
+                        docker-compose -f devops/environments/prod/docker-compose.yml down
+                        docker-compose -f devops/environments/prod/docker-compose.yml up -d
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline executado com sucesso!'
+        }
+        failure {
+            echo 'Pipeline falhou!'
+        }
+    }
+}

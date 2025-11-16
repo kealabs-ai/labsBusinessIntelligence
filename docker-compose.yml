@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: labsbi_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: labsbi
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - labsbi_network
+
+  backend:
+    build: ./backend
+    container_name: labsbi_backend
+    environment:
+      - DB_ENGINE=mysql
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=labsbi
+      - SECRET_KEY=your-super-secret-key-here
+      - PORT=6002
+    ports:
+      - "0.0.0.0:6002:6002"
+    depends_on:
+      - mysql
+    networks:
+      - labsbi_network
+
+  frontend:
+    build: ./frontend
+    container_name: labsbi_frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:6002
+      - PORT=3002
+    ports:
+      - "0.0.0.0:3002:3002"
+    depends_on:
+      - backend
+    networks:
+      - labsbi_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  labsbi_network:
+    driver: bridge
