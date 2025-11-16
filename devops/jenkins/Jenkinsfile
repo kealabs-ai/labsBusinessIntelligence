@@ -182,7 +182,7 @@ pipeline {
                         # Start Frontend
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
-                            -e REACT_APP_API_URL=http://localhost:6002 \
+                            -e REACT_APP_API_URL=http://labsbi_backend_dev:8000 \
                             -p 4002:5000 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
