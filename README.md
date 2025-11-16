@@ -33,7 +33,7 @@ Sistema de Business Intelligence desenvolvido com arquitetura Clean Code e padr√
 ### Executar com Docker
 ```bash
 # Clonar o reposit√≥rio
-git clone <repository-url>
+git clone https://github.com/kealabs-ai/labsBusinessIntelligence.git
 cd LabsBusinessIntelligence
 
 # Copiar arquivos de ambiente
