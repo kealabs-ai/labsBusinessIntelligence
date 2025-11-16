@@ -171,15 +171,20 @@ pipeline {
                         docker stop labsbi_mysql_dev mysql-test || true
                         docker rm labsbi_mysql_dev mysql-test || true
                         
-                        # Start MySQL
+                        # Start MySQL with initialization
                         docker run -d --name labsbi_mysql_dev \
                             --network labsbi_dev_network \
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
                             -e MYSQL_ROOT_HOST=% \
+                            -e MYSQL_USER=labsbi_user \
+                            -e MYSQL_PASSWORD=labsbi_pass \
                             -p 0.0.0.0:3309:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
-                            mysql:8.0
+                            mysql:8.0 \
+                            --default-authentication-plugin=mysql_native_password \
+                            --character-set-server=utf8mb4 \
+                            --collation-server=utf8mb4_unicode_ci
                         
                         # Verify MySQL container started
                         docker ps | grep labsbi_mysql_dev || echo "MySQL DEV container failed to start"
