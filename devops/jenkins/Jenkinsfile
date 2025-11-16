@@ -113,8 +113,16 @@ pipeline {
                                 # Test API endpoints
                                 curl -f http://localhost:6002/ || echo "API test skipped"
                                 
-                                # Test database connection
-                                docker exec mysql-test mysql -u root -ppassword -e "SELECT 1" || echo "DB test skipped"
+                                # Test database connection with retry
+                                for i in {1..3}; do
+                                    if docker exec mysql-test mysql -u root -ppassword -e "SELECT 1" 2>/dev/null; then
+                                        echo "Database connection test passed"
+                                        break
+                                    else
+                                        echo "DB test attempt $i failed, retrying..."
+                                        sleep 5
+                                    fi
+                                done || echo "DB test skipped - container not ready"
                             '''
                         }
                     }
@@ -167,19 +175,29 @@ pipeline {
                             -e MYSQL_USER=root \
                             -e MYSQL_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
-                            -p 6002:6002 \
+                            -p 6002:8000 \
                             ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Wait for backend to start
+                        sleep 30
                         
                         # Start Frontend
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
                             -e REACT_APP_API_URL=http://localhost:6002 \
-                            -p 4002:3002 \
+                            -p 4002:80 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
-                        # Health check
-                        sleep 20
-                        curl -f http://localhost:6002/ || echo "DEV deployment health check failed"
+                        # Health check with retry
+                        for i in {1..5}; do
+                            if curl -f http://localhost:6002/health 2>/dev/null || curl -f http://localhost:6002/ 2>/dev/null; then
+                                echo "DEV deployment health check passed"
+                                break
+                            else
+                                echo "Health check attempt $i failed, retrying..."
+                                sleep 10
+                            fi
+                        done || echo "DEV deployment health check failed"
                     '''
                 }
             }
