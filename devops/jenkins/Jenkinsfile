@@ -185,7 +185,7 @@ pipeline {
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
                             -e REACT_APP_API_URL=http://localhost:6002 \
-                            -p 4002:80 \
+                            -p 4002:5000 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Health check with retry
