@@ -161,15 +161,22 @@ pipeline {
                         docker network rm labsbi_dev_network || true
                         docker network create labsbi_dev_network
                         
+                        # Clean up any existing MySQL containers
+                        docker stop labsbi_mysql_dev mysql-test || true
+                        docker rm labsbi_mysql_dev mysql-test || true
+                        
                         # Start MySQL
                         docker run -d --name labsbi_mysql_dev \
                             --network labsbi_dev_network \
                             -e MYSQL_ROOT_PASSWORD=password \
                             -e MYSQL_DATABASE=labsbi_dev \
                             -e MYSQL_ROOT_HOST=% \
-                            -p 3306:3306 \
+                            -p 0.0.0.0:3306:3306 \
                             -v $(pwd)/devops/sql/init.sql:/docker-entrypoint-initdb.d/init.sql \
                             mysql:8.0
+                        
+                        # Verify MySQL container started
+                        docker ps | grep labsbi_mysql_dev || echo "MySQL DEV container failed to start"
                         
                         # Wait for MySQL
                         sleep 45
