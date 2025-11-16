@@ -149,7 +149,7 @@ pipeline {
                         # Wait for MySQL
                         sleep 45
                         
-                        # Start Backend
+                        # Start Backend with start script
                         docker run -d --name labsbi_backend_dev \
                             --network labsbi_dev_network \
                             -e DB_ENGINE=mysql \
@@ -159,7 +159,8 @@ pipeline {
                             -e MYSQL_PASSWORD="Kea2025@!@" \
                             -e MYSQL_DATABASE=labsbi_mysql_db \
                             -p 0.0.0.0:6002:8000 \
-                            ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                            ${BACKEND_IMAGE}:${BUILD_NUMBER} \
+                            ./start_backend.sh
                         
                         # Wait for backend to start
                         sleep 45
@@ -168,12 +169,13 @@ pipeline {
                         docker ps | grep labsbi_backend_dev || echo "Backend container status check"
                         docker logs labsbi_backend_dev | tail -5 || true
                         
-                        # Start Frontend
+                        # Start Frontend with start script
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
                             -e REACT_APP_API_URL=http://$(hostname -I | awk '{print $1}'):6002 \
                             -p 0.0.0.0:4002:5000 \
-                            ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                            ${FRONTEND_IMAGE}:${BUILD_NUMBER} \
+                            ./start_frontend.sh
                         
                         # Show backend logs for debugging
                         echo "Backend container logs:"
