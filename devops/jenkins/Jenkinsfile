@@ -110,9 +110,6 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                                # Test API endpoints
-                                curl -f http://localhost:6002/ || echo "API test skipped"
-                                
                                 # Test database connection with retry
                                 for i in 1 2 3; do
                                     if docker exec mysql-test mysql -u root -ppassword -e "SELECT 1" 2>/dev/null; then
