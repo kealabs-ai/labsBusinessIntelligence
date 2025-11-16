@@ -140,9 +140,41 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Deploy to development environment
-                        docker-compose -f devops/environments/dev/docker-compose.yml down || true
-                        docker-compose -f devops/environments/dev/docker-compose.yml up -d
+                        # Stop existing containers
+                        docker stop labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
+                        docker rm labsbi_backend_dev labsbi_frontend_dev labsbi_mysql_dev || true
+                        
+                        # Create network if not exists
+                        docker network create labsbi_dev_network || true
+                        
+                        # Start MySQL
+                        docker run -d --name labsbi_mysql_dev \
+                            --network labsbi_dev_network \
+                            -e MYSQL_ROOT_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_dev \
+                            -p 3306:3306 \
+                            mysql:8.0
+                        
+                        # Wait for MySQL
+                        sleep 15
+                        
+                        # Start Backend
+                        docker run -d --name labsbi_backend_dev \
+                            --network labsbi_dev_network \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=labsbi_mysql_dev \
+                            -e MYSQL_USER=root \
+                            -e MYSQL_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_dev \
+                            -p 6002:6002 \
+                            ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Start Frontend
+                        docker run -d --name labsbi_frontend_dev \
+                            --network labsbi_dev_network \
+                            -e REACT_APP_API_URL=http://localhost:6002 \
+                            -p 4002:3002 \
+                            ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Health check
                         sleep 10
@@ -160,11 +192,43 @@ pipeline {
                 script {
                     sh '''
                         # Backup database before deployment
-                        docker exec labsbi_mysql mysqldump -u root -ppassword labsbi > backups/hml_backup_${BUILD_NUMBER}.sql || true
+                        docker exec labsbi_mysql_hml mysqldump -u root -ppassword labsbi_hml > backups/hml_backup_${BUILD_NUMBER}.sql || true
                         
-                        # Deploy to homologation
-                        docker-compose -f devops/environments/hml/docker-compose.yml down || true
-                        docker-compose -f devops/environments/hml/docker-compose.yml up -d
+                        # Stop existing containers
+                        docker stop labsbi_backend_hml labsbi_frontend_hml labsbi_mysql_hml || true
+                        docker rm labsbi_backend_hml labsbi_frontend_hml labsbi_mysql_hml || true
+                        
+                        # Create network if not exists
+                        docker network create labsbi_hml_network || true
+                        
+                        # Start MySQL
+                        docker run -d --name labsbi_mysql_hml \
+                            --network labsbi_hml_network \
+                            -e MYSQL_ROOT_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_hml \
+                            -p 3307:3306 \
+                            mysql:8.0
+                        
+                        # Wait for MySQL
+                        sleep 15
+                        
+                        # Start Backend
+                        docker run -d --name labsbi_backend_hml \
+                            --network labsbi_hml_network \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=labsbi_mysql_hml \
+                            -e MYSQL_USER=root \
+                            -e MYSQL_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_hml \
+                            -p 6001:6002 \
+                            ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Start Frontend
+                        docker run -d --name labsbi_frontend_hml \
+                            --network labsbi_hml_network \
+                            -e REACT_APP_API_URL=http://localhost:6001 \
+                            -p 4001:3002 \
+                            ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Health check
                         sleep 15
@@ -183,11 +247,44 @@ pipeline {
                 script {
                     sh '''
                         # Backup production database
-                        docker exec labsbi_mysql mysqldump -u root -ppassword labsbi > backups/prod_backup_${BUILD_NUMBER}.sql || true
+                        docker exec labsbi_mysql_prod mysqldump -u root -ppassword labsbi_prod > backups/prod_backup_${BUILD_NUMBER}.sql || true
                         
-                        # Deploy to production
-                        docker-compose -f devops/environments/prod/docker-compose.yml down || true
-                        docker-compose -f devops/environments/prod/docker-compose.yml up -d
+                        # Stop existing containers
+                        docker stop labsbi_backend_prod labsbi_frontend_prod labsbi_mysql_prod || true
+                        docker rm labsbi_backend_prod labsbi_frontend_prod labsbi_mysql_prod || true
+                        
+                        # Create network if not exists
+                        docker network create labsbi_prod_network || true
+                        
+                        # Start MySQL
+                        docker run -d --name labsbi_mysql_prod \
+                            --network labsbi_prod_network \
+                            -e MYSQL_ROOT_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_prod \
+                            -p 3308:3306 \
+                            -v labsbi_prod_data:/var/lib/mysql \
+                            mysql:8.0
+                        
+                        # Wait for MySQL
+                        sleep 20
+                        
+                        # Start Backend
+                        docker run -d --name labsbi_backend_prod \
+                            --network labsbi_prod_network \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=labsbi_mysql_prod \
+                            -e MYSQL_USER=root \
+                            -e MYSQL_PASSWORD=password \
+                            -e MYSQL_DATABASE=labsbi_prod \
+                            -p 6000:6002 \
+                            ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Start Frontend
+                        docker run -d --name labsbi_frontend_prod \
+                            --network labsbi_prod_network \
+                            -e REACT_APP_API_URL=http://localhost:6000 \
+                            -p 4000:3002 \
+                            ${FRONTEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Health check
                         sleep 20
@@ -210,7 +307,7 @@ pipeline {
                     docker rm mysql-test || true
                     
                     # Archive logs
-                    docker-compose logs > build_logs_${BUILD_NUMBER}.log || true
+                    docker logs labsbi_backend_dev > build_logs_${BUILD_NUMBER}.log 2>&1 || true
                 '''
             }
             archiveArtifacts artifacts: '*.log, backups/*.sql', allowEmptyArchive: true
