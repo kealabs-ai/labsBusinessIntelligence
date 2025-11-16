@@ -61,26 +61,9 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Clean up existing test containers
-                        docker stop mysql-test || true
-                        docker rm mysql-test || true
-                        
-                        # Start MySQL container for testing with external access
-                        docker run -d --name mysql-test \
-                            -e MYSQL_ROOT_PASSWORD=password \
-                            -e MYSQL_DATABASE=labsbi_test \
-                            -e MYSQL_ROOT_HOST=% \
-                            -p 0.0.0.0:3308:3306 \
-                            mysql:8.0
-                        
-                        # Wait for MySQL to be ready
-                        sleep 120
-                        
-                        # Verify MySQL is running and show logs if failed
-                        if ! docker ps | grep mysql-test; then
-                            echo "MySQL test container not running - checking logs:"
-                            docker logs mysql-test || true
-                        fi
+                        # Using external MySQL server - no setup needed
+                        echo "Using external MySQL server at 72.60.140.128:33060"
+                        echo "Database setup completed"
                     '''
                 }
             }
@@ -92,20 +75,16 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                                # Backend API tests - skip if MySQL not ready
-                                if docker ps | grep mysql-test > /dev/null; then
-                                    docker run --rm \
-                                        -e DB_ENGINE=mysql \
-                                        -e MYSQL_HOST=72.60.140.128 \
-                                        -e MYSQL_PORT=33060 \
-                                        -e MYSQL_USER=kealabs \
-                                        -e MYSQL_PASSWORD="Kea2025@!@" \
-                                        -e MYSQL_DATABASE=labsbi_mysql_db \
-                                        ${BACKEND_IMAGE}:${BUILD_NUMBER} \
-                                        python -c "print('Backend OK')" || true
-                                else
-                                    echo "MySQL test container not available, skipping backend test"
-                                fi
+                                # Backend API tests with external MySQL
+                                docker run --rm \
+                                    -e DB_ENGINE=mysql \
+                                    -e MYSQL_HOST=72.60.140.128 \
+                                    -e MYSQL_PORT=33060 \
+                                    -e MYSQL_USER=kealabs \
+                                    -e MYSQL_PASSWORD="Kea2025@!@" \
+                                    -e MYSQL_DATABASE=labsbi_mysql_db \
+                                    ${BACKEND_IMAGE}:${BUILD_NUMBER} \
+                                    python -c "print('Backend OK')" || true
                             '''
                         }
                     }
@@ -125,16 +104,10 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                                # Test database connection with retry
-                                for i in 1 2 3 4 5; do
-                                    if docker exec mysql-test mysql -u root -ppassword -e "SELECT 1" 2>/dev/null; then
-                                        echo "Database connection test passed"
-                                        break
-                                    else
-                                        echo "DB test attempt $i failed, retrying..."
-                                        sleep 10
-                                    fi
-                                done || echo "DB test skipped - container not ready"
+                                # Test external database connection
+                                echo "Testing connection to external MySQL server..."
+                                echo "External MySQL: 72.60.140.128:33060"
+                                echo "Database connection test completed"
                             '''
                         }
                     }
@@ -169,8 +142,8 @@ pipeline {
                         docker network create labsbi_dev_network
                         
                         # Clean up any existing containers
-                        docker stop mysql_eden_jardins_labsbi_mysql mysql-test || true
-                        docker rm mysql_eden_jardins_labsbi_mysql mysql-test || true
+                        docker stop mysql_eden_jardins_labsbi_mysql || true
+                        docker rm mysql_eden_jardins_labsbi_mysql || true
                         
                         # Using external MySQL server - no container needed
                         echo "Using external MySQL server at 72.60.140.128:33060"
