@@ -21,10 +21,11 @@ services:
     container_name: labsbi_backend
     environment:
       - DB_ENGINE=mysql
-      - MYSQL_HOST=mysql
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=password
-      - MYSQL_DATABASE=labsbi
+      - MYSQL_HOST=72.60.140.128
+      - MYSQL_PORT=33060
+      - MYSQL_USER=kealabs
+      - MYSQL_PASSWORD=Kea2025@!@
+      - MYSQL_DATABASE=labsbi_mysql_db
       - SECRET_KEY=your-super-secret-key-here
       - PORT=6002
     ports:
