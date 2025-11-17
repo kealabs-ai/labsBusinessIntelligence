@@ -10,8 +10,8 @@ const MenuContainer = () => {
 
   const menuItems = [
     {
-      title: 'Gráficos',
-      description: 'Visualize dados em gráficos interativos',
+      title: 'Dashboards',
+      description: 'Visualize dados em Dashboards interativos',
       path: '/charts',
       icon: 'BarChart'
     },
