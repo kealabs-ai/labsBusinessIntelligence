@@ -181,11 +181,13 @@ pipeline {
                         
                         # Health check with retry
                         for i in 1 2 3 4 5; do
-                            if curl -f http://localhost:6002/docs 2>/dev/null || curl -f http://localhost:6002/ 2>/dev/null; then
+                            if curl -f http://127.0.0.1:6002/ 2>/dev/null || curl -f http://127.0.0.1:6002/docs 2>/dev/null || curl -f http://$(hostname -I | awk '{print $1}'):6002/ 2>/dev/null; then
                                 echo "DEV deployment health check passed"
                                 break
                             else
                                 echo "Health check attempt $i failed, retrying..."
+                                # Check if backend is responding on any interface
+                                docker exec labsbi_backend_dev curl -f http://localhost:8000/ 2>/dev/null && echo "Backend responding internally" || echo "Backend not responding"
                                 sleep 10
                             fi
                         done || echo "DEV deployment health check failed"
