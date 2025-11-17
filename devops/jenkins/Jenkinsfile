@@ -158,22 +158,38 @@ pipeline {
                             -e MYSQL_USER=kealabs \
                             -e MYSQL_PASSWORD="Kea2025@!@" \
                             -e MYSQL_DATABASE=labsbi_mysql_db \
+                            -e PORT=8000 \
                             -p 0.0.0.0:6002:8000 \
                             ${BACKEND_IMAGE}:${BUILD_NUMBER}
                         
                         # Wait for backend to start
-                        sleep 45
+                        sleep 30
                         
-                        # Check if backend container is running
-                        docker ps | grep labsbi_backend_dev || echo "Backend container status check"
-                        docker logs labsbi_backend_dev | tail -5 || true
+                        # Check backend container status
+                        echo "Backend container status:"
+                        docker ps -a | grep labsbi_backend_dev || echo "Backend container not found"
+                        echo "Backend container logs:"
+                        docker logs labsbi_backend_dev || echo "No logs available"
+                        
+                        # Check if backend process is running
+                        docker exec labsbi_backend_dev ps aux | grep python || echo "Python process not found"
                         
                         # Start Frontend
                         docker run -d --name labsbi_frontend_dev \
                             --network labsbi_dev_network \
                             -e REACT_APP_API_URL=http://$(hostname -I | awk '{print $1}'):6002 \
+                            -e PORT=5000 \
                             -p 0.0.0.0:4002:5000 \
                             ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Wait for frontend to start
+                        sleep 20
+                        
+                        # Check frontend container status
+                        echo "Frontend container status:"
+                        docker ps -a | grep labsbi_frontend_dev || echo "Frontend container not found"
+                        echo "Frontend container logs:"
+                        docker logs labsbi_frontend_dev || echo "No logs available"
                         
                         # Show backend logs for debugging
                         echo "Backend container logs:"
