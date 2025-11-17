@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS labsbi;
-USE labsbi;
+CREATE DATABASE IF NOT EXISTS labsbi_mysql_db;
+USE labsbi_mysql_db;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
