@@ -15,6 +15,26 @@ class ChartService:
             filters = {}
         return await self.chart_repository.get_chart_data("pie", filters)
     
+    async def get_line_chart_data(self, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        if filters is None:
+            filters = {}
+        return await self.chart_repository.get_chart_data("line", filters)
+    
+    async def get_area_chart_data(self, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        if filters is None:
+            filters = {}
+        return await self.chart_repository.get_chart_data("area", filters)
+    
+    async def get_scatter_chart_data(self, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        if filters is None:
+            filters = {}
+        return await self.chart_repository.get_chart_data("scatter", filters)
+    
+    async def get_kpi_data(self, filters: Dict[str, Any] = None) -> Dict[str, Any]:
+        if filters is None:
+            filters = {}
+        return await self.chart_repository.get_kpi_data(filters)
+    
     async def get_chart_data_by_type(self, chart_type: str, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         if filters is None:
             filters = {}

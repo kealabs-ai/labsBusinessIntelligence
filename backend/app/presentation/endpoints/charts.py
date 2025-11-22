@@ -46,6 +46,48 @@ async def get_pie_chart(
     data = await chart_service.get_pie_chart_data(filters)
     return {"chart_type": "pie", "data": data}
 
+@router.get("/line")
+async def get_line_chart(
+    user=Depends(get_current_user),
+    period: Optional[str] = Query(None)
+):
+    chart_service = ChartService()
+    filters = {}
+    if period:
+        filters["period"] = period
+    
+    data = await chart_service.get_line_chart_data(filters)
+    return {"chart_type": "line", "data": data}
+
+@router.get("/area")
+async def get_area_chart(
+    user=Depends(get_current_user),
+    period: Optional[str] = Query(None)
+):
+    chart_service = ChartService()
+    filters = {}
+    if period:
+        filters["period"] = period
+    
+    data = await chart_service.get_area_chart_data(filters)
+    return {"chart_type": "area", "data": data}
+
+@router.get("/scatter")
+async def get_scatter_chart(
+    user=Depends(get_current_user)
+):
+    chart_service = ChartService()
+    data = await chart_service.get_scatter_chart_data()
+    return {"chart_type": "scatter", "data": data}
+
+@router.get("/kpi")
+async def get_kpi_data(
+    user=Depends(get_current_user)
+):
+    chart_service = ChartService()
+    data = await chart_service.get_kpi_data()
+    return {"chart_type": "kpi", "data": data}
+
 @router.get("/{chart_type}")
 async def get_chart_by_type(
     chart_type: str,

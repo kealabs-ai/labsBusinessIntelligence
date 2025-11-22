@@ -40,9 +40,8 @@ services:
     container_name: labsbi_frontend
     environment:
       - REACT_APP_API_URL=http://localhost:6002
-      - PORT=3002
     ports:
-      - "0.0.0.0:3002:3002"
+      - "0.0.0.0:3002:80"
     depends_on:
       - backend
     networks:

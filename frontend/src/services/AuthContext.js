@@ -17,26 +17,44 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      authService.getCurrentUser()
-        .then(userData => {
-          setUser(userData);
-          setIsAuthenticated(true);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const checkSession = () => {
+      const token = localStorage.getItem('token');
+      const loginTime = localStorage.getItem('loginTime');
+      
+      if (token && loginTime) {
+        const now = Date.now();
+        const sessionDuration = 15 * 60 * 1000; // 15 minutos
+        
+        if (now - parseInt(loginTime) > sessionDuration) {
+          logout();
+          return;
+        }
+        
+        authService.getCurrentUser()
+          .then(userData => {
+            setUser(userData);
+            setIsAuthenticated(true);
+          })
+          .catch(() => {
+            logout();
+          })
+          .finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+    const interval = setInterval(checkSession, 60000); // Verifica a cada minuto
+    
+    return () => clearInterval(interval);
   }, []);
 
   const login = async (username, password) => {
     try {
       const response = await authService.login(username, password);
       localStorage.setItem('token', response.access_token);
+      localStorage.setItem('loginTime', Date.now().toString());
       setUser({ id: response.user_id });
       setIsAuthenticated(true);
       return true;
@@ -47,6 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('loginTime');
     setUser(null);
     setIsAuthenticated(false);
   };

@@ -8,7 +8,7 @@ class MySQLUserRepository(IUserRepository):
     def __init__(self):
         self.connection_config = {
             'host': os.getenv('MYSQL_HOST', 'localhost'),
-            'port': int(os.getenv('MYSQL_PORT', 3306)),
+            'port': int(os.getenv('MYSQL_PORT', 33060)),
             'user': os.getenv('MYSQL_USER', 'root'),
             'password': os.getenv('MYSQL_PASSWORD', ''),
             'database': os.getenv('MYSQL_DATABASE', 'labsbi')
@@ -40,7 +40,7 @@ class MySQLChartRepository(IChartRepository):
     def __init__(self):
         self.connection_config = {
             'host': os.getenv('MYSQL_HOST', 'localhost'),
-            'port': int(os.getenv('MYSQL_PORT', 3306)),
+            'port': int(os.getenv('MYSQL_PORT', 33060)),
             'user': os.getenv('MYSQL_USER', 'root'),
             'password': os.getenv('MYSQL_PASSWORD', ''),
             'database': os.getenv('MYSQL_DATABASE', 'labsbi')
@@ -54,10 +54,27 @@ class MySQLChartRepository(IChartRepository):
                 cursor.execute("SELECT category, value FROM chart_data WHERE type = 'bar'")
             elif chart_type == "pie":
                 cursor.execute("SELECT label, percentage FROM chart_data WHERE type = 'pie'")
+            elif chart_type == "line":
+                cursor.execute("SELECT month, value FROM chart_data WHERE type = 'line' ORDER BY id")
+            elif chart_type == "area":
+                cursor.execute("SELECT month, value FROM chart_data WHERE type = 'area' ORDER BY id")
+            elif chart_type == "scatter":
+                cursor.execute("SELECT id, x, y FROM chart_data WHERE type = 'scatter'")
             else:
                 cursor.execute("SELECT * FROM chart_data WHERE type = %s", (chart_type,))
             
             return cursor.fetchall()
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_kpi_data(self, filters: Dict[str, Any]) -> Dict[str, Any]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT metric_name, metric_value FROM kpi_data")
+            results = cursor.fetchall()
+            return {row['metric_name']: row['metric_value'] for row in results}
         finally:
             cursor.close()
             conn.close()

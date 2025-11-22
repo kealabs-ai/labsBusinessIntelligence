@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from presentation.endpoints import auth, charts
+from api import communication
 from infrastructure.database.factory import DatabaseFactory
 import os
 from dotenv import load_dotenv
@@ -22,6 +23,7 @@ DatabaseFactory.initialize()
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(charts.router, prefix="/api/v1/chart", tags=["charts"])
+app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
 
 @app.get("/")
 async def root():
@@ -31,7 +33,8 @@ if __name__ == "__main__":
     import uvicorn
     import logging
     
-    # Configurar logging para suprimir warnings desnecessários
+    # Configurar logging
+    logging.basicConfig(level=logging.INFO)
     logging.getLogger("uvicorn.error").setLevel(logging.ERROR)
     
     port = int(os.getenv("PORT", 6002))
@@ -39,7 +42,7 @@ if __name__ == "__main__":
         app, 
         host="0.0.0.0", 
         port=port, 
-        log_level="error",
+        log_level="info",
         access_log=False,
         server_header=False,
         date_header=False

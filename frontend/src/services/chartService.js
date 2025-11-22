@@ -31,5 +31,29 @@ export const chartService = {
     const params = new URLSearchParams(filters);
     const response = await api.get(`/chart/${chartType}?${params}`);
     return response.data;
+  },
+
+  async getLineChartData(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/chart/line?${params}`);
+    return response.data;
+  },
+
+  async getAreaChartData(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/chart/area?${params}`);
+    return response.data;
+  },
+
+  async getScatterChartData(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/chart/scatter?${params}`);
+    return response.data;
+  },
+
+  async getKPIData(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/chart/kpi?${params}`);
+    return response.data;
   }
 };

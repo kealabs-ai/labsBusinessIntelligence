@@ -15,3 +15,7 @@ class IChartRepository(ABC):
     @abstractmethod
     async def get_chart_data(self, chart_type: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
         pass
+    
+    @abstractmethod
+    async def get_kpi_data(self, filters: Dict[str, Any]) -> Dict[str, Any]:
+        pass
