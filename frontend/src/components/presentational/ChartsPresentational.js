@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  Container,
   Grid,
-  Paper,
   Typography,
   Box,
   Button,
@@ -12,17 +10,16 @@ import {
   CardContent
 } from '@mui/material';
 import { Refresh, TrendingUp, AttachMoney, Assessment } from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { LineChart, PieChart as MuiPieChart, ScatterChart } from '@mui/x-charts';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+import { chartsPresentationalStyles } from './ChartsPresentational.styles';
 
 const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterData, kpiData, loading, error, onRefresh }) => {
   if (loading) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ mt: 2 }}>
+      <Box sx={chartsPresentationalStyles.loadingContainer}>
+        <CircularProgress size={60} sx={chartsPresentationalStyles.loadingSpinner} />
+        <Typography variant="h6" sx={chartsPresentationalStyles.loadingText}>
           Carregando gráficos...
         </Typography>
       </Box>
@@ -31,12 +28,16 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error" action={
-          <Button color="inherit" size="small" onClick={onRefresh}>
-            Tentar Novamente
-          </Button>
-        }>
+      <Box sx={chartsPresentationalStyles.errorContainer}>
+        <Alert 
+          severity="error" 
+          sx={chartsPresentationalStyles.errorAlert}
+          action={
+            <Button color="inherit" size="small" onClick={onRefresh}>
+              Tentar Novamente
+            </Button>
+          }
+        >
           {error}
         </Alert>
       </Box>
@@ -44,29 +45,22 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
   }
 
   const kpiCards = [
-    { title: 'Receita Total', value: kpiData.revenue || 0, icon: <AttachMoney />, color: '#10b981' },
-    { title: 'Crescimento', value: `${kpiData.growth || 0}%`, icon: <TrendingUp />, color: '#3b82f6' },
-    { title: 'Performance', value: kpiData.performance || 0, icon: <Assessment />, color: '#8b5cf6' }
+    { title: 'Receita Total', value: kpiData.revenue || 0, icon: <AttachMoney />, color: '#667eea' },
+    { title: 'Crescimento', value: `${kpiData.growth || 0}%`, icon: <TrendingUp />, color: '#10b981' },
+    { title: 'Performance', value: kpiData.performance || 0, icon: <Assessment />, color: '#764ba2' }
   ];
 
   return (
-    <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ color: 'white', fontWeight: 'bold' }}>
+    <Box sx={chartsPresentationalStyles.container}>
+      <Box sx={chartsPresentationalStyles.header}>
+        <Typography variant="h4" component="h1" sx={chartsPresentationalStyles.title}>
           Business Intelligence Dashboard
         </Typography>
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<Refresh />}
           onClick={onRefresh}
-          sx={{
-            color: 'white',
-            borderColor: 'rgba(255, 255, 255, 0.3)',
-            '&:hover': {
-              borderColor: 'rgba(255, 255, 255, 0.5)',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)'
-            }
-          }}
+          sx={chartsPresentationalStyles.refreshButton}
         >
           Atualizar
         </Button>
@@ -76,33 +70,19 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {kpiCards.map((kpi, index) => (
           <Grid item xs={12} md={4} key={index}>
-            <Card sx={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: 3,
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
-              }
-            }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', p: 3 }}>
+            <Card sx={chartsPresentationalStyles.kpiCard}>
+              <CardContent sx={chartsPresentationalStyles.kpiContent}>
                 <Box sx={{ 
-                  backgroundColor: kpi.color, 
-                  borderRadius: 2, 
-                  p: 1.5, 
-                  mr: 2,
-                  color: 'white'
+                  ...chartsPresentationalStyles.kpiIcon,
+                  backgroundColor: kpi.color
                 }}>
                   {kpi.icon}
                 </Box>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1e293b' }}>
+                  <Typography variant="h4" sx={chartsPresentationalStyles.kpiValue}>
                     {kpi.value}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                  <Typography variant="body2" sx={chartsPresentationalStyles.kpiTitle}>
                     {kpi.title}
                   </Typography>
                 </Box>
@@ -115,22 +95,8 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
       {/* Charts Grid */}
       <Grid container spacing={4} sx={{ flexGrow: 1, maxWidth: '100%', margin: 0 }}>
         <Grid item xs={12} lg={6} sx={{ display: 'flex' }}>
-          <Paper sx={{ 
-            p: 3, 
-            height: { xs: 400, md: 450 },
-            width: '100%',
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
-            }
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
+          <Card sx={{ ...chartsPresentationalStyles.chartCard, height: { xs: 400, md: 450 } }}>
+            <Typography variant="h6" sx={chartsPresentationalStyles.chartTitle}>
               Gráfico de Barras
             </Typography>
             <ResponsiveContainer width="100%" height="85%">
@@ -138,38 +104,17 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                 <XAxis dataKey="category" stroke="#64748b" />
                 <YAxis stroke="#64748b" />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                  }}
-                />
+                <Tooltip contentStyle={chartsPresentationalStyles.tooltip} />
                 <Legend />
-                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" fill="#667eea" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </Paper>
+          </Card>
         </Grid>
 
         <Grid item xs={12} lg={6} sx={{ display: 'flex' }}>
-          <Paper sx={{ 
-            p: 3, 
-            height: { xs: 400, md: 450 },
-            width: '100%',
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
-            }
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
+          <Card sx={{ ...chartsPresentationalStyles.chartCard, height: { xs: 400, md: 450 } }}>
+            <Typography variant="h6" sx={chartsPresentationalStyles.chartTitle}>
               Gráfico de Linha
             </Typography>
             <LineChart
@@ -184,27 +129,13 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
                 data: lineData.map(item => item.month) || []
               }]}
             />
-          </Paper>
+          </Card>
         </Grid>
 
         <Grid item xs={12} lg={6} sx={{ display: 'flex' }}>
-          <Paper sx={{ 
-            p: 3, 
-            height: { xs: 400, md: 450 },
-            width: '100%',
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
-            }
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
-              Gráfico de Pizza (MUI)
+          <Card sx={{ ...chartsPresentationalStyles.chartCard, height: { xs: 400, md: 450 } }}>
+            <Typography variant="h6" sx={chartsPresentationalStyles.chartTitle}>
+              Gráfico de Pizza
             </Typography>
             <MuiPieChart
               series={[{
@@ -217,26 +148,12 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
               width={undefined}
               height={350}
             />
-          </Paper>
+          </Card>
         </Grid>
 
         <Grid item xs={12} lg={6} sx={{ display: 'flex' }}>
-          <Paper sx={{ 
-            p: 3, 
-            height: { xs: 400, md: 450 },
-            width: '100%',
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
-            }
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b', mb: 2 }}>
+          <Card sx={{ ...chartsPresentationalStyles.chartCard, height: { xs: 400, md: 450 } }}>
+            <Typography variant="h6" sx={chartsPresentationalStyles.chartTitle}>
               Gráfico de Dispersão
             </Typography>
             <ScatterChart
@@ -247,7 +164,7 @@ const ChartsPresentational = ({ barData, pieData, lineData, areaData, scatterDat
                 color: '#f59e0b'
               }]}
             />
-          </Paper>
+          </Card>
         </Grid>
       </Grid>
     </Box>

@@ -1,14 +1,24 @@
 import React from 'react';
 import {
+  AppBar,
+  Toolbar,
   Box,
-  TextField,
+  Typography,
+  Avatar,
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  Divider
 } from '@mui/material';
-import { AccountCircle, FilterList } from '@mui/icons-material';
+import { 
+  AccountCircle, 
+  Settings, 
+  ExitToApp,
+  Person
+} from '@mui/icons-material';
+import { toolbarStyles } from './ToolbarPresentational.styles';
 
-const ToolbarPresentational = ({ user, filters, onFilterChange, onLogout }) => {
+const ToolbarPresentational = ({ user, onLogout }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -24,64 +34,66 @@ const ToolbarPresentational = ({ user, filters, onFilterChange, onLogout }) => {
     onLogout();
   };
 
+  const getUserInitials = (username) => {
+    if (!username) return 'U';
+    return username.charAt(0).toUpperCase();
+  };
+
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      {onFilterChange && (
-        <>
-          <FilterList />
-          <TextField
-            size="small"
-            label="Categoria"
-            variant="outlined"
-            value={filters.category || ''}
-            onChange={(e) => onFilterChange('category', e.target.value)}
-            sx={{ 
-              '& .MuiOutlinedInput-root': { 
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-              },
-              '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
-              '& .MuiInputBase-input': { color: 'white' }
-            }}
-          />
-          <TextField
-            size="small"
-            label="Período"
-            variant="outlined"
-            value={filters.period || ''}
-            onChange={(e) => onFilterChange('period', e.target.value)}
-            sx={{ 
-              '& .MuiOutlinedInput-root': { 
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-              },
-              '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
-              '& .MuiInputBase-input': { color: 'white' }
-            }}
-          />
-        </>
-      )}
-      
-      <IconButton
-        size="large"
-        onClick={handleMenu}
-        color="inherit"
-      >
-        <AccountCircle />
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <MenuItem onClick={handleClose}>Perfil</MenuItem>
-        <MenuItem onClick={handleLogout}>Sair</MenuItem>
-      </Menu>
-    </Box>
+    <AppBar position="static" elevation={0} sx={toolbarStyles.toolbar}>
+      <Toolbar sx={toolbarStyles.container}>
+        <Box sx={toolbarStyles.logo}>
+          <Box sx={toolbarStyles.logoIcon}>
+            BI
+          </Box>
+          <Typography variant="h6" sx={toolbarStyles.logoText}>
+            Labs BI
+          </Typography>
+        </Box>
+        
+        <Box sx={toolbarStyles.userSection}>
+          <Box sx={toolbarStyles.userInfo}>
+            <Avatar sx={toolbarStyles.avatar}>
+              {getUserInitials(user?.username)}
+            </Avatar>
+            <Typography variant="body1" sx={toolbarStyles.userName}>
+              {user?.username || 'Usuário'}
+            </Typography>
+          </Box>
+          
+          <IconButton
+            size="large"
+            onClick={handleMenu}
+            sx={toolbarStyles.menuButton}
+          >
+            <AccountCircle />
+          </IconButton>
+          
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            sx={toolbarStyles.menu}
+          >
+            <MenuItem onClick={handleClose} sx={toolbarStyles.menuItem}>
+              <Person sx={{ mr: 1 }} />
+              Conta
+            </MenuItem>
+            <MenuItem onClick={handleClose} sx={toolbarStyles.menuItem}>
+              <Settings sx={{ mr: 1 }} />
+              Configurações
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleLogout} sx={toolbarStyles.menuItem}>
+              <ExitToApp sx={{ mr: 1 }} />
+              Sair
+            </MenuItem>
+          </Menu>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

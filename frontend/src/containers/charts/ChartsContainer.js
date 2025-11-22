@@ -13,10 +13,11 @@ import {
   Typography,
   CssBaseline
 } from '@mui/material';
-import { Menu as MenuIcon, ChevronLeft, Dashboard, BarChart, PieChart } from '@mui/icons-material';
+import { Menu as MenuIcon, Dashboard, BarChart, PieChart } from '@mui/icons-material';
 import { chartService } from '../../services/chartService';
 import ChartsPresentational from '../../components/presentational/ChartsPresentational';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
+import { chartsStyles } from './ChartsContainer.styles';
 
 const drawerWidth = 240;
 
@@ -76,43 +77,26 @@ const ChartsContainer = () => {
   ];
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={chartsStyles.container}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: '100%',
-          margin: 0,
-          backgroundColor: '#1e293b',
-        }}
-      >
-        <Toolbar>
+      <AppBar position="fixed" sx={chartsStyles.appBar}>
+        <Toolbar sx={chartsStyles.toolbar}>
           <IconButton
-            color="inherit"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             edge="start"
-            sx={{ mr: 2 }}
+            sx={chartsStyles.menuButton}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div" sx={chartsStyles.appTitle}>
             Business Intelligence Dashboard
           </Typography>
-          <ToolbarContainer onFilterChange={handleFilterChange} />
+          <ToolbarContainer />
         </Toolbar>
       </AppBar>
       
       <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            backgroundColor: '#1e293b',
-            color: 'white',
-          },
-        }}
+        sx={chartsStyles.drawer}
         variant="temporary"
         anchor="left"
         open={sidebarOpen}
@@ -121,50 +105,25 @@ const ChartsContainer = () => {
           keepMounted: true,
         }}
       >
-        <Toolbar>
-          <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-            KeaLabs
+        <Box sx={chartsStyles.drawerHeader}>
+          <Typography variant="h6" sx={chartsStyles.drawerTitle}>
+            Labs BI
           </Typography>
-        </Toolbar>
-        <List sx={{ pt: 0, px: 1 }}>
+        </Box>
+        <List sx={chartsStyles.menuList}>
           {menuItems.map((item) => (
-            <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={item.id} disablePadding sx={chartsStyles.menuItem}>
               <ListItemButton
                 selected={activeKPI === item.id}
                 onClick={() => setActiveKPI(item.id)}
-                sx={{
-                  borderRadius: 2,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                    color: '#3b82f6',
-                    '&:hover': {
-                      backgroundColor: 'rgba(59, 130, 246, 0.16)',
-                    },
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                    borderRadius: 2,
-                  },
-                  py: 1.5,
-                  transition: 'all 0.2s ease-in-out',
-                }}
+                sx={chartsStyles.menuButton}
               >
-                <ListItemIcon sx={{ 
-                  color: activeKPI === item.id ? '#3b82f6' : 'rgba(255, 255, 255, 0.7)',
-                  minWidth: 40
-                }}>
+                <ListItemIcon sx={chartsStyles.menuIcon}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText 
                   primary={item.label} 
-                  sx={{ 
-                    '& .MuiListItemText-primary': {
-                      fontSize: '0.875rem',
-                      fontWeight: activeKPI === item.id ? 600 : 400,
-                      color: activeKPI === item.id ? '#3b82f6' : 'rgba(255, 255, 255, 0.9)',
-                    }
-                  }}
+                  sx={chartsStyles.menuText}
                 />
               </ListItemButton>
             </ListItem>
@@ -172,31 +131,7 @@ const ChartsContainer = () => {
         </List>
       </Drawer>
       
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
-          p: 3,
-          width: '100%',
-          margin: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          minHeight: '100vh',
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)',
-            pointerEvents: 'none'
-          }
-        }}
-      >
+      <Box component="main" sx={chartsStyles.mainContent}>
         <Toolbar />
         <ChartsPresentational
           barData={barData}
