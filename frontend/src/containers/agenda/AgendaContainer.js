@@ -14,9 +14,12 @@ const AgendaContainer = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [allEvents, setAllEvents] = useState([]);
 
   useEffect(() => {
     loadAgendamentos();
+    loadAllEvents();
     loadContacts();
   }, []);
 
@@ -39,17 +42,67 @@ const AgendaContainer = () => {
       })) : [];
       setEvents(formattedEvents);
       
-      if (response.pagination) {
+      if (response.total !== undefined) {
         setPagination({
-          currentPage: response.pagination.current_page || page,
-          totalPages: response.pagination.total_pages || 1,
-          totalItems: response.pagination.total_items || formattedEvents.length
+          currentPage: response.page || page,
+          totalPages: response.pages || Math.ceil(response.total / 3),
+          totalItems: response.total || formattedEvents.length
         });
       }
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAllEvents = async () => {
+    try {
+      const response = await agendaService.getAgendamentos(1, 1000);
+      const agendamentos = response.items || response.data || response;
+      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+        id: ag.id,
+        date: ag.data,
+        title: `${ag.cliente} - ${ag.servico}`
+      })) : [];
+      setAllEvents(formattedEvents);
+    } catch (error) {
+      console.error('Erro ao carregar todos os agendamentos:', error);
+    }
+  };
+
+  const handleSearch = async (term) => {
+    setSearchTerm(term);
+    if (term.trim()) {
+      try {
+        const response = await agendaService.getAgendamentos(1, 3, term);
+        const agendamentos = response.items || response.data || response;
+        const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+          id: ag.id,
+          title: `${ag.cliente} - ${ag.servico}`,
+          date: ag.data,
+          time: ag.hora,
+          description: ag.servico,
+          cliente: ag.cliente,
+          servico: ag.servico,
+          whatsapp_number: ag.whatsapp_number,
+          custom_message: ag.custom_message,
+          enable_notification: ag.enable_notification
+        })) : [];
+        setEvents(formattedEvents);
+        
+        if (response.total !== undefined) {
+          setPagination({
+            currentPage: 1,
+            totalPages: response.pages || Math.ceil(response.total / 3),
+            totalItems: response.total || formattedEvents.length
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar agendamentos:', error);
+      }
+    } else {
+      loadAgendamentos(1);
     }
   };
 
@@ -97,7 +150,8 @@ const AgendaContainer = () => {
       
       if (result.success !== false) {
         await loadAgendamentos(pagination.currentPage);
-        await loadContacts(); // Recarregar contatos após criar/editar agendamento
+        await loadAllEvents();
+        await loadContacts();
         console.log(editingEvent ? 'Agendamento atualizado' : 'Agendamento criado', 'com sucesso');
       }
     } catch (error) {
@@ -207,10 +261,12 @@ const AgendaContainer = () => {
       <AgendaPresentational
         selectedDate={selectedDate}
         events={events}
+        allEvents={allEvents}
         contacts={contacts}
         messages={messages}
         selectedContact={selectedContact}
         pagination={pagination}
+        searchTerm={searchTerm}
         onDateChange={handleDateChange}
         onOpenModal={handleOpenModal}
         onSelectContact={handleSelectContact}
@@ -218,6 +274,7 @@ const AgendaContainer = () => {
         onEditEvent={handleEditEvent}
         onDeleteEvent={handleDeleteEvent}
         onPageChange={handlePageChange}
+        onSearch={handleSearch}
       />
       
       <AgendaModal

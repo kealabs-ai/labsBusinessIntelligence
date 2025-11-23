@@ -30,19 +30,32 @@ import { agendaStyles } from './AgendaPresentational.styles';
 const AgendaPresentational = ({
   selectedDate,
   events,
+  allEvents,
   contacts,
   messages,
   selectedContact,
   pagination,
+  searchTerm,
   onDateChange,
   onOpenModal,
   onSelectContact,
   onSendMessage,
   onEditEvent,
   onDeleteEvent,
-  onPageChange
+  onPageChange,
+  onSearch
 }) => {
   const [messageText, setMessageText] = useState('');
+
+  const isDateScheduled = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return allEvents.some(event => event.date === dateStr);
+  };
+
+  const getScheduledEventsForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return allEvents.filter(event => event.date === dateStr);
+  };
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedContact) {
@@ -81,6 +94,21 @@ const AgendaPresentational = ({
                 onChange={(e) => onDateChange(new Date(e.target.value))}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
+                sx={{ 
+                  ...agendaStyles.textField, 
+                  mb: 2,
+                  '& .MuiInputBase-input': {
+                    backgroundColor: isDateScheduled(selectedDate) ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
+                  }
+                }}
+              />
+              
+              <TextField
+                fullWidth
+                label="Buscar agendamentos"
+                value={searchTerm}
+                onChange={(e) => onSearch(e.target.value)}
+                placeholder="Digite o nome do cliente ou serviço..."
                 sx={{ ...agendaStyles.textField, mb: 2 }}
               />
 
@@ -139,7 +167,7 @@ const AgendaPresentational = ({
 
           {/* WhatsApp Manager */}
           <Grid item xs={12} md={6}>
-            <Card sx={{ ...agendaStyles.mainCard, display: 'flex', flexDirection: 'column' }}>
+            <Card sx={{ ...agendaStyles.whatsappCard, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" sx={agendaStyles.sectionTitle}>
                 <WhatsApp sx={agendaStyles.whatsappIcon} />
                 WhatsApp Manager

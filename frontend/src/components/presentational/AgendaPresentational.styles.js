@@ -51,6 +51,16 @@ export const agendaStyles = {
     height: '700px'
   },
   
+  whatsappCard: {
+    borderRadius: 3,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+    background: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    p: 3,
+    height: '800px'
+  },
+  
   sectionTitle: {
     fontWeight: 600,
     mb: 2,
