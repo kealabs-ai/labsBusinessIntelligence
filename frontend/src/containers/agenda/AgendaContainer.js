@@ -18,13 +18,6 @@ const AgendaContainer = () => {
   useEffect(() => {
     loadAgendamentos();
     loadContacts();
-
-    // Simular mensagens
-    setMessages([
-      { id: 1, contactId: 1, message: 'Oi, tudo bem?', sent: false, timestamp: '10:30' },
-      { id: 2, contactId: 1, message: 'Confirma reunião de amanhã?', sent: false, timestamp: '10:31' },
-      { id: 3, contactId: 1, message: 'Confirmado!', sent: true, timestamp: '10:35' }
-    ]);
   }, []);
 
   const loadAgendamentos = async (page = 1) => {
@@ -154,6 +147,31 @@ const AgendaContainer = () => {
     loadAgendamentos(page);
   };
 
+  const loadChatMessages = async (contact) => {
+    if (!contact) return;
+    
+    try {
+      const response = await agendaService.getChatMessages(contact.phone.replace(/\D/g, ''));
+      if (response.success && response.messages && response.messages.records) {
+        const chatMessages = response.messages.records.map((msg, index) => ({
+          id: msg.key?.id || index,
+          contactId: contact.id,
+          message: msg.message?.conversation || msg.message?.extendedTextMessage?.text || 'Mensagem não suportada',
+          sent: msg.key?.fromMe || false,
+          timestamp: new Date(msg.messageTimestamp * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        }));
+        setMessages(chatMessages);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar mensagens:', error);
+    }
+  };
+
+  const handleSelectContact = (contact) => {
+    setSelectedContact(contact);
+    loadChatMessages(contact);
+  };
+
   const handleSendMessage = async (contactId, message) => {
     try {
       const contact = contacts.find(c => c.id === contactId);
@@ -195,7 +213,7 @@ const AgendaContainer = () => {
         pagination={pagination}
         onDateChange={handleDateChange}
         onOpenModal={handleOpenModal}
-        onSelectContact={setSelectedContact}
+        onSelectContact={handleSelectContact}
         onSendMessage={handleSendMessage}
         onEditEvent={handleEditEvent}
         onDeleteEvent={handleDeleteEvent}

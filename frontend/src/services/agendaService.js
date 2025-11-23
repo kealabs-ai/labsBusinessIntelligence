@@ -147,6 +147,28 @@ class AgendaService {
       throw error;
     }
   }
+
+  async getChatMessages(contactPhone) {
+    try {
+      const url = `${API_BASE_URL}/communication/chat-client`;
+      const response = await axios.post(url, {
+        where: {
+          key: {
+            remoteJid: `${contactPhone}@s.whatsapp.net`
+          }
+        }
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+      throw error;
+    }
+  }
 }
 
 export const agendaService = new AgendaService();
