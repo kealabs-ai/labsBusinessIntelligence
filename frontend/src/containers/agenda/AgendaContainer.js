@@ -1,27 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AgendaPresentational from '../../components/presentational/AgendaPresentational';
+import AgendaModal from '../../components/presentational/AgendaModal';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
+import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [newEvent, setNewEvent] = useState({ title: '', date: '', time: '', description: '' });
   const [selectedContact, setSelectedContact] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
 
   useEffect(() => {
-    // Simular dados do Google Calendar
-    setEvents([
-      { id: 1, title: 'Reunião de equipe', date: '2024-01-15', time: '09:00', description: 'Reunião semanal' },
-      { id: 2, title: 'Apresentação cliente', date: '2024-01-16', time: '14:00', description: 'Demo do produto' }
-    ]);
-
-    // Simular contatos WhatsApp
-    setContacts([
-      { id: 1, name: 'João Silva', phone: '+5511999999999', lastMessage: 'Confirma reunião?', online: true },
-      { id: 2, name: 'Maria Santos', phone: '+5511888888888', lastMessage: 'Relatório enviado', online: false }
-    ]);
+    loadAgendamentos();
+    loadContacts();
 
     // Simular mensagens
     setMessages([
@@ -31,26 +27,156 @@ const AgendaContainer = () => {
     ]);
   }, []);
 
-  const handleAddEvent = () => {
-    if (newEvent.title && newEvent.date && newEvent.time) {
-      const event = {
-        id: Date.now(),
-        ...newEvent
-      };
-      setEvents(prev => [...prev, event]);
-      setNewEvent({ title: '', date: '', time: '', description: '' });
+  const loadAgendamentos = async (page = 1) => {
+    try {
+      setLoading(true);
+      const response = await agendaService.getAgendamentos(page, 3);
+      const agendamentos = response.items || response.data || response;
+      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+        id: ag.id,
+        title: `${ag.cliente} - ${ag.servico}`,
+        date: ag.data,
+        time: ag.hora,
+        description: ag.servico,
+        cliente: ag.cliente,
+        servico: ag.servico,
+        whatsapp_number: ag.whatsapp_number,
+        custom_message: ag.custom_message,
+        enable_notification: ag.enable_notification
+      })) : [];
+      setEvents(formattedEvents);
+      
+      if (response.pagination) {
+        setPagination({
+          currentPage: response.pagination.current_page || page,
+          totalPages: response.pagination.total_pages || 1,
+          totalItems: response.pagination.total_items || formattedEvents.length
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar agendamentos:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSendMessage = (contactId, message) => {
-    const newMessage = {
-      id: Date.now(),
-      contactId,
-      message,
-      sent: true,
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-    setMessages(prev => [...prev, newMessage]);
+  const loadContacts = async () => {
+    try {
+      const response = await agendaService.getContacts();
+      const contactsData = response.data || response;
+      const formattedContacts = Array.isArray(contactsData) ? contactsData.map(contact => ({
+        id: contact.id,
+        name: contact.name,
+        phone: contact.phone,
+        lastMessage: contact.last_message || 'Sem mensagens',
+        online: contact.is_online
+      })) : [];
+      setContacts(formattedContacts);
+    } catch (error) {
+      console.error('Erro ao carregar contatos:', error);
+      setContacts([
+        { id: 1, name: 'João Silva', phone: '+5511999999999', lastMessage: 'Confirma reunião?', online: true },
+        { id: 2, name: 'Maria Santos', phone: '+5511888888888', lastMessage: 'Relatório enviado', online: false }
+      ]);
+    }
+  };
+
+  const handleSaveEvent = async (eventData) => {
+    try {
+      setLoading(true);
+      
+      const agendamentoData = {
+        cliente: eventData.cliente,
+        servico: eventData.servico,
+        data: eventData.date,
+        hora: eventData.time,
+        whatsapp_number: eventData.whatsappNumber,
+        custom_message: eventData.customMessage,
+        enable_notification: eventData.enableNotification
+      };
+      
+      let result;
+      if (editingEvent && editingEvent.id) {
+        result = await agendaService.updateAgendamento(editingEvent.id, agendamentoData);
+      } else {
+        result = await agendaService.createAgendamento(agendamentoData);
+      }
+      
+      if (result.success !== false) {
+        await loadAgendamentos(pagination.currentPage);
+        await loadContacts(); // Recarregar contatos após criar/editar agendamento
+        console.log(editingEvent ? 'Agendamento atualizado' : 'Agendamento criado', 'com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar agendamento:', error);
+      alert('Erro ao salvar agendamento. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+    setEditingEvent(null);
+  };
+
+  const scheduleWhatsAppNotification = (event) => {
+    const notificationDate = new Date(`${event.date} ${event.time}`);
+    notificationDate.setDate(notificationDate.getDate() - 1);
+    
+    console.log('Notificação agendada para:', notificationDate);
+    console.log('Dados do evento:', event);
+  };
+
+  const handleOpenModal = (event = null) => {
+    setEditingEvent(event);
+    setModalOpen(true);
+  };
+
+  const handleEditEvent = (event) => {
+    setEditingEvent(event);
+    setModalOpen(true);
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (window.confirm('Tem certeza que deseja inativar este agendamento?')) {
+      try {
+        setLoading(true);
+        await agendaService.deleteAgendamento(eventId);
+        await loadAgendamentos(pagination.currentPage);
+        console.log('Agendamento inativado com sucesso');
+      } catch (error) {
+        console.error('Erro ao inativar agendamento:', error);
+        alert('Erro ao inativar agendamento. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handlePageChange = (page) => {
+    loadAgendamentos(page);
+  };
+
+  const handleSendMessage = async (contactId, message) => {
+    try {
+      const contact = contacts.find(c => c.id === contactId);
+      if (!contact) return;
+      
+      const result = await agendaService.sendWhatsAppMessage(contact.phone, message);
+      
+      if (result.success) {
+        const newMessage = {
+          id: Date.now(),
+          contactId,
+          message,
+          sent: true,
+          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, newMessage]);
+      } else {
+        alert('Erro ao enviar mensagem WhatsApp');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      alert('Erro ao enviar mensagem. Tente novamente.');
+    }
   };
 
   const handleDateChange = (date) => {
@@ -65,13 +191,22 @@ const AgendaContainer = () => {
         events={events}
         contacts={contacts}
         messages={messages}
-        newEvent={newEvent}
         selectedContact={selectedContact}
+        pagination={pagination}
         onDateChange={handleDateChange}
-        onEventChange={setNewEvent}
-        onAddEvent={handleAddEvent}
+        onOpenModal={handleOpenModal}
         onSelectContact={setSelectedContact}
         onSendMessage={handleSendMessage}
+        onEditEvent={handleEditEvent}
+        onDeleteEvent={handleDeleteEvent}
+        onPageChange={handlePageChange}
+      />
+      
+      <AgendaModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveEvent}
+        editingEvent={editingEvent}
       />
     </>
   );

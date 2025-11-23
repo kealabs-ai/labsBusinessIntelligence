@@ -147,6 +147,8 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         logger.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)} - Check logs for details")
 
+
+
 @router.post("/send-message-client")
 async def send_message_client(request: SendMessageRequest, user=Depends(get_current_user)):
     try:

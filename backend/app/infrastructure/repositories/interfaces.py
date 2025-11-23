@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 
+class BaseRepository(ABC):
+    pass
+
 class IUserRepository(ABC):
     @abstractmethod
     async def get_user_by_credentials(self, username: str) -> Optional[User]:

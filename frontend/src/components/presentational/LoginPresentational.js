@@ -10,6 +10,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { loginStyles } from './LoginPresentational.styles';
+import logoKea from '../../assets/logotipo_kea.png';
 
 const LoginPresentational = ({
   username,
@@ -24,16 +25,15 @@ const LoginPresentational = ({
     <Box sx={loginStyles.container}>
       <Paper elevation={0} sx={loginStyles.loginCard}>
         <Box sx={loginStyles.logo}>
-          <Box sx={loginStyles.logoIcon}>
-            BI
-          </Box>
-          <Typography component="h1" variant="h4" sx={loginStyles.title}>
-            Labs BI
-          </Typography>
+          <img 
+            src={logoKea} 
+            alt="Kea Labs" 
+            style={loginStyles.logoImage}
+          />
         </Box>
         
         <Typography component="h2" variant="body1" sx={loginStyles.subtitle}>
-          Business Intelligence Platform
+          Labs Intelligence Platform
         </Typography>
         
         {error && (

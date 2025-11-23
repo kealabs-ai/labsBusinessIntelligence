@@ -10,8 +10,7 @@ export const toolbarStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    maxWidth: 'lg',
-    mx: 'auto',
+    width: '100%',
     px: 3,
     py: 2
   },
@@ -21,24 +20,11 @@ export const toolbarStyles = {
     alignItems: 'center'
   },
   
-  logoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.2)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    mr: 2
-  },
-  
-  logoText: {
-    color: 'white',
-    fontWeight: 700,
-    fontSize: 20
+  logoImage: {
+    height: 60,
+    width: 'auto',
+    maxWidth: 210,
+    objectFit: 'contain'
   },
   
   userSection: {
@@ -47,28 +33,13 @@ export const toolbarStyles = {
     gap: 2
   },
   
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1.5,
-    color: 'white'
-  },
-  
-  avatar: {
-    width: 40,
-    height: 40,
-    background: 'rgba(255, 255, 255, 0.2)',
-    color: 'white',
-    fontWeight: 600
-  },
-  
-  userName: {
-    fontWeight: 500,
-    display: { xs: 'none', sm: 'block' }
-  },
+
   
   menuButton: {
     color: 'white',
+    width: 48,
+    height: 48,
+    mx: 2,
     '&:hover': {
       background: 'rgba(255, 255, 255, 0.1)'
     }

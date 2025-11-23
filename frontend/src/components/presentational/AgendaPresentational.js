@@ -12,14 +12,18 @@ import {
   Avatar,
   Card,
   CardContent,
-  Badge
+  Badge,
+  IconButton,
+  Pagination
 } from '@mui/material';
 import {
   CalendarToday,
   WhatsApp,
   Person,
   Add,
-  Send
+  Send,
+  Edit,
+  Delete
 } from '@mui/icons-material';
 import { agendaStyles } from './AgendaPresentational.styles';
 
@@ -28,13 +32,15 @@ const AgendaPresentational = ({
   events,
   contacts,
   messages,
-  newEvent,
   selectedContact,
+  pagination,
   onDateChange,
-  onEventChange,
-  onAddEvent,
+  onOpenModal,
   onSelectContact,
-  onSendMessage
+  onSendMessage,
+  onEditEvent,
+  onDeleteEvent,
+  onPageChange
 }) => {
   const [messageText, setMessageText] = useState('');
 
@@ -70,60 +76,24 @@ const AgendaPresentational = ({
             
               <TextField
                 type="date"
+                label="Data Selecionada"
                 value={selectedDate.toISOString().split('T')[0]}
                 onChange={(e) => onDateChange(new Date(e.target.value))}
                 fullWidth
+                InputLabelProps={{ shrink: true }}
                 sx={{ ...agendaStyles.textField, mb: 2 }}
               />
 
               <Box sx={agendaStyles.addEventSection}>
-                <Typography variant="subtitle1" gutterBottom>Adicionar Evento</Typography>
-                <TextField
-                  label="Título"
-                  value={newEvent.title}
-                  onChange={(e) => onEventChange({...newEvent, title: e.target.value})}
-                  fullWidth
-                  size="small"
-                  sx={{ ...agendaStyles.textField, mb: 1 }}
-                />
-                <Grid container spacing={1}>
-                  <Grid item xs={6}>
-                    <TextField
-                      type="date"
-                      value={newEvent.date}
-                      onChange={(e) => onEventChange({...newEvent, date: e.target.value})}
-                      fullWidth
-                      size="small"
-                      sx={agendaStyles.textField}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      type="time"
-                      value={newEvent.time}
-                      onChange={(e) => onEventChange({...newEvent, time: e.target.value})}
-                      fullWidth
-                      size="small"
-                      sx={agendaStyles.textField}
-                    />
-                  </Grid>
-                </Grid>
-                <TextField
-                  label="Descrição"
-                  value={newEvent.description}
-                  onChange={(e) => onEventChange({...newEvent, description: e.target.value})}
-                  fullWidth
-                  size="small"
-                  sx={{ ...agendaStyles.textField, mt: 1, mb: 1 }}
-                />
+                <Typography variant="subtitle1" gutterBottom>Gerenciar Agendamentos</Typography>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
-                  onClick={onAddEvent}
-                  size="small"
+                  onClick={onOpenModal}
+                  fullWidth
                   sx={agendaStyles.addButton}
                 >
-                  Adicionar
+                  ADICIONAR AGENDAMENTO
                 </Button>
               </Box>
 
@@ -135,9 +105,35 @@ const AgendaPresentational = ({
                       primary={event.title}
                       secondary={`${event.date} às ${event.time} - ${event.description}`}
                     />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => onEditEvent(event)}
+                        sx={{ color: 'primary.main' }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => onDeleteEvent(event.id)}
+                        sx={{ color: 'error.main' }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </ListItem>
                 ))}
               </List>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Pagination
+                  count={pagination?.totalPages || 1}
+                  page={pagination?.currentPage || 1}
+                  onChange={(e, page) => onPageChange(page)}
+                  color="primary"
+                  size="small"
+                />
+              </Box>
             </Card>
           </Grid>
 

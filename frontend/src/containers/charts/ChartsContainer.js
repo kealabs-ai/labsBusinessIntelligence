@@ -14,14 +14,17 @@ import {
   CssBaseline
 } from '@mui/material';
 import { Menu as MenuIcon, Dashboard, BarChart, PieChart } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { chartService } from '../../services/chartService';
 import ChartsPresentational from '../../components/presentational/ChartsPresentational';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { chartsStyles } from './ChartsContainer.styles';
+import logoKea from '../../assets/logotipo_kea.png';
 
 const drawerWidth = 240;
 
 const ChartsContainer = () => {
+  const navigate = useNavigate();
   const [barData, setBarData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [lineData, setLineData] = useState([]);
@@ -81,13 +84,20 @@ const ChartsContainer = () => {
       <CssBaseline />
       <AppBar position="fixed" sx={chartsStyles.appBar}>
         <Toolbar sx={chartsStyles.toolbar}>
-          <IconButton
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            edge="start"
-            sx={chartsStyles.menuButton}
-          >
-            <MenuIcon />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img 
+              src={logoKea} 
+              alt="Kea Labs" 
+              style={{ height: 40, width: 'auto', maxWidth: 150, objectFit: 'contain', marginRight: 16, cursor: 'pointer' }}
+              onClick={() => navigate('/menu')}
+            />
+            <IconButton
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              sx={chartsStyles.menuButton}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
           <Typography variant="h6" noWrap component="div" sx={chartsStyles.appTitle}>
             Business Intelligence Dashboard
           </Typography>

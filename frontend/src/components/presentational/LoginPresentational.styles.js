@@ -26,28 +26,15 @@ export const loginStyles = {
     mb: 3
   },
   
-  logoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    mr: 2
+  logoImage: {
+    width: 120,
+    height: 'auto',
+    maxHeight: 80,
+    objectFit: 'contain',
+    mb: 2
   },
   
-  title: {
-    fontWeight: 700,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    textAlign: 'center'
-  },
+
   
   subtitle: {
     textAlign: 'center',

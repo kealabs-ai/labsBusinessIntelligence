@@ -3,8 +3,6 @@ import {
   AppBar,
   Toolbar,
   Box,
-  Typography,
-  Avatar,
   IconButton,
   Menu,
   MenuItem,
@@ -16,10 +14,13 @@ import {
   ExitToApp,
   Person
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { toolbarStyles } from './ToolbarPresentational.styles';
+import logoKea from '../../assets/logotipo_kea.png';
 
 const ToolbarPresentational = ({ user, onLogout }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -43,23 +44,15 @@ const ToolbarPresentational = ({ user, onLogout }) => {
     <AppBar position="static" elevation={0} sx={toolbarStyles.toolbar}>
       <Toolbar sx={toolbarStyles.container}>
         <Box sx={toolbarStyles.logo}>
-          <Box sx={toolbarStyles.logoIcon}>
-            BI
-          </Box>
-          <Typography variant="h6" sx={toolbarStyles.logoText}>
-            Labs BI
-          </Typography>
+          <img 
+            src={logoKea} 
+            alt="Kea Labs" 
+            style={{ ...toolbarStyles.logoImage, cursor: 'pointer' }}
+            onClick={() => navigate('/menu')}
+          />
         </Box>
         
         <Box sx={toolbarStyles.userSection}>
-          <Box sx={toolbarStyles.userInfo}>
-            <Avatar sx={toolbarStyles.avatar}>
-              {getUserInitials(user?.username)}
-            </Avatar>
-            <Typography variant="body1" sx={toolbarStyles.userName}>
-              {user?.username || 'Usuário'}
-            </Typography>
-          </Box>
           
           <IconButton
             size="large"

@@ -48,7 +48,7 @@ export const agendaStyles = {
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     p: 3,
-    height: '600px'
+    height: '700px'
   },
   
   sectionTitle: {
