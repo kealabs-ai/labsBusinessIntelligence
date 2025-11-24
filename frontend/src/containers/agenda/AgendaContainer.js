@@ -300,6 +300,7 @@ const AgendaContainer = () => {
         onPageChange={handlePageChange}
         onSearch={handleSearch}
         onRefreshEvents={handleRefreshEvents}
+        loading={loading}
       />
       
       <AgendaModal

@@ -7,7 +7,8 @@ import {
   Card,
   CardContent,
   IconButton,
-  Grid
+  Grid,
+  CircularProgress
 } from '@mui/material';
 import {
   Close,
@@ -17,18 +18,14 @@ import {
   Build,
   Refresh
 } from '@mui/icons-material';
-import { CircularProgress } from '@mui/material';
 
 const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
   const today = new Date().toISOString().split('T')[0];
-  const todayEvents = events.filter(event => {
-    const eventDate = event.date;
-    console.log('Comparando:', eventDate, 'com hoje:', today);
-    return eventDate === today;
-  });
+  // Mostrar todos os eventos para debug
+  const todayEvents = events;
   
   console.log('Total events:', events.length);
-  console.log('Today events:', todayEvents.length);
+  console.log('All events being shown:', todayEvents.length);
   console.log('Events data:', events);
 
   const handleFullscreen = () => {
@@ -77,7 +74,7 @@ const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
-          })} - Total: {todayEvents.length} agendamentos
+          })} - {todayEvents.length} agendamentos
         </Typography>
 
         {loading ? (

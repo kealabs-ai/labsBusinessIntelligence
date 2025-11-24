@@ -38,6 +38,7 @@ const AgendaPresentational = ({
   selectedContact,
   pagination,
   searchTerm,
+  loading,
   onDateChange,
   onOpenModal,
   onSelectContact,
