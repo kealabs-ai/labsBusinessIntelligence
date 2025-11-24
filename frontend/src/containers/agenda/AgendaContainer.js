@@ -255,6 +255,11 @@ const AgendaContainer = () => {
     setSelectedDate(date);
   };
 
+  const handleRefreshEvents = async () => {
+    await loadAllEvents();
+    await loadAgendamentos(pagination.currentPage);
+  };
+
   return (
     <>
       <ToolbarContainer />
@@ -275,6 +280,7 @@ const AgendaContainer = () => {
         onDeleteEvent={handleDeleteEvent}
         onPageChange={handlePageChange}
         onSearch={handleSearch}
+        onRefreshEvents={handleRefreshEvents}
       />
       
       <AgendaModal

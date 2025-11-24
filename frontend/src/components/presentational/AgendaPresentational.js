@@ -45,7 +45,8 @@ const AgendaPresentational = ({
   onEditEvent,
   onDeleteEvent,
   onPageChange,
-  onSearch
+  onSearch,
+  onRefreshEvents
 }) => {
   const [messageText, setMessageText] = useState('');
   const [tvModalOpen, setTvModalOpen] = useState(false);
@@ -291,6 +292,7 @@ const AgendaPresentational = ({
         open={tvModalOpen}
         onClose={() => setTvModalOpen(false)}
         events={allEvents}
+        onRefresh={onRefreshEvents}
       />
     </Box>
   );

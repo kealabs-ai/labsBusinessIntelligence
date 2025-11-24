@@ -14,10 +14,11 @@ import {
   Fullscreen,
   Person,
   Schedule,
-  Build
+  Build,
+  Refresh
 } from '@mui/icons-material';
 
-const TVModal = ({ open, onClose, events }) => {
+const TVModal = ({ open, onClose, events, onRefresh }) => {
   const today = new Date().toISOString().split('T')[0];
   const todayEvents = events.filter(event => event.date === today);
 
@@ -49,6 +50,9 @@ const TVModal = ({ open, onClose, events }) => {
             Agendamentos de Hoje
           </Typography>
           <Box>
+            <IconButton onClick={onRefresh} sx={{ color: 'white', mr: 1 }}>
+              <Refresh fontSize="large" />
+            </IconButton>
             <IconButton onClick={handleFullscreen} sx={{ color: 'white', mr: 1 }}>
               <Fullscreen fontSize="large" />
             </IconButton>
@@ -91,21 +95,21 @@ const TVModal = ({ open, onClose, events }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Person sx={{ mr: 1, color: '#667eea' }} />
                       <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
-                        {event.cliente}
+                        {event.cliente || event.title?.split(' - ')[0] || 'Cliente'}
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Build sx={{ mr: 1, color: '#764ba2' }} />
                       <Typography variant="body1" sx={{ color: '#555' }}>
-                        {event.servico}
+                        {event.servico || event.description || event.title?.split(' - ')[1] || 'Serviço'}
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Schedule sx={{ mr: 1, color: '#25D366' }} />
                       <Typography variant="h5" sx={{ fontWeight: 700, color: '#333' }}>
-                        {event.time}
+                        {event.time || event.hora || '00:00'}
                       </Typography>
                     </Box>
                   </CardContent>
