@@ -293,6 +293,7 @@ const AgendaPresentational = ({
         onClose={() => setTvModalOpen(false)}
         events={allEvents}
         onRefresh={onRefreshEvents}
+        loading={loading}
       />
     </Box>
   );

@@ -17,10 +17,19 @@ import {
   Build,
   Refresh
 } from '@mui/icons-material';
+import { CircularProgress } from '@mui/material';
 
-const TVModal = ({ open, onClose, events, onRefresh }) => {
+const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
   const today = new Date().toISOString().split('T')[0];
-  const todayEvents = events.filter(event => event.date === today);
+  const todayEvents = events.filter(event => {
+    const eventDate = event.date;
+    console.log('Comparando:', eventDate, 'com hoje:', today);
+    return eventDate === today;
+  });
+  
+  console.log('Total events:', events.length);
+  console.log('Today events:', todayEvents.length);
+  console.log('Events data:', events);
 
   const handleFullscreen = () => {
     if (document.documentElement.requestFullscreen) {
@@ -68,10 +77,14 @@ const TVModal = ({ open, onClose, events, onRefresh }) => {
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
-          })}
+          })} - Total: {todayEvents.length} agendamentos
         </Typography>
 
-        {todayEvents.length === 0 ? (
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+            <CircularProgress size={60} sx={{ color: 'white' }} />
+          </Box>
+        ) : todayEvents.length === 0 ? (
           <Box sx={{ textAlign: 'center', mt: 8 }}>
             <Typography variant="h4" sx={{ opacity: 0.7 }}>
               Nenhum agendamento para hoje
@@ -109,7 +122,7 @@ const TVModal = ({ open, onClose, events, onRefresh }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Schedule sx={{ mr: 1, color: '#25D366' }} />
                       <Typography variant="h5" sx={{ fontWeight: 700, color: '#333' }}>
-                        {event.time || event.hora || '00:00'}
+                        {(event.time || event.hora || '00:00').substring(0, 5)}
                       </Typography>
                     </Box>
                   </CardContent>

@@ -58,13 +58,32 @@ const AgendaContainer = () => {
 
   const loadAllEvents = async () => {
     try {
-      const response = await agendaService.getAgendamentos(1, 1000);
-      const agendamentos = response.items || response.data || response;
-      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+      let allAgendamentos = [];
+      let page = 1;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const response = await agendaService.getAgendamentos(page, 100);
+        const agendamentos = response.items || response.data || response;
+        
+        if (Array.isArray(agendamentos) && agendamentos.length > 0) {
+          allAgendamentos = [...allAgendamentos, ...agendamentos];
+          hasMore = agendamentos.length === 100;
+          page++;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      const formattedEvents = allAgendamentos.map(ag => ({
         id: ag.id,
         date: ag.data,
-        title: `${ag.cliente} - ${ag.servico}`
-      })) : [];
+        time: ag.hora,
+        title: `${ag.cliente} - ${ag.servico}`,
+        cliente: ag.cliente,
+        servico: ag.servico
+      }));
+      
       setAllEvents(formattedEvents);
     } catch (error) {
       console.error('Erro ao carregar todos os agendamentos:', error);
