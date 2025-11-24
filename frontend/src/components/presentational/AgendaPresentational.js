@@ -23,8 +23,10 @@ import {
   Add,
   Send,
   Edit,
-  Delete
+  Delete,
+  Tv
 } from '@mui/icons-material';
+import TVModal from './TVModal';
 import { agendaStyles } from './AgendaPresentational.styles';
 
 const AgendaPresentational = ({
@@ -46,6 +48,7 @@ const AgendaPresentational = ({
   onSearch
 }) => {
   const [messageText, setMessageText] = useState('');
+  const [tvModalOpen, setTvModalOpen] = useState(false);
 
   const isDateScheduled = (date) => {
     const dateStr = date.toISOString().split('T')[0];
@@ -125,7 +128,20 @@ const AgendaPresentational = ({
                 </Button>
               </Box>
 
-              <Typography variant="subtitle1" gutterBottom>Próximos Eventos</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="subtitle1">Próximos Eventos</Typography>
+                <IconButton
+                  onClick={() => setTvModalOpen(true)}
+                  sx={{ 
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                    }
+                  }}
+                >
+                  <Tv />
+                </IconButton>
+              </Box>
               <List>
                 {events.map((event) => (
                   <ListItem key={event.id} sx={agendaStyles.eventItem}>
@@ -270,6 +286,12 @@ const AgendaPresentational = ({
           </Grid>
         </Grid>
       </Box>
+      
+      <TVModal
+        open={tvModalOpen}
+        onClose={() => setTvModalOpen(false)}
+        events={allEvents}
+      />
     </Box>
   );
 };
