@@ -17,7 +17,7 @@ class ContactService:
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = ContactRepository(self.connection)
 
-    def get_or_create_contact(self, name: str, phone: str) -> Contact:
+    def get_or_create_contact(self, name: str, phone: str, user_id: int) -> Contact:
         """Busca contato por telefone ou cria novo se não existir"""
         formatted_phone = self._format_phone_number(phone)
         
@@ -32,11 +32,11 @@ class ContactService:
             is_online=False,
             active=True
         )
-        return self.repository.create(new_contact)
+        return self.repository.create(new_contact, user_id)
 
-    def get_all_contacts(self) -> List[Contact]:
+    def get_all_contacts(self, user_id: int) -> List[Contact]:
         """Buscar todos os contatos ativos"""
-        return self.repository.get_all_active()
+        return self.repository.get_all_active(user_id)
 
     def update_last_message(self, contact_id: int, message: str):
         """Atualizar última mensagem do contato"""

@@ -29,13 +29,13 @@ class AgendamentoRepository(BaseRepository):
         """)
         self.connection.commit()
     
-    def create(self, agendamento: Agendamento) -> Agendamento:
+    def create(self, agendamento: Agendamento, user_id: int) -> Agendamento:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
                 INSERT INTO agendamentos (cliente, servico, data, hora, whatsapp_number, 
-                                        custom_message, enable_notification)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                        custom_message, enable_notification, user_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -45,7 +45,8 @@ class AgendamentoRepository(BaseRepository):
                 agendamento.hora,
                 agendamento.whatsapp_number,
                 agendamento.custom_message,
-                agendamento.enable_notification
+                agendamento.enable_notification,
+                user_id
             ))
             
             agendamento.id = cursor.lastrowid
@@ -54,13 +55,18 @@ class AgendamentoRepository(BaseRepository):
         finally:
             cursor.close()
     
-    def get_all(self, page: int = 1, limit: int = 10, search: str = None) -> dict:
+    def get_all(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None) -> dict:
         cursor = self.connection.cursor(dictionary=True)
         try:
-            # Query base - filtrar apenas registros ativos
+            # Query base - filtrar apenas registros ativos e do usuário
             base_query = "SELECT * FROM agendamentos WHERE (ativo IS NULL OR ativo = TRUE)"
             count_query = "SELECT COUNT(*) as total FROM agendamentos WHERE (ativo IS NULL OR ativo = TRUE)"
             params = []
+            
+            if user_id:
+                base_query += " AND user_id = %s"
+                count_query += " AND user_id = %s"
+                params.append(user_id)
             
             # Adicionar filtro de busca
             if search:
@@ -140,14 +146,14 @@ class AgendamentoRepository(BaseRepository):
         
         return agendamentos
     
-    def update(self, agendamento_id: int, agendamento: Agendamento) -> Agendamento:
+    def update(self, agendamento_id: int, agendamento: Agendamento, user_id: int) -> Agendamento:
         cursor = self.connection.cursor()
         
         query = """
             UPDATE agendamentos SET 
             cliente = %s, servico = %s, data = %s, hora = %s, 
             whatsapp_number = %s, custom_message = %s, enable_notification = %s
-            WHERE id = %s
+            WHERE id = %s AND user_id = %s
         """
         
         cursor.execute(query, (
@@ -158,7 +164,8 @@ class AgendamentoRepository(BaseRepository):
             agendamento.whatsapp_number,
             agendamento.custom_message,
             agendamento.enable_notification,
-            agendamento_id
+            agendamento_id,
+            user_id
         ))
         
         self.connection.commit()

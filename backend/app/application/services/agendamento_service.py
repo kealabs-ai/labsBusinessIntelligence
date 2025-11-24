@@ -19,7 +19,7 @@ class AgendamentoService:
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = AgendamentoRepository(self.connection)
     
-    async def create_agendamento(self, agendamento_data: dict) -> Agendamento:
+    async def create_agendamento(self, agendamento_data: dict, user_id: int) -> Agendamento:
         """Criar novo agendamento"""
         # Validar e formatar número WhatsApp
         if agendamento_data.get('whatsapp_number'):
@@ -28,7 +28,7 @@ class AgendamentoService:
             )
         
         agendamento = Agendamento(**agendamento_data)
-        created_agendamento = self.repository.create(agendamento)
+        created_agendamento = self.repository.create(agendamento, user_id)
         
         # Criar ou atualizar contato se número WhatsApp fornecido
         if created_agendamento.whatsapp_number:
@@ -36,7 +36,8 @@ class AgendamentoService:
                 contact_service = ContactService()
                 contact_service.get_or_create_contact(
                     created_agendamento.cliente,
-                    created_agendamento.whatsapp_number
+                    created_agendamento.whatsapp_number,
+                    user_id
                 )
             except Exception as e:
                 print(f"Erro ao criar contato: {e}")
@@ -45,15 +46,15 @@ class AgendamentoService:
         
         return created_agendamento
     
-    def get_all_agendamentos(self, page: int = 1, limit: int = 10, search: str = None) -> dict:
+    def get_all_agendamentos(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None) -> dict:
         """Buscar todos os agendamentos com paginação"""
-        return self.repository.get_all(page, limit, search)
+        return self.repository.get_all(page, limit, search, user_id)
     
     def get_agendamento_by_id(self, agendamento_id: int) -> Agendamento:
         """Buscar agendamento por ID"""
         return self.repository.get_by_id(agendamento_id)
     
-    def update_agendamento(self, agendamento_id: int, agendamento_data: dict) -> Agendamento:
+    def update_agendamento(self, agendamento_id: int, agendamento_data: dict, user_id: int) -> Agendamento:
         """Atualizar agendamento"""
         if agendamento_data.get('whatsapp_number'):
             agendamento_data['whatsapp_number'] = self._format_whatsapp_number(
@@ -61,7 +62,7 @@ class AgendamentoService:
             )
         
         agendamento = Agendamento(**agendamento_data)
-        return self.repository.update(agendamento_id, agendamento)
+        return self.repository.update(agendamento_id, agendamento, user_id)
     
     def delete_agendamento(self, agendamento_id: int):
         """Inativar agendamento"""

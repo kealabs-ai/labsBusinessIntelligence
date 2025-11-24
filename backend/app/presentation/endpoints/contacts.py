@@ -22,7 +22,7 @@ async def get_contacts(user=Depends(get_current_user)):
     """
     try:
         service = ContactService()
-        contacts = service.get_all_contacts()
+        contacts = service.get_all_contacts(user.id)
         return {
             "success": True,
             "data": [contact.dict() for contact in contacts]

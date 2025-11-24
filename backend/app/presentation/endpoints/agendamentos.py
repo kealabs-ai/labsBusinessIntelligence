@@ -34,7 +34,7 @@ async def create_agendamento(request: AgendamentoRequest, user=Depends(get_curre
     logger.info(f"Request data: {request.dict()}")
     try:
         service = AgendamentoService()
-        agendamento = await service.create_agendamento(request.dict())
+        agendamento = await service.create_agendamento(request.dict(), user.id)
         logger.info(f"Agendamento created successfully: {agendamento.dict()}")
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:
@@ -56,7 +56,7 @@ async def get_agendamentos(
     logger.info(f"GET /agendamentos/ called - page: {page}, limit: {limit}, search: {search}")
     try:
         service = AgendamentoService()
-        result = service.get_all_agendamentos(page, limit, search)
+        result = service.get_all_agendamentos(page, limit, search, user.id)
         return {
             "items": [agendamento.dict() for agendamento in result["items"]],
             "total": result["total"],
@@ -91,7 +91,7 @@ async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, u
     logger.info(f"PUT /agendamentos/{agendamento_id} called")
     try:
         service = AgendamentoService()
-        agendamento = service.update_agendamento(agendamento_id, request.dict())
+        agendamento = service.update_agendamento(agendamento_id, request.dict(), user.id)
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:
         logger.error(f"Error updating agendamento: {str(e)}")

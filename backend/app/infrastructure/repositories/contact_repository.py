@@ -7,12 +7,12 @@ class ContactRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, contact: Contact) -> Contact:
+    def create(self, contact: Contact, user_id: int) -> Contact:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO contacts (name, phone, last_message, last_message_time, is_online, active)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO contacts (name, phone, last_message, last_message_time, is_online, active, user_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(query, (
                 contact.name,
@@ -20,7 +20,8 @@ class ContactRepository:
                 contact.last_message,
                 contact.last_message_time,
                 contact.is_online,
-                contact.active
+                contact.active,
+                user_id
             ))
             self.connection.commit()
             
@@ -39,11 +40,11 @@ class ContactRepository:
         finally:
             cursor.close()
 
-    def get_all_active(self) -> List[Contact]:
+    def get_all_active(self, user_id: int) -> List[Contact]:
         cursor = self.connection.cursor(dictionary=True)
         try:
-            query = "SELECT * FROM contacts WHERE active = TRUE ORDER BY updated_at DESC"
-            cursor.execute(query)
+            query = "SELECT * FROM contacts WHERE active = TRUE AND user_id = %s ORDER BY updated_at DESC"
+            cursor.execute(query, (user_id,))
             results = cursor.fetchall()
             return [Contact(**row) for row in results]
         finally:
