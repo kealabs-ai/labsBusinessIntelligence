@@ -144,7 +144,7 @@ export const agendaStyles = {
   
   messagesArea: {
     flexGrow: 1,
-    maxHeight: '300px',
+    maxHeight: '500px',
     overflow: 'auto',
     mb: 2,
     p: 1,

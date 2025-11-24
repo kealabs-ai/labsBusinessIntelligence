@@ -177,7 +177,7 @@ const AgendaPresentational = ({
                 {/* Lista de Contatos */}
                 <Grid item xs={5}>
                   <Typography variant="subtitle2" gutterBottom>Contatos</Typography>
-                  <List sx={{ maxHeight: '400px', overflow: 'auto' }}>
+                  <List sx={{ maxHeight: '600px', overflow: 'auto' }}>
                     {contacts.map((contact) => (
                       <ListItem
                         key={contact.id}
@@ -213,7 +213,7 @@ const AgendaPresentational = ({
                         Chat com {selectedContact.name}
                       </Typography>
                       
-                      <Box sx={agendaStyles.messagesArea}>
+                      <Box sx={{ ...agendaStyles.messagesArea, maxHeight: '500px' }}>
                         {getContactMessages(selectedContact.id).map((msg) => (
                           <Card
                             key={msg.id}
