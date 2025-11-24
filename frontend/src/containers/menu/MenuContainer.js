@@ -26,6 +26,13 @@ const MenuContainer = () => {
       description: 'Gerencie compromissos, calendário e notificações WhatsApp',
       path: '/agenda',
       icon: 'CalendarToday'
+    },
+    {
+      title: 'Administrador',
+      description: 'Gerencie usuários, permissões e módulos do sistema',
+      path: '/admin',
+      icon: 'AdminPanelSettings',
+      adminOnly: true
     }
   ];
 

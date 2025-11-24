@@ -30,15 +30,14 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         
-        authService.getCurrentUser()
-          .then(userData => {
-            setUser(userData);
-            setIsAuthenticated(true);
-          })
-          .catch(() => {
-            logout();
-          })
-          .finally(() => setLoading(false));
+        const userData = decodeToken(token);
+        if (userData) {
+          setUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          logout();
+        }
+        setLoading(false);
       } else {
         setLoading(false);
       }
@@ -50,12 +49,27 @@ export const AuthProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
+  const decodeToken = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return {
+        id: parseInt(payload.sub),
+        role: payload.role || 'user',
+        is_active: payload.is_active
+      };
+    } catch (error) {
+      return null;
+    }
+  };
+
   const login = async (username, password) => {
     try {
       const response = await authService.login(username, password);
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('loginTime', Date.now().toString());
-      setUser({ id: response.user_id });
+      
+      const userData = decodeToken(response.access_token);
+      setUser(userData);
       setIsAuthenticated(true);
       return true;
     } catch (error) {

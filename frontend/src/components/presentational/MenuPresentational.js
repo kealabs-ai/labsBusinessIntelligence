@@ -7,7 +7,7 @@ import {
   Typography,
   Box
 } from '@mui/material';
-import { BarChart, SmartToy, CalendarToday } from '@mui/icons-material';
+import { BarChart, SmartToy, CalendarToday, AdminPanelSettings } from '@mui/icons-material';
 import { menuStyles } from './MenuPresentational.styles';
 
 const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
@@ -19,6 +19,8 @@ const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
         return <SmartToy sx={{ fontSize: 32 }} />;
       case 'CalendarToday':
         return <CalendarToday sx={{ fontSize: 32 }} />;
+      case 'AdminPanelSettings':
+        return <AdminPanelSettings sx={{ fontSize: 32 }} />;
       default:
         return <BarChart sx={{ fontSize: 32 }} />;
     }
@@ -37,7 +39,7 @@ const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
         </Box>
         
         <Grid container spacing={4}>
-          {menuItems.map((item, index) => (
+          {menuItems.filter(item => !item.adminOnly || (user && user.role === 'admin')).map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={menuStyles.menuCard}>
                 <CardContent sx={menuStyles.cardContent}>

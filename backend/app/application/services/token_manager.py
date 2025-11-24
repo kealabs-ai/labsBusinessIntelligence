@@ -18,12 +18,13 @@ class TokenManager:
         return hashlib.sha256(password.encode()).hexdigest()
     
     @classmethod
-    def create_access_token(cls, user_id: int, is_active: bool = True) -> Token:
+    def create_access_token(cls, user_id: int, is_active: bool = True, role: str = 'user') -> Token:
         expire = datetime.utcnow() + timedelta(minutes=cls.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = {
             "sub": str(user_id),
             "exp": expire,
-            "is_active": is_active
+            "is_active": is_active,
+            "role": role
         }
         encoded_jwt = jwt.encode(to_encode, cls.SECRET_KEY, algorithm=cls.ALGORITHM)
         
@@ -40,10 +41,11 @@ class TokenManager:
             payload = jwt.decode(token, cls.SECRET_KEY, algorithms=[cls.ALGORITHM])
             user_id: str = payload.get("sub")
             is_active: bool = payload.get("is_active", True)
+            role: str = payload.get("role", "user")
             
             if user_id is None or not is_active:
                 return None
                 
-            return {"user_id": int(user_id), "is_active": is_active}
+            return {"user_id": int(user_id), "is_active": is_active, "role": role}
         except JWTError:
             return None

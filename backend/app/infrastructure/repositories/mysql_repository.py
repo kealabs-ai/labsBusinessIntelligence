@@ -18,7 +18,7 @@ class MySQLUserRepository(IUserRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT * FROM users WHERE username = %s AND is_active = 1", (username,))
+            cursor.execute("SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE username = %s AND is_active = 1", (username,))
             result = cursor.fetchone()
             return User(**result) if result else None
         finally:
@@ -29,7 +29,7 @@ class MySQLUserRepository(IUserRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            cursor.execute("SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE id = %s", (user_id,))
             result = cursor.fetchone()
             return User(**result) if result else None
         finally:

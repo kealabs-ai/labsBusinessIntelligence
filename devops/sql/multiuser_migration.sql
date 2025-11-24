@@ -24,3 +24,7 @@ ALTER TABLE kpi_data ADD COLUMN user_id INT;
 ALTER TABLE kpi_data ADD CONSTRAINT fk_kpi_data_user 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 CREATE INDEX idx_kpi_data_user_id ON kpi_data(user_id);
+
+-- Adicionar coluna role na tabela users
+ALTER TABLE users ADD COLUMN role ENUM('user', 'admin') DEFAULT 'user';
+CREATE INDEX idx_users_role ON users(role);

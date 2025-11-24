@@ -17,7 +17,7 @@ class AuthService:
         if not TokenManager.verify_password(password, user.password_hash):
             return None
             
-        return TokenManager.create_access_token(user.id, user.is_active)
+        return TokenManager.create_access_token(user.id, user.is_active, user.role)
     
     async def get_current_user(self, token: str) -> Optional[User]:
         token_data = TokenManager.verify_token(token)
