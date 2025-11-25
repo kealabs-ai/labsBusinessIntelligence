@@ -33,9 +33,10 @@ class AgendamentoRepository(BaseRepository):
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO agendamentos (cliente, servico, data, hora, whatsapp_number, 
-                                        custom_message, enable_notification, user_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO agendamentos (cliente, servico, data, hora, valor, whatsapp_number, 
+                                        custom_message, enable_notification, notification_quantity, 
+                                        notification_unit, notification_date, user_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -43,9 +44,13 @@ class AgendamentoRepository(BaseRepository):
                 agendamento.servico,
                 agendamento.data,
                 agendamento.hora,
+                agendamento.valor,
                 agendamento.whatsapp_number,
                 agendamento.custom_message,
                 agendamento.enable_notification,
+                agendamento.notification_quantity,
+                agendamento.notification_unit,
+                agendamento.notification_date,
                 user_id
             ))
             
@@ -95,6 +100,7 @@ class AgendamentoRepository(BaseRepository):
                     servico=row['servico'],
                     data=str(row['data']),
                     hora=str(row['hora']),
+                    valor=float(row['valor']) if row.get('valor') else None,
                     whatsapp_number=row['whatsapp_number'],
                     custom_message=row['custom_message'],
                     enable_notification=bool(row['enable_notification']),
@@ -151,8 +157,9 @@ class AgendamentoRepository(BaseRepository):
         
         query = """
             UPDATE agendamentos SET 
-            cliente = %s, servico = %s, data = %s, hora = %s, 
-            whatsapp_number = %s, custom_message = %s, enable_notification = %s
+            cliente = %s, servico = %s, data = %s, hora = %s, valor = %s,
+            whatsapp_number = %s, custom_message = %s, enable_notification = %s,
+            notification_quantity = %s, notification_unit = %s, notification_date = %s
             WHERE id = %s AND user_id = %s
         """
         
@@ -161,9 +168,13 @@ class AgendamentoRepository(BaseRepository):
             agendamento.servico,
             agendamento.data,
             agendamento.hora,
+            agendamento.valor,
             agendamento.whatsapp_number,
             agendamento.custom_message,
             agendamento.enable_notification,
+            agendamento.notification_quantity,
+            agendamento.notification_unit,
+            agendamento.notification_date,
             agendamento_id,
             user_id
         ))

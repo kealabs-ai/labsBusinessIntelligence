@@ -24,9 +24,11 @@ import {
   Send,
   Edit,
   Delete,
-  Tv
+  Tv,
+  NotificationsActive
 } from '@mui/icons-material';
 import TVModal from './TVModal';
+import NotificationModal from './NotificationModal';
 import { agendaStyles } from './AgendaPresentational.styles';
 
 const AgendaPresentational = ({
@@ -51,6 +53,7 @@ const AgendaPresentational = ({
 }) => {
   const [messageText, setMessageText] = useState('');
   const [tvModalOpen, setTvModalOpen] = useState(false);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
 
   const isDateScheduled = (date) => {
     const dateStr = date.toISOString().split('T')[0];
@@ -132,17 +135,32 @@ const AgendaPresentational = ({
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle1">Próximos Eventos</Typography>
-                <IconButton
-                  onClick={() => setTvModalOpen(true)}
-                  sx={{ 
-                    color: 'primary.main',
-                    '&:hover': {
-                      backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                    }
-                  }}
-                >
-                  <Tv />
-                </IconButton>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    onClick={() => setNotificationModalOpen(true)}
+                    sx={{ 
+                      color: '#FF9800',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                    title="Configurar Avisos"
+                  >
+                    <NotificationsActive />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setTvModalOpen(true)}
+                    sx={{ 
+                      color: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                      }
+                    }}
+                    title="Modo TV"
+                  >
+                    <Tv />
+                  </IconButton>
+                </Box>
               </Box>
               <List>
                 {events.map((event) => (
@@ -295,6 +313,16 @@ const AgendaPresentational = ({
         events={allEvents}
         onRefresh={onRefreshEvents}
         loading={loading}
+      />
+      
+      <NotificationModal
+        open={notificationModalOpen}
+        onClose={() => setNotificationModalOpen(false)}
+        onSave={(config) => {
+          // Salvar configuração global de notificação
+          localStorage.setItem('defaultNotificationConfig', JSON.stringify(config));
+          console.log('Configuração de aviso salva:', config);
+        }}
       />
     </Box>
   );

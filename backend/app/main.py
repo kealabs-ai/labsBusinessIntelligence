@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from presentation.endpoints import auth, charts, agendamentos, contacts
+from presentation.endpoints import auth, charts, agendamentos, contacts, admin
 from api import communication
 from infrastructure.database.factory import DatabaseFactory
 import os
@@ -25,6 +25,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(charts.router, prefix="/api/v1/chart", tags=["charts"])
 app.include_router(agendamentos.router, prefix="/api/v1/agendamentos", tags=["agendamentos"])
 app.include_router(contacts.router, prefix="/api/v1/contacts", tags=["contacts"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
 
 @app.get("/")

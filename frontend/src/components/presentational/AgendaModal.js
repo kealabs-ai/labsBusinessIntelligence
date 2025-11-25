@@ -22,6 +22,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     time: '',
     cliente: '',
     servico: '',
+    valor: '',
     whatsappNumber: '',
     customMessage: 'Olá {{nome_cliente}}, lembramos que você tem um agendamento em {{data_agenda}} às {{hora_agenda}} para {{servico}}.',
     enableNotification: true
@@ -35,6 +36,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         time: editingEvent.time || '',
         cliente: editingEvent.cliente || '',
         servico: editingEvent.servico || '',
+        valor: editingEvent.valor ? editingEvent.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
         whatsappNumber: editingEvent.whatsapp_number || '',
         customMessage: editingEvent.custom_message || 'Olá {{nome_cliente}}, lembramos que você tem um agendamento em {{data_agenda}} às {{hora_agenda}} para {{servico}}.',
         enableNotification: editingEvent.enable_notification !== undefined ? editingEvent.enable_notification : true
@@ -46,6 +48,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         time: '',
         cliente: '',
         servico: '',
+        valor: '',
         whatsappNumber: '',
         customMessage: 'Olá {{nome_cliente}}, lembramos que você tem um agendamento em {{data_agenda}} às {{hora_agenda}} para {{servico}}.',
         enableNotification: true
@@ -57,6 +60,17 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const formatCurrency = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    const amount = parseFloat(numbers) / 100;
+    return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  const parseCurrency = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    return parseFloat(numbers) / 100;
+  };
+
   const handleSave = () => {
     // Mapear campos do modal para formato esperado pelo backend
     const mappedData = {
@@ -64,6 +78,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       servico: formData.servico,
       date: formData.date,
       time: formData.time,
+      valor: formData.valor ? parseCurrency(formData.valor) : null,
       whatsappNumber: formData.whatsappNumber,
       customMessage: formData.customMessage,
       enableNotification: formData.enableNotification
@@ -77,6 +92,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       time: '',
       cliente: '',
       servico: '',
+      valor: '',
       whatsappNumber: '',
       customMessage: 'Olá {{nome_cliente}}, lembramos que você tem um agendamento em {{data_agenda}} às {{hora_agenda}} para {{servico}}.',
       enableNotification: true
@@ -146,6 +162,17 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 onChange={(e) => handleChange('time', e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Valor (Opcional)"
+                value={formData.valor}
+                onChange={(e) => handleChange('valor', formatCurrency(e.target.value))}
+                placeholder="R$ 0,00"
+                helperText="Valor do serviço em reais"
               />
             </Grid>
           </Grid>

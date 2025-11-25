@@ -14,9 +14,12 @@ class AgendamentoRequest(BaseModel):
     servico: str
     data: str
     hora: str
+    valor: float = None
     whatsapp_number: str = None
     custom_message: str = None
     enable_notification: bool = False
+    notification_quantity: int = 1
+    notification_unit: str = 'dias'
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     auth_service = AuthService()

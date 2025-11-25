@@ -155,9 +155,12 @@ const AgendaContainer = () => {
         servico: eventData.servico,
         data: eventData.date,
         hora: eventData.time,
+        valor: eventData.valor,
         whatsapp_number: eventData.whatsappNumber,
         custom_message: eventData.customMessage,
-        enable_notification: eventData.enableNotification
+        enable_notification: eventData.enableNotification,
+        notification_quantity: eventData.notificationQuantity || 1,
+        notification_unit: eventData.notificationUnit || 'dias'
       };
       
       let result;

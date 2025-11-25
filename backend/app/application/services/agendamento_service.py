@@ -125,6 +125,25 @@ class AgendamentoService:
         
         return message
     
+    def _calculate_notification_date(self, data: str, hora: str, quantity: int, unit: str) -> datetime:
+        """Calcular data de notificação baseada na antecedencia"""
+        from datetime import datetime, timedelta
+        
+        # Combinar data e hora
+        agendamento_datetime = datetime.strptime(f"{data} {hora}", "%Y-%m-%d %H:%M")
+        
+        # Calcular antecedencia
+        if unit == 'dias':
+            notification_datetime = agendamento_datetime - timedelta(days=quantity)
+        elif unit == 'semanas':
+            notification_datetime = agendamento_datetime - timedelta(weeks=quantity)
+        elif unit == 'meses':
+            notification_datetime = agendamento_datetime - timedelta(days=quantity * 30)
+        else:
+            notification_datetime = agendamento_datetime - timedelta(days=1)
+        
+        return notification_datetime
+    
     async def send_whatsapp_confirmation(self, agendamento: Agendamento) -> bool:
         """Enviar confirmação via WhatsApp"""
         if not agendamento.whatsapp_number:
