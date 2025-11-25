@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime, timedelta
 from domain.entities.agendamento import Agendamento
 from infrastructure.repositories.agendamento_repository import AgendamentoRepository
 from application.services.contact_service import ContactService
@@ -110,7 +111,6 @@ class AgendamentoService:
             message = f"Olá {{{{nome_cliente}}}}! Seu agendamento foi confirmado para {{{{data_agenda}}}} às {{{{hora_agenda}}}} - {{{{servico}}}}. Obrigado!"
         
         # Formatar data para dd/MM/yyyy
-        from datetime import datetime
         try:
             date_obj = datetime.strptime(agendamento.data, '%Y-%m-%d')
             formatted_date = date_obj.strftime('%d/%m/%Y')
@@ -127,7 +127,6 @@ class AgendamentoService:
     
     def _calculate_notification_date(self, data: str, hora: str, quantity: int, unit: str) -> datetime:
         """Calcular data de notificação baseada na antecedencia"""
-        from datetime import datetime, timedelta
         
         # Combinar data e hora
         agendamento_datetime = datetime.strptime(f"{data} {hora}", "%Y-%m-%d %H:%M")
