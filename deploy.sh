@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "=== CONFIGURANDO FIREWALL ==="
+./setup-firewall.sh
+
 echo "=== PARANDO CONTAINERS ==="
 docker-compose down
 

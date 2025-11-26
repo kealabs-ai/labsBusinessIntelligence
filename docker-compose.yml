@@ -29,7 +29,7 @@ services:
       - SECRET_KEY=your-super-secret-key-here
       - PORT=6002
     ports:
-      - "6002:6002"
+      - "0.0.0.0:6002:6002"
     depends_on:
       - mysql
     networks:
@@ -41,7 +41,7 @@ services:
     environment:
       - REACT_APP_API_URL=http://72.60.140.128:6002
     ports:
-      - "3002:80"
+      - "0.0.0.0:3002:80"
     depends_on:
       - backend
     networks:
