@@ -28,6 +28,7 @@ services:
       - MYSQL_DATABASE=labsbi_mysql_db
       - SECRET_KEY=your-super-secret-key-here
       - PORT=6002
+      - HOST=0.0.0.0
     ports:
       - "0.0.0.0:6002:6002"
     depends_on:
