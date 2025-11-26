@@ -133,20 +133,133 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Configure firewall
-                        echo "Configuring firewall..."
-                         ufw allow 3002/tcp || true
-                         ufw allow 6002/tcp || true
-                        
                         # Stop existing containers
-                        docker-compose down || true
+                        docker stop labsbi_backend_dev labsbi_frontend_dev || true
+                        docker rm labsbi_backend_dev labsbi_frontend_dev || true
                         
-                        # Remove old images
-                        docker rmi labsbusinessintelligence_frontend labsbusinessintelligence_backend || true
+                        # Remove and recreate network
+                        docker network rm labsbi_dev_network || true
+                        docker network create labsbi_dev_network
                         
-                        # Executar script de deploy
-                        chmod +x jenkins-deploy.sh
-                        ./jenkins-deploy.sh
+                        # Clean up completed - using external MySQL
+                        
+                        # Using external MySQL server - no container needed
+                        echo "Using external MySQL server at 72.60.140.128:33060"
+                        
+                        # Wait for MySQL
+                        sleep 45
+                        
+                        # Start Backend
+                        docker run -d --name labsbi_backend_dev \
+                            --network labsbi_dev_network \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=72.60.140.128 \
+                            -e MYSQL_PORT=33060 \
+                            -e MYSQL_USER=kealabs \
+                            -e MYSQL_PASSWORD="Kea2025@!@" \
+                            -e MYSQL_DATABASE=labsbi_mysql_db \
+                            -e PORT=8000 \
+                            -p 0.0.0.0:6002:8000 \
+                            ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Wait for backend to start
+                        sleep 30
+                        
+                        # Test database connectivity
+                        echo "Testing database connectivity..."
+                        docker exec labsbi_backend_dev python -c "
+import mysql.connector
+try:
+    conn = mysql.connector.connect(
+        host='72.60.140.128',
+        port=33060,
+        user='kealabs',
+        password='Kea2025@!@',
+        database='labsbi_mysql_db'
+    )
+    print('Database connection: SUCCESS')
+    conn.close()
+except Exception as e:
+    print(f'Database connection: FAILED - {e}')
+" 2>/dev/null || echo "Database connectivity test failed"
+                        
+                        # Check backend container status
+                        echo "Backend container status:"
+                        docker ps -a | grep labsbi_backend_dev || echo "Backend container not found"
+                        
+                        # Check environment variables
+                        echo "Environment variables:"
+                        docker exec labsbi_backend_dev env | grep -E "(DB_|MYSQL_|PORT)" || echo "Environment variables not found"
+                        
+                        echo "Backend container logs:"
+                        docker logs labsbi_backend_dev || echo "No logs available"
+                        
+                        # Check if backend process is running
+                        docker exec labsbi_backend_dev ps aux | grep python || echo "Python process not found"
+                        
+                        # Check backend logs for errors
+                        echo "Backend startup logs:"
+                        docker logs labsbi_backend_dev 2>&1 | head -50
+                        
+                        # Wait for backend to be ready before starting frontend
+                        echo "Waiting for backend to be ready..."
+                        for i in 1 2 3 4 5; do
+                            if curl -f http://72.60.140.128:6002/ 2>/dev/null; then
+                                echo "Backend is ready"
+                                break
+                            else
+                                echo "Backend not ready, attempt $i/5"
+                        sleep 10
+                            fi
+                        done
+                        
+                        # Start Frontend
+                        docker run -d --name labsbi_frontend_dev \
+                            --network labsbi_dev_network \
+                            -e REACT_APP_API_URL=http://72.60.140.128:6002 \
+                            -e PORT=5000 \
+                            -p 0.0.0.0:4002:5000 \
+                            ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        
+                        # Wait for frontend to start
+                        sleep 20
+                        
+                        # Check frontend container status
+                        echo "Frontend container status:"
+                        docker ps -a | grep labsbi_frontend_dev || echo "Frontend container not found"
+                        echo "Frontend container logs:"
+                        docker logs labsbi_frontend_dev || echo "No logs available"
+                        
+                        # Show backend logs for debugging
+                        echo "Backend container logs:"
+                        docker logs labsbi_backend_dev | tail -10 || true
+                        
+                        # Health check with retry
+                        for i in 1 2 3 4 5; do
+                            if curl -f http://127.0.0.1:6002/ 2>/dev/null || curl -f http://127.0.0.1:6002/docs 2>/dev/null || curl -f http://$(hostname -I | awk '{print $1}'):6002/ 2>/dev/null; then
+                                echo "DEV deployment health check passed"
+                                break
+                            else
+                                echo "Health check attempt $i failed, retrying..."
+                                # Check container status and logs
+                                docker ps | grep labsbi_backend_dev && echo "Backend container running" || echo "Backend container stopped"
+                                echo "Recent backend logs:"
+                                docker logs labsbi_backend_dev 2>&1 | tail -20
+                                # Try internal health check without curl
+                                docker exec labsbi_backend_dev python -c "import requests; print('OK' if requests.get('http://localhost:8000/').status_code == 200 else 'FAIL')" 2>/dev/null || echo "Backend not responding"
+                                sleep 10
+                            fi
+                        done || echo "DEV deployment health check failed"
+                        
+                        # Display access information
+                        echo "========================================"
+                        echo "DEV ENVIRONMENT ACCESS INFORMATION"
+                        echo "========================================"
+                        echo "Frontend: http://72.60.140.128:3002"
+                        echo "Backend API: http://72.60.140.128:6002"
+                        echo "Backend Docs: http://72.60.140.128:6002/docs"
+                        echo "MySQL: 72.60.140.128:33060"
+                        echo "======================================="
                     '''
                 }
             }
