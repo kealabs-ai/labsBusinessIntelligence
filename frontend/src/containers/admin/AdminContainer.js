@@ -4,6 +4,7 @@ import { People, Security, Settings } from '@mui/icons-material';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import UserManagement from './UserManagement';
 import PermissionManagement from './PermissionManagement';
+import DatabaseConfigContainer from './DatabaseConfigContainer';
 
 const AdminContainer = () => {
   const [currentModule, setCurrentModule] = useState(null);
@@ -24,7 +25,7 @@ const AdminContainer = () => {
       title: 'Configurações',
       description: 'Configurações gerais do sistema',
       icon: <Settings sx={{ fontSize: 48, color: '#25D366' }} />,
-      action: () => console.log('Configurações')
+      action: () => setCurrentModule('settings')
     }
   ];
 
@@ -153,6 +154,34 @@ const AdminContainer = () => {
             </Button>
           </Box>
           <PermissionManagement />
+        </Box>
+      )}
+      
+      {currentModule === 'settings' && (
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'white', zIndex: 1300 }}>
+          <ToolbarContainer />
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            p: 3, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>Configurações de Banco de Dados</Typography>
+            <Button 
+              onClick={() => setCurrentModule(null)}
+              sx={{ 
+                color: 'white', 
+                borderColor: 'white',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+              }}
+              variant="outlined"
+            >
+              Voltar
+            </Button>
+          </Box>
+          <DatabaseConfigContainer />
         </Box>
       )}
     </>
