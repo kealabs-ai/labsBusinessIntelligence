@@ -136,7 +136,9 @@ pipeline {
                         # Deploy
                         docker stop labsbi_backend labsbi_frontend || true
                         docker rm labsbi_backend labsbi_frontend || true
-                        docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend || true
+                        # Remove images if they exist
+                        docker rmi labsbusinessintelligence_backend 2>/dev/null || echo "Image labsbusinessintelligence_backend not found"
+                        docker rmi labsbusinessintelligence_frontend 2>/dev/null || echo "Image labsbusinessintelligence_frontend not found"
                         
                         # Parar todos os containers
                         docker stop $(docker ps -q) || true
