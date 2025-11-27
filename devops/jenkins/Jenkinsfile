@@ -140,6 +140,10 @@ pipeline {
                         docker rm labsbi_backend labsbi_frontend || true
                         docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend || true
                         
+                        # Matar processos nas portas
+                        fuser -k 6002/tcp || true
+                        fuser -k 3002/tcp || true
+                        
                         # Build images
                         docker build -t labsbusinessintelligence_backend ./backend
                         docker build -t labsbusinessintelligence_frontend ./frontend
