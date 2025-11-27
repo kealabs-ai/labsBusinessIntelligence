@@ -136,17 +136,39 @@ pipeline {
 
                         
                         # Deploy
-                        docker-compose down || true
-                        docker rmi labsbusinessintelligence_frontend labsbusinessintelligence_backend || true
-                        docker-compose up --build -d
+                        docker stop labsbi_backend labsbi_frontend || true
+                        docker rm labsbi_backend labsbi_frontend || true
+                        docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend || true
+                        
+                        # Build images
+                        docker build -t labsbusinessintelligence_backend ./backend
+                        docker build -t labsbusinessintelligence_frontend ./frontend
+                        
+                        # Start containers
+                        docker run -d --name labsbi_backend \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=72.60.140.128 \
+                            -e MYSQL_PORT=33060 \
+                            -e MYSQL_USER=kealabs \
+                            -e MYSQL_PASSWORD="Kea2025@!@" \
+                            -e MYSQL_DATABASE=labsbi_mysql_db \
+                            -e SECRET_KEY=your-super-secret-key-here \
+                            -e PORT=6002 \
+                            -p 0.0.0.0:6002:6002 \
+                            labsbusinessintelligence_backend
+                        
+                        docker run -d --name labsbi_frontend \
+                            -e REACT_APP_API_URL=http://72.60.140.128:6002 \
+                            -p 0.0.0.0:3002:80 \
+                            labsbusinessintelligence_frontend
                         
                         # Aguardar inicialização
                         sleep 30
                         
                         # Verificação
-                        docker-compose ps
-                        docker-compose logs frontend --tail=10
-                        docker-compose logs backend --tail=10
+                        docker ps
+                        docker logs labsbi_backend --tail=10
+                        docker logs labsbi_frontend --tail=10
                         
                         # Teste de conectividade
                         curl -I http://localhost:6002 || echo "Backend não acessível"
