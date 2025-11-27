@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker'
+    }
     
     environment {
         DOCKER_REGISTRY = 'kealabsai'
@@ -39,7 +41,9 @@ pipeline {
                         script {
                             sh '''
                                 cd backend
-                                /usr/bin/docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} .
+                                which docker || echo "Docker not in PATH"
+                                docker --version || echo "Docker version check failed"
+                                docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} .
                                 echo "Backend image built: ${BACKEND_IMAGE}:${BUILD_NUMBER}"
                             '''
                         }
@@ -50,7 +54,7 @@ pipeline {
                         script {
                             sh '''
                                 cd frontend
-                                /usr/bin/docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} .
+                                docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} .
                                 echo "Frontend image built: ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
                             '''
                         }
@@ -96,7 +100,7 @@ pipeline {
                         script {
                             sh '''
                                 # Frontend build test
-                                /usr/bin/docker run --rm ${FRONTEND_IMAGE}:${BUILD_NUMBER} \
+                                docker run --rm ${FRONTEND_IMAGE}:${BUILD_NUMBER} \
                                     npm run build || true
                             '''
                         }
@@ -136,22 +140,22 @@ pipeline {
                 script {
                     sh '''
                         # Deploy
-                        /usr/bin/docker stop labsbi_backend labsbi_frontend || true
-                        /usr/bin/docker rm labsbi_backend labsbi_frontend || true
+                        docker stop labsbi_backend labsbi_frontend || true
+                        docker rm labsbi_backend labsbi_frontend || true
                         # Remove images if they exist
-                        /usr/bin/docker rmi labsbusinessintelligence_backend 2>/dev/null || echo "Image labsbusinessintelligence_backend not found"
-                        /usr/bin/docker rmi labsbusinessintelligence_frontend 2>/dev/null || echo "Image labsbusinessintelligence_frontend not found"
+                        docker rmi labsbusinessintelligence_backend 2>/dev/null || echo "Image labsbusinessintelligence_backend not found"
+                        docker rmi labsbusinessintelligence_frontend 2>/dev/null || echo "Image labsbusinessintelligence_frontend not found"
                         
                         # Parar todos os containers
-                        /usr/bin/docker stop $(/usr/bin/docker ps -q) || true
-                        /usr/bin/docker rm $(/usr/bin/docker ps -aq) || true
+                        docker stop $(docker ps -q) || true
+                        docker rm $(docker ps -aq) || true
                         
                         # Build images
-                        /usr/bin/docker build -t labsbusinessintelligence_backend ./backend
-                        /usr/bin/docker build -t labsbusinessintelligence_frontend ./frontend
+                        docker build -t labsbusinessintelligence_backend ./backend
+                        docker build -t labsbusinessintelligence_frontend ./frontend
                         
                         # Start containers
-                        /usr/bin/docker run -d --name labsbi_backend \
+                        docker run -d --name labsbi_backend \
                             -e DB_ENGINE=mysql \
                             -e MYSQL_HOST=72.60.140.128 \
                             -e MYSQL_PORT=33060 \
@@ -163,7 +167,7 @@ pipeline {
                             -p 0.0.0.0:6002:6002 \
                             labsbusinessintelligence_backend
                         
-                        /usr/bin/docker run -d --name labsbi_frontend \
+                        docker run -d --name labsbi_frontend \
                             -e REACT_APP_API_URL=http://72.60.140.128:6002 \
                             -p 0.0.0.0:3002:80 \
                             labsbusinessintelligence_frontend
@@ -172,9 +176,9 @@ pipeline {
                         sleep 30
                         
                         # Verificação
-                        /usr/bin/docker ps
-                        /usr/bin/docker logs labsbi_backend --tail=10
-                        /usr/bin/docker logs labsbi_frontend --tail=10
+                        docker ps
+                        docker logs labsbi_backend --tail=10
+                        docker logs labsbi_frontend --tail=10
                         
                         # Teste de conectividade
                         curl -I http://localhost:6002 || echo "Backend não acessível"
