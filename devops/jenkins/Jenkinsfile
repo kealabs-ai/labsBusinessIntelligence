@@ -131,11 +131,8 @@ pipeline {
         
         stage('Deploy to DEV') {
             steps {
-                node {
-                    script {
-                        sh '''
-
-                        
+                script {
+                    sh '''
                         # Deploy
                         docker stop labsbi_backend labsbi_frontend || true
                         docker rm labsbi_backend labsbi_frontend || true
@@ -184,8 +181,7 @@ pipeline {
                         echo "Frontend: http://72.60.140.128:3002"
                         echo "Backend: http://72.60.140.128:6002"
                         echo "======================================="
-                        '''
-                    }
+                    '''
                 }
             }
         }
