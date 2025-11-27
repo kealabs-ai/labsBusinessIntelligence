@@ -135,22 +135,18 @@ pipeline {
                     sh '''
 
                         
-                        # Configurar firewall
-                        ufw allow 3002/tcp || true
-                        ufw allow 6002/tcp || true
-                        
                         # Deploy
-                        docker-compose down || true
+                        docker compose down || true
                         docker rmi labsbusinessintelligence_frontend labsbusinessintelligence_backend || true
-                        docker-compose up --build -d
+                        docker compose up --build -d
                         
                         # Aguardar inicialização
                         sleep 30
                         
                         # Verificação
-                        docker-compose ps
-                        docker-compose logs frontend --tail=10
-                        docker-compose logs backend --tail=10
+                        docker compose ps
+                        docker compose logs frontend --tail=10
+                        docker compose logs backend --tail=10
                         
                         # Teste de conectividade
                         curl -I http://localhost:6002 || echo "Backend não acessível"
