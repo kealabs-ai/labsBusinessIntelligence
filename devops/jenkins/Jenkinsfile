@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'docker'
-    }
+    agent any
     
     environment {
         DOCKER_REGISTRY = 'kealabsai'
@@ -35,30 +33,27 @@ pipeline {
         }
         
         stage('Build Images') {
-            parallel {
-                stage('Build Backend') {
-                    steps {
-                        script {
-                            sh '''
-                                cd backend
-                                which docker || echo "Docker not in PATH"
-                                docker --version || echo "Docker version check failed"
-                                docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} .
-                                echo "Backend image built: ${BACKEND_IMAGE}:${BUILD_NUMBER}"
-                            '''
-                        }
-                    }
-                }
-                stage('Build Frontend') {
-                    steps {
-                        script {
-                            sh '''
-                                cd frontend
-                                docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} .
-                                echo "Frontend image built: ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
-                            '''
-                        }
-                    }
+            steps {
+                script {
+                    sh '''
+                        # Verificar Docker
+                        which docker || { echo "Docker não encontrado"; exit 1; }
+                        docker --version
+                        
+                        # Cleanup de imagens antigas
+                        docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend 2>/dev/null || true
+                        
+                        # Build Backend
+                        echo "Building Backend..."
+                        docker build -t labsbusinessintelligence_backend ./backend
+                        
+                        # Build Frontend
+                        echo "Building Frontend..."
+                        docker build -t labsbusinessintelligence_frontend ./frontend
+                        
+                        # Verificar imagens criadas
+                        docker images | grep labsbusinessintelligence
+                    '''
                 }
             }
         }
@@ -76,47 +71,24 @@ pipeline {
         }
         
         stage('Test') {
-            parallel {
-                stage('Backend Tests') {
-                    steps {
-                        script {
-                            sh '''
-                                # Backend API tests with external MySQL
-                                docker run --rm \
-                                    -e DB_ENGINE=mysql \
-                                    -e MYSQL_HOST=72.60.140.128 \
-                                    -e MYSQL_PORT=33060 \
-                                    -e MYSQL_USER=kealabs \
-                                    -e MYSQL_PASSWORD="Kea2025@!@" \
-                                    -e MYSQL_DATABASE=labsbi_mysql_db \
-                                    ${BACKEND_IMAGE}:${BUILD_NUMBER} \
-                                    python -c "print('Backend OK')" || true
-                            '''
-                        }
-                    }
-                }
-                stage('Frontend Tests') {
-                    steps {
-                        script {
-                            sh '''
-                                # Frontend build test
-                                docker run --rm ${FRONTEND_IMAGE}:${BUILD_NUMBER} \
-                                    npm run build || true
-                            '''
-                        }
-                    }
-                }
-                stage('Integration Tests') {
-                    steps {
-                        script {
-                            sh '''
-                                # Test external database connection
-                                echo "Testing connection to external MySQL server..."
-                                echo "External MySQL: 72.60.140.128:33060"
-                                echo "Database connection test completed"
-                            '''
-                        }
-                    }
+            steps {
+                script {
+                    sh '''
+                        echo "Executando testes básicos..."
+                        
+                        # Teste básico do backend
+                        docker run --rm \
+                            -e DB_ENGINE=mysql \
+                            -e MYSQL_HOST=72.60.140.128 \
+                            -e MYSQL_PORT=33060 \
+                            -e MYSQL_USER=kealabs \
+                            -e MYSQL_PASSWORD="Kea2025@!@" \
+                            -e MYSQL_DATABASE=labsbi_mysql_db \
+                            labsbusinessintelligence_backend \
+                            python -c "print('Backend OK')" || echo "Backend test failed"
+                        
+                        echo "Testes concluídos"
+                    '''
                 }
             }
         }
@@ -139,23 +111,19 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Deploy
-                        docker stop labsbi_backend labsbi_frontend || true
-                        docker rm labsbi_backend labsbi_frontend || true
-                        # Remove images if they exist
-                        docker rmi labsbusinessintelligence_backend 2>/dev/null || echo "Image labsbusinessintelligence_backend not found"
-                        docker rmi labsbusinessintelligence_frontend 2>/dev/null || echo "Image labsbusinessintelligence_frontend not found"
+                        echo "Iniciando deploy para DEV..."
                         
-                        # Parar todos os containers
-                        docker stop $(docker ps -q) || true
-                        docker rm $(docker ps -aq) || true
+                        # Criar network se não existir
+                        docker network create labsbi_network 2>/dev/null || echo "Network já existe"
                         
-                        # Build images
-                        docker build -t labsbusinessintelligence_backend ./backend
-                        docker build -t labsbusinessintelligence_frontend ./frontend
+                        # Parar containers existentes
+                        docker stop labsbi_backend labsbi_frontend 2>/dev/null || true
+                        docker rm labsbi_backend labsbi_frontend 2>/dev/null || true
                         
-                        # Start containers
+                        # Iniciar Backend
                         docker run -d --name labsbi_backend \
+                            --network labsbi_network \
+                            --restart unless-stopped \
                             -e DB_ENGINE=mysql \
                             -e MYSQL_HOST=72.60.140.128 \
                             -e MYSQL_PORT=33060 \
@@ -163,32 +131,50 @@ pipeline {
                             -e MYSQL_PASSWORD="Kea2025@!@" \
                             -e MYSQL_DATABASE=labsbi_mysql_db \
                             -e SECRET_KEY=your-super-secret-key-here \
+                            -e ENVIRONMENT=dev \
                             -e PORT=6002 \
-                            -p 0.0.0.0:6002:6002 \
+                            -p 6002:6002 \
                             labsbusinessintelligence_backend
                         
+                        # Aguardar backend inicializar
+                        echo "Aguardando backend inicializar..."
+                        sleep 15
+                        
+                        # Iniciar Frontend
                         docker run -d --name labsbi_frontend \
+                            --network labsbi_network \
+                            --restart unless-stopped \
                             -e REACT_APP_API_URL=http://72.60.140.128:6002 \
-                            -p 0.0.0.0:3002:80 \
+                            -p 3002:80 \
                             labsbusinessintelligence_frontend
                         
-                        # Aguardar inicialização
-                        sleep 30
+                        # Aguardar inicialização completa
+                        echo "Aguardando inicialização completa..."
+                        sleep 20
                         
-                        # Verificação
-                        docker ps
-                        docker logs labsbi_backend --tail=10
-                        docker logs labsbi_frontend --tail=10
+                        # Verificação de status
+                        echo "=== STATUS DOS CONTAINERS ==="
+                        docker ps --filter name=labsbi
+                        
+                        echo "=== LOGS DO BACKEND ==="
+                        docker logs labsbi_backend --tail=15
+                        
+                        echo "=== LOGS DO FRONTEND ==="
+                        docker logs labsbi_frontend --tail=15
                         
                         # Teste de conectividade
-                        curl -I http://localhost:6002 || echo "Backend não acessível"
-                        curl -I http://localhost:3002 || echo "Frontend não acessível"
+                        echo "=== TESTE DE CONECTIVIDADE ==="
+                        curl -I http://localhost:6002/docs 2>/dev/null && echo "✓ Backend API acessível" || echo "✗ Backend não acessível"
+                        curl -I http://localhost:3002 2>/dev/null && echo "✓ Frontend acessível" || echo "✗ Frontend não acessível"
                         
                         # Informações de acesso
                         echo "========================================"
+                        echo "🚀 DEPLOY CONCLUÍDO - DEV ENVIRONMENT"
                         echo "Frontend: http://72.60.140.128:3002"
-                        echo "Backend: http://72.60.140.128:6002"
-                        echo "======================================="
+                        echo "Backend API: http://72.60.140.128:6002"
+                        echo "API Docs: http://72.60.140.128:6002/docs"
+                        echo "Build: ${BUILD_NUMBER}"
+                        echo "========================================"
                     '''
                 }
             }
@@ -319,7 +305,8 @@ pipeline {
                     docker rm mysql-test || true
                     
                     # Archive logs
-                    docker logs labsbi_backend_dev > build_logs_${BUILD_NUMBER}.log 2>&1 || true
+                    docker logs labsbi_backend > build_logs_backend_${BUILD_NUMBER}.log 2>&1 || true
+                    docker logs labsbi_frontend > build_logs_frontend_${BUILD_NUMBER}.log 2>&1 || true
                 '''
             }
             archiveArtifacts artifacts: '*.log, backups/*.sql', allowEmptyArchive: true
