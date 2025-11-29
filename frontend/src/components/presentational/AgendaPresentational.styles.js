@@ -9,24 +9,27 @@ export const agendaStyles = {
   content: {
     maxWidth: 'xl',
     mx: 'auto',
-    px: 3,
-    py: 4
+    px: { xs: 2, sm: 3 },
+    py: { xs: 2, sm: 4 }
   },
   
   header: {
     display: 'flex',
     alignItems: 'center',
-    mb: 4,
-    p: 3,
+    mb: { xs: 2, sm: 4 },
+    p: { xs: 2, sm: 3 },
     borderRadius: 3,
     background: 'rgba(255, 255, 255, 0.9)',
     backdropFilter: 'blur(10px)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+    flexDirection: { xs: 'column', sm: 'row' },
+    textAlign: { xs: 'center', sm: 'left' }
   },
   
   headerIcon: {
-    fontSize: 40,
-    mr: 2,
+    fontSize: { xs: 32, sm: 40 },
+    mr: { xs: 0, sm: 2 },
+    mb: { xs: 1, sm: 0 },
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
@@ -35,6 +38,7 @@ export const agendaStyles = {
   
   title: {
     fontWeight: 700,
+    fontSize: { xs: '1.5rem', sm: '2.125rem' },
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
@@ -47,8 +51,9 @@ export const agendaStyles = {
     background: 'rgba(255, 255, 255, 0.95)',
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
-    p: 3,
-    height: '700px'
+    p: { xs: 2, sm: 3 },
+    height: { xs: 'auto', md: '700px' },
+    minHeight: { xs: '500px', md: '700px' }
   },
   
   whatsappCard: {
@@ -57,8 +62,9 @@ export const agendaStyles = {
     background: 'rgba(255, 255, 255, 0.95)',
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
-    p: 3,
-    height: '800px'
+    p: { xs: 2, sm: 3 },
+    height: { xs: 'auto', md: '800px' },
+    minHeight: { xs: '600px', md: '800px' }
   },
   
   sectionTitle: {
@@ -144,7 +150,8 @@ export const agendaStyles = {
   
   messagesArea: {
     flexGrow: 1,
-    maxHeight: '500px',
+    maxHeight: { xs: '300px', sm: '500px' },
+    minHeight: { xs: '200px', sm: '300px' },
     overflow: 'auto',
     mb: 2,
     p: 1,
@@ -159,13 +166,13 @@ export const agendaStyles = {
   },
   
   sentMessage: {
-    ml: 2,
+    ml: { xs: 1, sm: 2 },
     bgcolor: 'rgba(102, 126, 234, 0.1)',
     borderLeft: '3px solid #667eea'
   },
   
   receivedMessage: {
-    mr: 2,
+    mr: { xs: 1, sm: 2 },
     bgcolor: 'rgba(245, 245, 245, 0.8)',
     borderLeft: '3px solid #e0e0e0'
   },

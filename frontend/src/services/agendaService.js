@@ -49,10 +49,11 @@ class AgendaService {
     }
   }
 
-  async getAgendamentos(page = 1, limit = 10, search = '') {
+  async getAgendamentos(page = 1, limit = 10, search = '', dateFilter = '') {
     try {
       const params = new URLSearchParams({ page, limit });
       if (search) params.append('search', search);
+      if (dateFilter) params.append('date', dateFilter);
       
       const url = `${API_BASE_URL}/agendamentos?${params}`;
       console.log('Fetching agendamentos with URL:', url);

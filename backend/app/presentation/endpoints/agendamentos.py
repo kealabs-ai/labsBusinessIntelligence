@@ -50,16 +50,17 @@ async def create_agendamento(request: AgendamentoRequest, user=Depends(get_curre
 async def get_agendamentos(
     page: int = 1, 
     limit: int = 10, 
-    search: str = None, 
+    search: str = None,
+    date: str = None,
     user=Depends(get_current_user)
 ):
     """
-    Buscar agendamentos com paginação e busca
+    Buscar agendamentos com paginação, busca e filtro por data
     """
-    logger.info(f"GET /agendamentos/ called - page: {page}, limit: {limit}, search: {search}")
+    logger.info(f"GET /agendamentos/ called - page: {page}, limit: {limit}, search: {search}, date: {date}")
     try:
         service = AgendamentoService()
-        result = service.get_all_agendamentos(page, limit, search, user.id)
+        result = service.get_all_agendamentos(page, limit, search, user.id, date)
         return {
             "items": [agendamento.dict() for agendamento in result["items"]],
             "total": result["total"],

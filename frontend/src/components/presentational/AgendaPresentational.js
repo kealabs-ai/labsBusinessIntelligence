@@ -133,7 +133,7 @@ const AgendaPresentational = ({
                 </Button>
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
                 <Typography variant="subtitle1">Próximos Eventos</Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton
@@ -162,14 +162,36 @@ const AgendaPresentational = ({
                   </IconButton>
                 </Box>
               </Box>
-              <List>
+              <List sx={{ maxHeight: { xs: '300px', md: '400px' }, overflow: 'auto' }}>
                 {events.map((event) => (
-                  <ListItem key={event.id} sx={agendaStyles.eventItem}>
+                  <ListItem 
+                    key={event.id} 
+                    sx={{
+                      ...agendaStyles.eventItem,
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                      gap: { xs: 1, sm: 0 }
+                    }}
+                  >
                     <ListItemText
                       primary={event.title}
                       secondary={`${event.date} às ${event.time} - ${event.description}`}
+                      sx={{ 
+                        flex: 1,
+                        '& .MuiListItemText-primary': {
+                          fontSize: { xs: '0.9rem', sm: '1rem' },
+                          fontWeight: 500
+                        },
+                        '& .MuiListItemText-secondary': {
+                          fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                        }
+                      }}
                     />
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 1,
+                      alignSelf: { xs: 'flex-end', sm: 'center' }
+                    }}>
                       <IconButton
                         size="small"
                         onClick={() => onEditEvent(event)}
@@ -211,23 +233,34 @@ const AgendaPresentational = ({
 
               <Grid container spacing={2} sx={{ flexGrow: 1 }}>
                 {/* Lista de Contatos */}
-                <Grid item xs={5}>
+                <Grid item xs={12} sm={5}>
                   <Typography variant="subtitle2" gutterBottom>Contatos</Typography>
-                  <List sx={{ maxHeight: '600px', overflow: 'auto' }}>
+                  <List sx={{ 
+                    maxHeight: { xs: '250px', sm: '600px' }, 
+                    overflow: 'auto',
+                    border: { xs: '1px solid #e0e0e0', sm: 'none' },
+                    borderRadius: { xs: 1, sm: 0 }
+                  }}>
                     {contacts.map((contact) => (
                       <ListItem
                         key={contact.id}
                         button
                         selected={selectedContact?.id === contact.id}
                         onClick={() => onSelectContact(contact)}
-                        sx={agendaStyles.contactItem}
+                        sx={{
+                          ...agendaStyles.contactItem,
+                          py: { xs: 1, sm: 1.5 },
+                          '&.Mui-selected': {
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                          }
+                        }}
                       >
                         <ListItemAvatar>
                           <Badge
                             color={contact.online ? 'success' : 'default'}
                             variant="dot"
                           >
-                            <Avatar>
+                            <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
                               <Person />
                             </Avatar>
                           </Badge>
@@ -235,6 +268,18 @@ const AgendaPresentational = ({
                         <ListItemText
                           primary={contact.name}
                           secondary={contact.lastMessage}
+                          sx={{
+                            '& .MuiListItemText-primary': {
+                              fontSize: { xs: '0.9rem', sm: '1rem' },
+                              fontWeight: 500
+                            },
+                            '& .MuiListItemText-secondary': {
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }
+                          }}
                         />
                       </ListItem>
                     ))}
@@ -242,14 +287,18 @@ const AgendaPresentational = ({
                 </Grid>
 
                 {/* Chat */}
-                <Grid item xs={7}>
+                <Grid item xs={12} sm={7}>
                   {selectedContact ? (
                     <Box sx={agendaStyles.chatContainer}>
                       <Typography variant="subtitle2" gutterBottom>
                         Chat com {selectedContact.name}
                       </Typography>
                       
-                      <Box sx={{ ...agendaStyles.messagesArea, maxHeight: '500px' }}>
+                      <Box sx={{ 
+                        ...agendaStyles.messagesArea, 
+                        maxHeight: { xs: '300px', sm: '500px' },
+                        minHeight: { xs: '200px', sm: '300px' }
+                      }}>
                         {getContactMessages(selectedContact.id).map((msg) => (
                           <Card
                             key={msg.id}
@@ -268,24 +317,39 @@ const AgendaPresentational = ({
                         ))}
                       </Box>
 
-                      <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        mt: 1
+                      }}>
                         <TextField
                           fullWidth
                           size="small"
                           placeholder="Digite sua mensagem..."
                           value={messageText}
                           onChange={(e) => setMessageText(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          sx={agendaStyles.messageInput}
+                          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                          sx={{
+                            ...agendaStyles.messageInput,
+                            mb: { xs: 1, sm: 0 }
+                          }}
+                          multiline
+                          maxRows={3}
                         />
                         <Button
                           variant="contained"
                           size="small"
                           onClick={handleSendMessage}
                           disabled={!messageText.trim()}
-                          sx={agendaStyles.sendButton}
+                          sx={{
+                            ...agendaStyles.sendButton,
+                            minWidth: { xs: '100%', sm: 'auto' },
+                            height: { xs: '40px', sm: 'auto' }
+                          }}
                         >
-                          <Send />
+                          <Send sx={{ mr: { xs: 1, sm: 0 } }} />
+                          <Box sx={{ display: { xs: 'inline', sm: 'none' } }}>Enviar</Box>
                         </Button>
                       </Box>
                     </Box>

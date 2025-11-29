@@ -60,7 +60,7 @@ class AgendamentoRepository(BaseRepository):
         finally:
             cursor.close()
     
-    def get_all(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None) -> dict:
+    def get_all(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None, date_filter: str = None) -> dict:
         cursor = self.connection.cursor(dictionary=True)
         try:
             # Query base - filtrar apenas registros ativos e do usuário
@@ -80,6 +80,13 @@ class AgendamentoRepository(BaseRepository):
                 count_query += search_filter
                 search_param = f"%{search}%"
                 params.extend([search_param, search_param])
+            
+            # Adicionar filtro por data
+            if date_filter:
+                date_filter_sql = " AND data = %s"
+                base_query += date_filter_sql
+                count_query += date_filter_sql
+                params.append(date_filter)
             
             # Contar total de registros
             cursor.execute(count_query, params)

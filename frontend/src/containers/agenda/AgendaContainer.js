@@ -92,9 +92,11 @@ const AgendaContainer = () => {
 
   const handleSearch = async (term) => {
     setSearchTerm(term);
+    const dateFilter = selectedDate.toISOString().split('T')[0];
+    
     if (term.trim()) {
       try {
-        const response = await agendaService.getAgendamentos(1, 3, term);
+        const response = await agendaService.getAgendamentos(1, 3, term, dateFilter);
         const agendamentos = response.items || response.data || response;
         const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
           id: ag.id,
@@ -275,6 +277,42 @@ const AgendaContainer = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    // Filtrar eventos pela data selecionada
+    filterEventsByDate(date);
+  };
+
+  const filterEventsByDate = async (date) => {
+    const dateFilter = date.toISOString().split('T')[0];
+    try {
+      setLoading(true);
+      const response = await agendaService.getAgendamentos(1, 3, searchTerm, dateFilter);
+      const agendamentos = response.items || response.data || response;
+      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+        id: ag.id,
+        title: `${ag.cliente} - ${ag.servico}`,
+        date: ag.data,
+        time: ag.hora,
+        description: ag.servico,
+        cliente: ag.cliente,
+        servico: ag.servico,
+        whatsapp_number: ag.whatsapp_number,
+        custom_message: ag.custom_message,
+        enable_notification: ag.enable_notification
+      })) : [];
+      setEvents(formattedEvents);
+      
+      if (response.total !== undefined) {
+        setPagination({
+          currentPage: 1,
+          totalPages: response.pages || Math.ceil(response.total / 3),
+          totalItems: response.total || formattedEvents.length
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao filtrar por data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRefreshEvents = async () => {

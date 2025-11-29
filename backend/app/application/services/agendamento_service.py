@@ -47,9 +47,9 @@ class AgendamentoService:
         
         return created_agendamento
     
-    def get_all_agendamentos(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None) -> dict:
-        """Buscar todos os agendamentos com paginação"""
-        return self.repository.get_all(page, limit, search, user_id)
+    def get_all_agendamentos(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None, date_filter: str = None) -> dict:
+        """Buscar todos os agendamentos com paginação e filtro por data"""
+        return self.repository.get_all(page, limit, search, user_id, date_filter)
     
     def get_agendamento_by_id(self, agendamento_id: int) -> Agendamento:
         """Buscar agendamento por ID"""
