@@ -1,48 +1,78 @@
-import axios from 'axios';
-
 const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
 class ClientService {
   constructor() {
-    this.api = axios.create({
-      baseURL: `${API_BASE_URL}/clients`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    this.baseURL = `${API_BASE_URL}/clients`;
+  }
 
-    this.api.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  }
+
+  async request(url, options = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, {
+        headers: this.getHeaders(),
+        ...options
+      });
+      
+      if (!response.ok) {
+        if (response.status === 405) {
+          console.warn(`Method not allowed for ${url}, trying without explicit method`);
+          // Retry without explicit method for GET requests
+          if (!options.method || options.method === 'GET') {
+            const retryOptions = { ...options };
+            delete retryOptions.method;
+            const retryResponse = await fetch(`${this.baseURL}${url}`, {
+              headers: this.getHeaders(),
+              ...retryOptions
+            });
+            if (retryResponse.ok) {
+              return await retryResponse.json();
+            }
+          }
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return config;
-    });
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Request error:', error);
+      throw error;
+    }
   }
 
   async getClients() {
-    const response = await this.api.get('/');
-    return response.data;
+    return this.request('/');
   }
 
   async getClient(clientId) {
-    const response = await this.api.get(`/${clientId}`);
-    return response.data;
+    return this.request(`/${clientId}`);
   }
 
   async createClient(clientData) {
-    const response = await this.api.post('/', clientData);
-    return response.data;
+    return this.request('/', {
+      method: 'POST',
+      body: JSON.stringify(clientData)
+    });
   }
 
   async updateClient(clientId, clientData) {
-    const response = await this.api.post(`/${clientId}/update`, clientData);
-    return response.data;
+    return this.request(`/${clientId}/update`, {
+      method: 'POST',
+      body: JSON.stringify(clientData)
+    });
   }
 
   async updateClientStatus(clientId, status) {
-    const response = await this.api.post(`/${clientId}/status`, { status });
-    return response.data;
+    return this.request(`/${clientId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status })
+    });
   }
 }
 

@@ -102,6 +102,9 @@ const AgendaContainer = () => {
       }
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
+      // Set empty state on error
+      setEvents([]);
+      setPagination({ currentPage: 1, totalPages: 1, totalItems: 0 });
     } finally {
       setLoading(false);
     }
@@ -192,6 +195,7 @@ const AgendaContainer = () => {
       setContacts(formattedContacts);
     } catch (error) {
       console.error('Erro ao carregar contatos:', error);
+      // Set empty array on error to prevent UI issues
       setContacts([]);
     }
   };

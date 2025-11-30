@@ -20,14 +20,16 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"]
 )
 
 # Add OPTIONS handler for preflight requests
 @app.options("/{path:path}")
 async def options_handler(path: str):
     return {"message": "OK"}
+
+
 
 # Initialize database
 DatabaseFactory.initialize()

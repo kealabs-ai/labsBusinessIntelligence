@@ -15,6 +15,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="Invalid token")
     return user
 
+@router.get("/test")
+async def test_contacts():
+    """
+    Test endpoint to verify contacts API is working (no auth required)
+    """
+    return {"message": "Contacts API is working", "status": "ok"}
+
 @router.get("/")
 async def get_contacts(user=Depends(get_current_user)):
     """
@@ -25,8 +32,12 @@ async def get_contacts(user=Depends(get_current_user)):
         contacts = service.get_all_contacts(user.id)
         return {
             "success": True,
-            "data": [contact.dict() for contact in contacts]
+            "data": [contact.dict() for contact in contacts] if contacts else []
         }
     except Exception as e:
         logger.error(f"Error fetching contacts: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {
+            "success": False,
+            "data": [],
+            "error": str(e)
+        }

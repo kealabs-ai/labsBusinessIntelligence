@@ -28,6 +28,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="Invalid token")
     return user
 
+@router.get("/test")
+async def test_agendamentos():
+    """
+    Test endpoint to verify agendamentos API is working (no auth required)
+    """
+    return {"message": "Agendamentos API is working", "status": "ok"}
+
 @router.post("/")
 async def create_agendamento(request: AgendamentoRequest, user=Depends(get_current_user)):
     """
@@ -62,15 +69,22 @@ async def get_agendamentos(
         service = AgendamentoService()
         result = service.get_all_agendamentos(page, limit, search, user.id, date)
         return {
-            "items": [agendamento.dict() for agendamento in result["items"]],
-            "total": result["total"],
-            "page": result["page"],
-            "limit": result["limit"],
-            "pages": result["pages"]
+            "items": [agendamento.dict() for agendamento in result["items"]] if result.get("items") else [],
+            "total": result.get("total", 0),
+            "page": result.get("page", page),
+            "limit": result.get("limit", limit),
+            "pages": result.get("pages", 1)
         }
     except Exception as e:
         logger.error(f"Error fetching agendamentos: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {
+            "items": [],
+            "total": 0,
+            "page": page,
+            "limit": limit,
+            "pages": 1,
+            "error": str(e)
+        }
 
 @router.get("/{agendamento_id}")
 async def get_agendamento(agendamento_id: int, user=Depends(get_current_user)):
@@ -81,25 +95,25 @@ async def get_agendamento(agendamento_id: int, user=Depends(get_current_user)):
         service = AgendamentoService()
         agendamento = service.get_agendamento_by_id(agendamento_id)
         if not agendamento:
-            raise HTTPException(status_code=404, detail="Agendamento not found")
+            return {"success": False, "error": "Agendamento not found"}
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:
         logger.error(f"Error fetching agendamento: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"success": False, "error": str(e)}
 
-@router.put("/{agendamento_id}")
+@router.post("/{agendamento_id}/update")
 async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, user=Depends(get_current_user)):
     """
     Atualizar agendamento
     """
-    logger.info(f"PUT /agendamentos/{agendamento_id} called")
+    logger.info(f"POST /agendamentos/{agendamento_id}/update called")
     try:
         service = AgendamentoService()
         agendamento = service.update_agendamento(agendamento_id, request.dict(), user.id)
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:
         logger.error(f"Error updating agendamento: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"success": False, "error": str(e)}
 
 @router.delete("/{agendamento_id}")
 async def delete_agendamento(agendamento_id: int, user=Depends(get_current_user)):
@@ -113,4 +127,4 @@ async def delete_agendamento(agendamento_id: int, user=Depends(get_current_user)
         return {"success": True, "message": "Agendamento inativado com sucesso"}
     except Exception as e:
         logger.error(f"Error deleting agendamento: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"success": False, "error": str(e)}
