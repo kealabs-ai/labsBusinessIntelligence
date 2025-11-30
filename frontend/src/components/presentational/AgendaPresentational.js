@@ -255,12 +255,26 @@ const AgendaPresentational = ({
                       >
                         <ListItemAvatar>
                           <Badge
-                            color={contact.online ? 'success' : 'default'}
-                            variant="dot"
+                            badgeContent={getContactMessages(contact.id).length}
+                            color="primary"
+                            sx={{
+                              '& .MuiBadge-badge': {
+                                backgroundColor: '#667eea',
+                                color: 'white',
+                                fontSize: '0.75rem',
+                                minWidth: '18px',
+                                height: '18px'
+                              }
+                            }}
                           >
-                            <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
-                              <Person />
-                            </Avatar>
+                            <Badge
+                              color={contact.online ? 'success' : 'default'}
+                              variant="dot"
+                            >
+                              <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
+                                <Person />
+                              </Avatar>
+                            </Badge>
                           </Badge>
                         </ListItemAvatar>
                         <ListItemText

@@ -288,7 +288,13 @@ const AgendaContainer = () => {
             contactId: contact.id,
             message: msg.message?.conversation || msg.message?.extendedTextMessage?.text || 'Mensagem não suportada',
             sent: msg.key?.fromMe || false,
-            timestamp: new Date(msg.messageTimestamp * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date(msg.messageTimestamp * 1000).toLocaleString('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }),
             messageTimestamp: msg.messageTimestamp
           }))
           .sort((a, b) => b.messageTimestamp - a.messageTimestamp);
@@ -347,7 +353,13 @@ const AgendaContainer = () => {
           contactId,
           message,
           sent: true,
-          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          timestamp: new Date().toLocaleString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
           messageTimestamp: Math.floor(now / 1000)
         };
         setMessages(prev => [newMessage, ...prev]);
