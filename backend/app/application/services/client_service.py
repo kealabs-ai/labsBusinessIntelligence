@@ -1,10 +1,21 @@
 from typing import Optional, List
 from domain.entities.client import Client
-from infrastructure.database.factory import DatabaseFactory
+from infrastructure.repositories.client_repository import ClientRepository
+from infrastructure.config.env_manager import env
+import mysql.connector
 
 class ClientService:
     def __init__(self):
-        self.client_repository = DatabaseFactory.get_client_repository()
+        db_config = env.get_database_config()
+        connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
+        self.connection = mysql.connector.connect(**connection_config)
+        self.client_repository = ClientRepository(self.connection)
     
     async def create_client(self, client: Client) -> Client:
         return await self.client_repository.create_client(client)

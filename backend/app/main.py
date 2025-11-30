@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from presentation.endpoints import auth, charts, agendamentos, contacts, admin, database_config, config
 try:
     from presentation.endpoints import clients
-    print("✓ Clients module imported successfully")
+    print("Clients module imported successfully")
 except Exception as e:
-    print(f"✗ Error importing clients module: {e}")
+    print(f"Error importing clients module: {e}")
     clients = None
 from api import communication
 from infrastructure.database.factory import DatabaseFactory
@@ -49,9 +49,9 @@ app.include_router(agendamentos.router, prefix="/api/v1/agendamentos", tags=["ag
 app.include_router(contacts.router, prefix="/api/v1/contacts", tags=["contacts"])
 if clients:
     app.include_router(clients.router, prefix="/api/v1/clients", tags=["clients"])
-    print("✓ Clients router registered successfully")
+    print("Clients router registered successfully")
 else:
-    print("✗ Clients router not registered - module failed to import")
+    print("Clients router not registered - module failed to import")
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 app.include_router(database_config.router, prefix="/api", tags=["database-config"])
 app.include_router(config.router, prefix="/api", tags=["config"])
