@@ -87,7 +87,7 @@ class AgendaService {
   async updateAgendamento(id, agendamentoData) {
     try {
       const url = `${API_BASE_URL}/agendamentos/${id}`;
-      const response = await axios.post(url, agendamentoData, {
+      const response = await axios.put(url, agendamentoData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`

@@ -87,7 +87,7 @@ async def get_agendamento(agendamento_id: int, user=Depends(get_current_user)):
         logger.error(f"Error fetching agendamento: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{agendamento_id}")
+@router.put("/{agendamento_id}")
 async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, user=Depends(get_current_user)):
     """
     Atualizar agendamento

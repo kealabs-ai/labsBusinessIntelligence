@@ -192,10 +192,7 @@ const AgendaContainer = () => {
       setContacts(formattedContacts);
     } catch (error) {
       console.error('Erro ao carregar contatos:', error);
-      setContacts([
-        { id: 1, name: 'João Silva', phone: '+5511999999999', lastMessage: 'Confirma reunião?', online: true },
-        { id: 2, name: 'Maria Santos', phone: '+5511888888888', lastMessage: 'Relatório enviado', online: false }
-      ]);
+      setContacts([]);
     }
   };
 
