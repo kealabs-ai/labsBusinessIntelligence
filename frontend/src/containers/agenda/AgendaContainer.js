@@ -1,10 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Drawer, 
+  AppBar, 
+  Toolbar, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemIcon, 
+  ListItemText, 
+  IconButton,
+  Typography,
+  CssBaseline,
+  Collapse
+} from '@mui/material';
+import { 
+  Menu as MenuIcon, 
+  CalendarToday, 
+  People, 
+  WhatsApp, 
+  AccountBalance, 
+  Assessment,
+  Settings,
+  ExpandLess,
+  ExpandMore
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import AgendaPresentational from '../../components/presentational/AgendaPresentational';
 import AgendaModal from '../../components/presentational/AgendaModal';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
+  const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState('agendamentos');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -320,10 +351,123 @@ const AgendaContainer = () => {
     await loadAgendamentos(pagination.currentPage);
   };
 
+  const handleMenuClick = (option) => {
+    setCurrentView(option);
+    setMenuOpen(false);
+    console.log('Navegando para:', option);
+  };
+
+  const menuItems = [
+    { id: 'agendamentos', label: 'Agendamentos', icon: <CalendarToday /> },
+    { id: 'clientes', label: 'Clientes', icon: <People /> },
+    { id: 'comunicacao', label: 'Comunicação', icon: <WhatsApp /> },
+    { id: 'caixa', label: 'Caixa e Transações', icon: <AccountBalance /> },
+    { id: 'relatorios', label: 'Relatórios', icon: <Assessment /> }
+  ];
+
+  const configSubItems = [
+    { title: 'Serviços', action: () => handleMenuClick('config-servicos') },
+    { title: 'Recursos e Profissionais', action: () => handleMenuClick('config-recursos') },
+    { title: 'Configurações da Unidade', action: () => handleMenuClick('config-unidade') }
+  ];
+
   return (
-    <>
-      <ToolbarContainer />
-      <AgendaPresentational
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="fixed" sx={{ zIndex: 1201 }}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            onClick={() => setMenuOpen(!menuOpen)}
+            edge="start"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            Sistema de Agendamentos
+          </Typography>
+          <ToolbarContainer />
+        </Toolbar>
+      </AppBar>
+      
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          width: 280,
+          flexShrink: 0,
+          zIndex: 1300,
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            zIndex: 1300
+          }
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+            Menu Principal
+          </Typography>
+        </Box>
+        
+        <List>
+          {menuItems.map((item) => (
+            <ListItem key={item.id} disablePadding>
+              <ListItemButton 
+                onClick={() => handleMenuClick(item.id)}
+                selected={currentView === item.id}
+                sx={{
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+                  '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.2)' }
+                }}
+              >
+                <ListItemIcon sx={{ color: 'white' }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+          
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setConfigOpen(!configOpen)}>
+              <ListItemIcon sx={{ color: 'white' }}>
+                <Settings />
+              </ListItemIcon>
+              <ListItemText primary="Configurações" />
+              {configOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+          </ListItem>
+          
+          <Collapse in={configOpen} timeout="auto" unmountOnExit>
+            {configSubItems.map((subItem, subIndex) => (
+              <ListItem key={subIndex} disablePadding sx={{ pl: 4 }}>
+                <ListItemButton 
+                  onClick={subItem.action}
+                  sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+                >
+                  <ListItemText 
+                    primary={subItem.title}
+                    sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem' } }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </Collapse>
+        </List>
+      </Drawer>
+      
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        {currentView === 'agendamentos' ? (
+          <AgendaPresentational
         selectedDate={selectedDate}
         events={events}
         allEvents={allEvents}
@@ -340,9 +484,20 @@ const AgendaContainer = () => {
         onDeleteEvent={handleDeleteEvent}
         onPageChange={handlePageChange}
         onSearch={handleSearch}
-        onRefreshEvents={handleRefreshEvents}
-        loading={loading}
-      />
+            onRefreshEvents={handleRefreshEvents}
+            loading={loading}
+          />
+        ) : (
+          <Box>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              {currentView.charAt(0).toUpperCase() + currentView.slice(1)}
+            </Typography>
+            <Typography variant="body1">
+              Módulo em desenvolvimento...
+            </Typography>
+          </Box>
+        )}
+      </Box>
       
       <AgendaModal
         open={modalOpen}
@@ -350,7 +505,7 @@ const AgendaContainer = () => {
         onSave={handleSaveEvent}
         editingEvent={editingEvent}
       />
-    </>
+    </Box>
   );
 };
 
