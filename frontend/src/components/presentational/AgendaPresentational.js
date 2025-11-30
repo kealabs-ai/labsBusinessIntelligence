@@ -145,7 +145,7 @@ const AgendaPresentational = ({
                   </IconButton>
                 </Box>
               </Box>
-              <List sx={{ maxHeight: { xs: '300px', md: '400px' }, overflow: 'auto' }}>
+              <List sx={{ maxHeight: { xs: '250px', sm: '600px' }, overflow: 'auto' }}>
                 {events.map((event) => (
                   <ListItem 
                     key={event.id} 
