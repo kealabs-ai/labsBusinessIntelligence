@@ -2,16 +2,16 @@ import pyodbc
 from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 from .interfaces import IUserRepository, IChartRepository
-import os
+from infrastructure.config.env_manager import env
 
 class SQLServerUserRepository(IUserRepository):
     def __init__(self):
         self.connection_string = (
             f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-            f"SERVER={os.getenv('SQLSERVER_HOST', 'localhost')};"
-            f"DATABASE={os.getenv('SQLSERVER_DATABASE', 'labsbi')};"
-            f"UID={os.getenv('SQLSERVER_USER', 'sa')};"
-            f"PWD={os.getenv('SQLSERVER_PASSWORD', '')}"
+            f"SERVER={env.get('SQLSERVER_HOST', 'localhost')};"
+            f"DATABASE={env.get('SQLSERVER_DATABASE', 'labsbi')};"
+            f"UID={env.get_required('SQLSERVER_USER')};"
+            f"PWD={env.get_required('SQLSERVER_PASSWORD')}"
         )
     
     async def get_user_by_credentials(self, username: str) -> Optional[User]:
@@ -48,10 +48,10 @@ class SQLServerChartRepository(IChartRepository):
     def __init__(self):
         self.connection_string = (
             f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-            f"SERVER={os.getenv('SQLSERVER_HOST', 'localhost')};"
-            f"DATABASE={os.getenv('SQLSERVER_DATABASE', 'labsbi')};"
-            f"UID={os.getenv('SQLSERVER_USER', 'sa')};"
-            f"PWD={os.getenv('SQLSERVER_PASSWORD', '')}"
+            f"SERVER={env.get('SQLSERVER_HOST', 'localhost')};"
+            f"DATABASE={env.get('SQLSERVER_DATABASE', 'labsbi')};"
+            f"UID={env.get_required('SQLSERVER_USER')};"
+            f"PWD={env.get_required('SQLSERVER_PASSWORD')}"
         )
     
     async def get_chart_data(self, chart_type: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:

@@ -2,16 +2,17 @@ import mysql.connector
 from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 from .interfaces import IUserRepository, IChartRepository
-import os
+from infrastructure.config.env_manager import env
 
 class MySQLUserRepository(IUserRepository):
     def __init__(self):
+        db_config = env.get_database_config()
         self.connection_config = {
-            'host': os.getenv('MYSQL_HOST', 'localhost'),
-            'port': int(os.getenv('MYSQL_PORT', 33060)),
-            'user': os.getenv('MYSQL_USER', 'root'),
-            'password': os.getenv('MYSQL_PASSWORD', ''),
-            'database': os.getenv('MYSQL_DATABASE', 'labsbi')
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
         }
     
     async def get_user_by_credentials(self, username: str) -> Optional[User]:
@@ -38,12 +39,13 @@ class MySQLUserRepository(IUserRepository):
 
 class MySQLChartRepository(IChartRepository):
     def __init__(self):
+        db_config = env.get_database_config()
         self.connection_config = {
-            'host': os.getenv('MYSQL_HOST', 'localhost'),
-            'port': int(os.getenv('MYSQL_PORT', 33060)),
-            'user': os.getenv('MYSQL_USER', 'root'),
-            'password': os.getenv('MYSQL_PASSWORD', ''),
-            'database': os.getenv('MYSQL_DATABASE', 'labsbi')
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
         }
     
     async def get_chart_data(self, chart_type: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:

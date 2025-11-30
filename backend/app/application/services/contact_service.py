@@ -1,18 +1,19 @@
 from typing import List, Optional
 from domain.entities.contact import Contact
 from infrastructure.repositories.contact_repository import ContactRepository
+from infrastructure.config.env_manager import env
 import mysql.connector
-import os
 import re
 
 class ContactService:
     def __init__(self):
+        db_config = env.get_database_config()
         connection_config = {
-            'host': os.getenv('MYSQL_HOST', '72.60.140.128'),
-            'port': int(os.getenv('MYSQL_PORT', 33060)),
-            'user': os.getenv('MYSQL_USER', 'kealabs'),
-            'password': os.getenv('MYSQL_PASSWORD', 'Kea2025@!@'),
-            'database': os.getenv('MYSQL_DATABASE', 'labsbi_mysql_db')
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
         }
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = ContactRepository(self.connection)

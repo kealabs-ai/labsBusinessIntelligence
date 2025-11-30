@@ -3,19 +3,19 @@ from datetime import datetime, timedelta
 from domain.entities.agendamento import Agendamento
 from infrastructure.repositories.agendamento_repository import AgendamentoRepository
 from application.services.contact_service import ContactService
+from infrastructure.config.env_manager import env
 import mysql.connector
-import os
 import re
 
 class AgendamentoService:
     def __init__(self):
-        # Usar as credenciais do arquivo .env
+        db_config = env.get_database_config()
         connection_config = {
-            'host': os.getenv('MYSQL_HOST', '72.60.140.128'),
-            'port': int(os.getenv('MYSQL_PORT', 33060)),
-            'user': os.getenv('MYSQL_USER', 'kealabs'),
-            'password': os.getenv('MYSQL_PASSWORD', 'Kea2025@!@'),
-            'database': os.getenv('MYSQL_DATABASE', 'labsbi_mysql_db')
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
         }
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = AgendamentoRepository(self.connection)
@@ -151,9 +151,9 @@ class AgendamentoService:
         try:
             import httpx
             
-            current_api_key = os.getenv("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
-            current_instance = os.getenv("INSTANCE", "kealabs_comunication")
-            url_evolution_api = os.getenv("URL_EVOLUTION_API", "https://comunication-with-client-evolution-api.t37hka.easypanel.host")
+            current_api_key = env.get_required("API_KEY")
+            current_instance = env.get_required("INSTANCE")
+            url_evolution_api = env.get_required("URL_EVOLUTION_API")
             
             headers = {
                 "Content-Type": "application/json",

@@ -3,30 +3,15 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional
 from application.services.auth_service import AuthService
+from infrastructure.config.env_manager import env
 import httpx
-import os
 import logging
 import traceback
-from dotenv import load_dotenv
-import pathlib
-
-# Forçar carregamento do .env com caminho absoluto
-env_path = pathlib.Path(__file__).parent.parent / '.env'
-load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
-logger.info(f"Loading .env from: {env_path.absolute()}")
-logger.info(f"Env file exists: {env_path.exists()}")
 
 router = APIRouter()
 security = HTTPBearer()
-
-URL_EVOLUTION_API = os.getenv("URL_EVOLUTION_API", "https://comunication-with-client-evolution-api.t37hka.easypanel.host")
-INSTANCE = os.getenv("INSTANCE")
-API_KEY = os.getenv("API_KEY")
-
-# Debug das variáveis
-logger.info(f"Loading env vars - API_KEY: {bool(API_KEY)}, INSTANCE: {bool(INSTANCE)}")
 
 class ChatClientRequest(BaseModel):
     where: dict
@@ -67,34 +52,21 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @router.get("/env-check")
 async def check_environment():
-    # Recarregar variáveis
-    load_dotenv(dotenv_path=env_path, override=True)
-    current_api_key = os.getenv("API_KEY")
-    current_instance = os.getenv("INSTANCE")
-    
     return {
-        "URL_EVOLUTION_API": URL_EVOLUTION_API,
-        "API_KEY_exists": bool(current_api_key),
-        "INSTANCE_exists": bool(current_instance),
-        "API_KEY_value": current_api_key[:10] + "..." if current_api_key else None,
-        "INSTANCE_value": current_instance,
-        "env_file_path": os.path.abspath(".env")
+        "URL_EVOLUTION_API": env.get("URL_EVOLUTION_API", "https://comunication-with-client-evolution-api.t37hka.easypanel.host"),
+        "API_KEY_exists": bool(env.get("API_KEY")),
+        "INSTANCE_exists": bool(env.get("INSTANCE")),
+        "API_KEY_value": "***",
+        "INSTANCE_value": env.get("INSTANCE"),
+        "env_file_configured": True
     }
 
 @router.post("/chat-client")
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
-        # Recarregar variáveis de ambiente
-        current_api_key = os.getenv("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
-        current_instance = os.getenv("INSTANCE", "kealabs_comunication")
-        
-        # Validar variáveis de ambiente
-        logger.info(f"API_KEY exists: {bool(current_api_key)}, INSTANCE exists: {bool(current_instance)}")
-        if not current_api_key or not current_instance:
-            missing = []
-            if not current_api_key: missing.append("API_KEY")
-            if not current_instance: missing.append("INSTANCE")
-            raise HTTPException(status_code=500, detail=f"Missing environment variables: {', '.join(missing)}")
+        # Obter variáveis de ambiente
+        current_api_key = env.get_required("API_KEY")
+        current_instance = env.get_required("INSTANCE")
         
         headers = {
             "Content-Type": "application/json",
@@ -102,7 +74,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
             "instance": current_instance
         }
         
-        url = f"{URL_EVOLUTION_API}/chat/findMessages/{current_instance}"
+        url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/chat/findMessages/{current_instance}"
         logger.info(f"Making request to: {url}")
         logger.info(f"Request payload: {request.dict()}")
         
@@ -152,17 +124,9 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
 @router.post("/send-message-client")
 async def send_message_client(request: SendMessageRequest, user=Depends(get_current_user)):
     try:
-        # Recarregar variáveis de ambiente
-        current_api_key = os.getenv("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
-        current_instance = os.getenv("INSTANCE", "kealabs_comunication")
-        
-        # Validar variáveis de ambiente
-        logger.info(f"API_KEY exists: {bool(current_api_key)}, INSTANCE exists: {bool(current_instance)}")
-        if not current_api_key or not current_instance:
-            missing = []
-            if not current_api_key: missing.append("API_KEY")
-            if not current_instance: missing.append("INSTANCE")
-            raise HTTPException(status_code=500, detail=f"Missing environment variables: {', '.join(missing)}")
+        # Obter variáveis de ambiente
+        current_api_key = env.get_required("API_KEY")
+        current_instance = env.get_required("INSTANCE")
         
         headers = {
             "Content-Type": "application/json",
@@ -170,7 +134,7 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
             "instance": current_instance
         }
         
-        url = f"{URL_EVOLUTION_API}/message/sendText/{current_instance}"
+        url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/message/sendText/{current_instance}"
         logger.info(f"Making request to: {url}")
         
         # Extrair number e text do request

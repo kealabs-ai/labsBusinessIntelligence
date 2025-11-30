@@ -2,17 +2,18 @@ from typing import List, Dict, Any
 from domain.entities.user import User
 from infrastructure.repositories.admin_repository import AdminRepository
 from application.services.token_manager import TokenManager
+from infrastructure.config.env_manager import env
 import mysql.connector
-import os
 
 class AdminService:
     def __init__(self):
+        db_config = env.get_database_config()
         connection_config = {
-            'host': os.getenv('MYSQL_HOST', '72.60.140.128'),
-            'port': int(os.getenv('MYSQL_PORT', 33060)),
-            'user': os.getenv('MYSQL_USER', 'kealabs'),
-            'password': os.getenv('MYSQL_PASSWORD', 'Kea2025@!@'),
-            'database': os.getenv('MYSQL_DATABASE', 'labsbi_mysql_db')
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
         }
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = AdminRepository(self.connection)

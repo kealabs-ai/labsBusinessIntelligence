@@ -1,9 +1,9 @@
-import os
 import json
 from typing import Dict, Any
 import mysql.connector
 from pathlib import Path
 from dotenv import load_dotenv
+from infrastructure.config.env_manager import env
 
 try:
     import pyodbc
@@ -24,42 +24,42 @@ class DatabaseConfigService:
             # Forçar reload do .env
             load_dotenv(self.env_file_path, override=True)
             
+            db_config = env.get_database_config()
             mysql_config = {
-                'host': os.getenv('MYSQL_HOST', '72.60.140.128'),
-                'port': os.getenv('MYSQL_PORT', '33060'),
-                'user': os.getenv('MYSQL_USER', 'kealabs'),
-                'password': os.getenv('MYSQL_PASSWORD', 'Kea2025@!@'),
-                'database': os.getenv('MYSQL_DATABASE', 'labsbi_mysql_db')
+                'host': db_config['host'],
+                'port': str(db_config['port']),
+                'user': env.get('MYSQL_USER', ''),
+                'password': '***',  # Não expor senha
+                'database': db_config['database']
             }
 
-            
             sqlserver_config = {
-                'host': os.getenv('SQLSERVER_HOST', ''),
-                'port': os.getenv('SQLSERVER_PORT', '1433'),
-                'user': os.getenv('SQLSERVER_USER', ''),
-                'password': os.getenv('SQLSERVER_PASSWORD', ''),
-                'database': os.getenv('SQLSERVER_DATABASE', ''),
-                'driver': os.getenv('SQLSERVER_DRIVER', '{ODBC Driver 18 for SQL Server}')
+                'host': env.get('SQLSERVER_HOST', ''),
+                'port': env.get('SQLSERVER_PORT', '1433'),
+                'user': env.get('SQLSERVER_USER', ''),
+                'password': '***',  # Não expor senha
+                'database': env.get('SQLSERVER_DATABASE', ''),
+                'driver': env.get('SQLSERVER_DRIVER', '{ODBC Driver 18 for SQL Server}')
             }
             
             environment_config = {
-                'dbEngine': os.getenv('DB_ENGINE', 'mysql'),
-                'environment': os.getenv('ENVIRONMENT', 'dev'),
-                'port': os.getenv('PORT', '6002'),
-                'secretKey': os.getenv('SECRET_KEY', ''),
-                'evolutionApiUrl': os.getenv('URL_EVOLUTION_API', ''),
-                'evolutionInstance': os.getenv('INSTANCE', ''),
-                'evolutionApiKey': os.getenv('API_KEY', '')
+                'dbEngine': env.get('DB_ENGINE', 'mysql'),
+                'environment': env.get('ENVIRONMENT', 'dev'),
+                'port': env.get('PORT', '6002'),
+                'secretKey': '***',  # Não expor chave secreta
+                'evolutionApiUrl': env.get('URL_EVOLUTION_API', ''),
+                'evolutionInstance': env.get('INSTANCE', ''),
+                'evolutionApiKey': '***'  # Não expor API key
             }
             
             openvpn_config = {
-                'server': os.getenv('OPENVPN_SERVER', ''),
-                'port': os.getenv('OPENVPN_PORT', '1194'),
-                'protocol': os.getenv('OPENVPN_PROTOCOL', 'udp'),
-                'username': os.getenv('OPENVPN_USERNAME', ''),
-                'password': os.getenv('OPENVPN_PASSWORD', ''),
-                'caCert': os.getenv('OPENVPN_CA_CERT', ''),
-                'additionalConfig': os.getenv('OPENVPN_ADDITIONAL_CONFIG', '')
+                'server': env.get('OPENVPN_SERVER', ''),
+                'port': env.get('OPENVPN_PORT', '1194'),
+                'protocol': env.get('OPENVPN_PROTOCOL', 'udp'),
+                'username': env.get('OPENVPN_USERNAME', ''),
+                'password': '***',  # Não expor senha
+                'caCert': env.get('OPENVPN_CA_CERT', ''),
+                'additionalConfig': env.get('OPENVPN_ADDITIONAL_CONFIG', '')
             }
             
             result = {
