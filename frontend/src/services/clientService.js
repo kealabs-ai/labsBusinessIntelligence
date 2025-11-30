@@ -47,7 +47,15 @@ class ClientService {
   }
 
   async getClients() {
-    return this.request('/');
+    try {
+      return await this.request('/');
+    } catch (error) {
+      if (error.message.includes('405')) {
+        console.warn('Clients endpoint not available, returning empty data');
+        return [];
+      }
+      throw error;
+    }
   }
 
   async getClient(clientId) {

@@ -1,58 +1,64 @@
-import axios from 'axios';
-
 const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
 class AdminService {
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  }
 
-    this.api.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
+  async request(url, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      headers: this.getHeaders(),
+      ...options
     });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   }
 
   async getUsers(page = 1, limit = 10) {
-    const response = await this.api.get(`/admin/users?page=${page}&limit=${limit}`);
-    return response.data;
+    return this.request(`/admin/users?page=${page}&limit=${limit}`);
   }
 
   async createUser(userData) {
-    const response = await this.api.post('/admin/users', userData);
-    return response.data;
+    return this.request('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
   }
 
   async updateUser(userId, userData) {
-    const response = await this.api.put(`/admin/users/${userId}`, userData);
-    return response.data;
+    return this.request(`/admin/users/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
   }
 
   async deleteUser(userId) {
-    const response = await this.api.delete(`/admin/users/${userId}`);
-    return response.data;
+    return this.request(`/admin/users/${userId}`, {
+      method: 'POST'
+    });
   }
 
   async getModules() {
-    const response = await this.api.get('/admin/modules');
-    return response.data;
+    return this.request('/admin/modules');
   }
 
   async getUserPermissions(userId) {
-    const response = await this.api.get(`/admin/permissions/${userId}`);
-    return response.data;
+    return this.request(`/admin/permissions/${userId}`);
   }
 
   async updateUserPermissions(userId, permissions) {
-    const response = await this.api.post(`/admin/permissions/${userId}`, permissions);
-    return response.data;
+    return this.request(`/admin/permissions/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify(permissions)
+    });
   }
 }
 

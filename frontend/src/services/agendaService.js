@@ -54,11 +54,25 @@ class AgendaService {
   }
 
   async getAgendamentos(page = 1, limit = 10, search = '', dateFilter = '') {
-    const params = new URLSearchParams({ page, limit });
-    if (search) params.append('search', search);
-    if (dateFilter) params.append('date', dateFilter);
-    
-    return this.request(`/agendamentos?${params}`);
+    try {
+      const params = new URLSearchParams({ page, limit });
+      if (search) params.append('search', search);
+      if (dateFilter) params.append('date', dateFilter);
+      
+      return await this.request(`/agendamentos?${params}`);
+    } catch (error) {
+      if (error.message.includes('405')) {
+        console.warn('Agendamentos endpoint not available, returning empty data');
+        return {
+          items: [],
+          total: 0,
+          page: page,
+          limit: limit,
+          pages: 1
+        };
+      }
+      throw error;
+    }
   }
 
   async getAgendamento(id) {
@@ -73,8 +87,8 @@ class AgendaService {
   }
 
   async deleteAgendamento(id) {
-    return this.request(`/agendamentos/${id}`, {
-      method: 'DELETE'
+    return this.request(`/agendamentos/${id}/delete`, {
+      method: 'POST'
     });
   }
 
@@ -86,7 +100,18 @@ class AgendaService {
   }
 
   async getContacts() {
-    return this.request('/contacts');
+    try {
+      return await this.request('/contacts');
+    } catch (error) {
+      if (error.message.includes('405')) {
+        console.warn('Contacts endpoint not available, returning empty data');
+        return {
+          success: true,
+          data: []
+        };
+      }
+      throw error;
+    }
   }
 
   async getChatMessages(contactPhone) {

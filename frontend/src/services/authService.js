@@ -1,27 +1,37 @@
-import axios from 'axios';
+const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
-const API_BASE_URL = 'http://72.60.140.128:6002';
-
-const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+class AuthService {
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
   }
-  return config;
-});
 
-export const authService = {
+  async request(url, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      headers: this.getHeaders(),
+      ...options
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  }
+
   async login(username, password) {
-    const response = await api.post('/auth/login', { username, password });
-    return response.data;
-  },
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+  }
 
   async getCurrentUser() {
-    const response = await api.get('/auth/me');
-    return response.data;
+    return this.request('/auth/me');
   }
-};
+}
+
+export const authService = new AuthService();

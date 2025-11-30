@@ -1,59 +1,61 @@
-import axios from 'axios';
+const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
-const API_BASE_URL = 'http://72.60.140.128:6002';
-
-const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+class ChartService {
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
   }
-  return config;
-});
 
-export const chartService = {
+  async request(url, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      headers: this.getHeaders(),
+      ...options
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  }
+
   async getBarChartData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/bar?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/bar?${params}`);
+  }
 
   async getPieChartData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/pie?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/pie?${params}`);
+  }
 
   async getChartData(chartType, filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/${chartType}?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/${chartType}?${params}`);
+  }
 
   async getLineChartData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/line?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/line?${params}`);
+  }
 
   async getAreaChartData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/area?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/area?${params}`);
+  }
 
   async getScatterChartData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/scatter?${params}`);
-    return response.data;
-  },
+    return this.request(`/chart/scatter?${params}`);
+  }
 
   async getKPIData(filters = {}) {
     const params = new URLSearchParams(filters);
-    const response = await api.get(`/chart/kpi?${params}`);
-    return response.data;
+    return this.request(`/chart/kpi?${params}`);
   }
-};
+}
+
+export const chartService = new ChartService();

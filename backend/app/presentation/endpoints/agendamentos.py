@@ -115,12 +115,12 @@ async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, u
         logger.error(f"Error updating agendamento: {str(e)}")
         return {"success": False, "error": str(e)}
 
-@router.delete("/{agendamento_id}")
+@router.post("/{agendamento_id}/delete")
 async def delete_agendamento(agendamento_id: int, user=Depends(get_current_user)):
     """
     Inativar agendamento
     """
-    logger.info(f"DELETE /agendamentos/{agendamento_id} called")
+    logger.info(f"POST /agendamentos/{agendamento_id}/delete called")
     try:
         service = AgendamentoService()
         service.delete_agendamento(agendamento_id)

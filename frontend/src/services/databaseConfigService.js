@@ -1,65 +1,86 @@
-import axios from 'axios';
-
 const API_BASE_URL = 'http://72.60.140.128:6002';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+class DatabaseConfigService {
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
   }
-  return config;
-});
 
-export const databaseConfigService = {
+  async request(url, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      headers: this.getHeaders(),
+      ...options
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  }
+
   async getConfigurations() {
-    const response = await api.get('/api/database-config-public');
-    return response.data;
-  },
+    return this.request('/api/database-config-public');
+  }
 
   async testMysqlConnection(config) {
-    const response = await api.post('/api/database-config/test-mysql-public', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/test-mysql-public', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async testSqlServerConnection(config) {
-    const response = await api.post('/api/database-config/test-sqlserver-public', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/test-sqlserver-public', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async testEnvironmentConfig(config) {
-    const response = await api.post('/api/database-config/test-environment', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/test-environment', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async saveMysqlConfig(config) {
-    const response = await api.post('/api/database-config/mysql-public', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/mysql-public', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async saveSqlServerConfig(config) {
-    const response = await api.post('/api/database-config/sqlserver-public', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/sqlserver-public', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async saveEnvironmentConfig(config) {
-    const response = await api.post('/api/database-config/environment', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/environment', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async testOpenVpnConnection(config) {
-    const response = await api.post('/api/database-config/test-openvpn', config);
-    return response.data;
-  },
+    return this.request('/api/database-config/test-openvpn', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
+  }
 
   async saveOpenVpnConfig(config) {
-    const response = await api.post('/api/database-config/openvpn', config);
-    return response.data;
+    return this.request('/api/database-config/openvpn', {
+      method: 'POST',
+      body: JSON.stringify(config)
+    });
   }
-};
+}
+
+export const databaseConfigService = new DatabaseConfigService();
