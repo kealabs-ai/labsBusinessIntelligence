@@ -28,6 +28,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AgendaPresentational from '../../components/presentational/AgendaPresentational';
 import AgendaModal from '../../components/presentational/AgendaModal';
+import ClientsContainer from '../clients/ClientsContainer';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { agendaService } from '../../services/agendaService';
 
@@ -565,6 +566,8 @@ const AgendaContainer = () => {
             onRefreshEvents={handleRefreshEvents}
             loading={loading}
           />
+        ) : currentView === 'clientes' ? (
+          <ClientsContainer />
         ) : (
           <Box>
             <Typography variant="h4" sx={{ mb: 2 }}>

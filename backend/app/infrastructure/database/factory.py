@@ -1,9 +1,9 @@
 import os
-from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository
-from infrastructure.repositories.interfaces import IUserRepository, IChartRepository
+from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository
+from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository
 
 try:
-    from infrastructure.repositories.sqlserver_repository import SQLServerUserRepository, SQLServerChartRepository
+    from infrastructure.repositories.sqlserver_repository import SQLServerUserRepository, SQLServerChartRepository, SQLServerClientRepository
     SQLSERVER_AVAILABLE = True
 except ImportError:
     SQLSERVER_AVAILABLE = False
@@ -11,6 +11,7 @@ except ImportError:
 class DatabaseFactory:
     _user_repository: IUserRepository = None
     _chart_repository: IChartRepository = None
+    _client_repository: IClientRepository = None
     
     @classmethod
     def initialize(cls):
@@ -19,11 +20,13 @@ class DatabaseFactory:
         if db_engine == 'mysql':
             cls._user_repository = MySQLUserRepository()
             cls._chart_repository = MySQLChartRepository()
+            cls._client_repository = MySQLClientRepository()
         elif db_engine == 'sqlserver':
             if not SQLSERVER_AVAILABLE:
                 raise ValueError("SQL Server support not available. Install pyodbc and ODBC drivers.")
             cls._user_repository = SQLServerUserRepository()
             cls._chart_repository = SQLServerChartRepository()
+            cls._client_repository = SQLServerClientRepository()
         else:
             raise ValueError(f"Unsupported database engine: {db_engine}")
     
@@ -38,3 +41,9 @@ class DatabaseFactory:
         if cls._chart_repository is None:
             cls.initialize()
         return cls._chart_repository
+    
+    @classmethod
+    def get_client_repository(cls) -> IClientRepository:
+        if cls._client_repository is None:
+            cls.initialize()
+        return cls._client_repository

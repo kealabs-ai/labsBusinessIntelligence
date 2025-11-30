@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List, Dict, Any
 from domain.entities.user import User
+from domain.entities.client import Client
 
 class BaseRepository(ABC):
     pass
@@ -21,4 +22,29 @@ class IChartRepository(ABC):
     
     @abstractmethod
     async def get_kpi_data(self, filters: Dict[str, Any]) -> Dict[str, Any]:
+        pass
+
+class IClientRepository(ABC):
+    @abstractmethod
+    async def create_client(self, client: Client) -> Client:
+        pass
+    
+    @abstractmethod
+    async def update_client(self, client_id: int, client: Client) -> Optional[Client]:
+        pass
+    
+    @abstractmethod
+    async def get_client_by_id(self, client_id: int) -> Optional[Client]:
+        pass
+    
+    @abstractmethod
+    async def get_clients_by_user(self, user_id: int) -> List[Client]:
+        pass
+    
+    @abstractmethod
+    async def update_client_status(self, client_id: int, status: bool) -> bool:
+        pass
+    
+    @abstractmethod
+    async def get_client_by_phone(self, phone: str, exclude_id: int = None) -> Optional[Client]:
         pass
