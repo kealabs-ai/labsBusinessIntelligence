@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,8 @@ import {
   CardContent,
   IconButton,
   Grid,
-  CircularProgress
+  CircularProgress,
+  TextField
 } from '@mui/material';
 import {
   Close,
@@ -20,13 +21,25 @@ import {
 } from '@mui/icons-material';
 
 const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
-  const today = new Date().toISOString().split('T')[0];
-  // Mostrar todos os eventos para debug
-  const todayEvents = events;
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  console.log('Total events:', events.length);
-  console.log('All events being shown:', todayEvents.length);
-  console.log('Events data:', events);
+  const filteredEvents = events.filter(event => event.date === selectedDate);
+  
+  const handleDateChange = async (e) => {
+    const newDate = e.target.value;
+    setSelectedDate(newDate);
+    setIsLoading(true);
+    
+    // Simular carregamento
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
 
   const handleFullscreen = () => {
     if (document.documentElement.requestFullscreen) {
@@ -51,15 +64,31 @@ const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
       }}
     >
       <DialogContent sx={{ p: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h3" sx={{ fontWeight: 700, color: 'white' }}>
-            Agendamentos de Hoje
+            📅 Agendamentos
           </Typography>
-          <Box>
-            <IconButton onClick={onRefresh} sx={{ color: 'white', mr: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              sx={{
+                '& .MuiInputBase-root': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: 2,
+                  minWidth: '150px'
+                },
+                '& .MuiInputBase-input': {
+                  color: '#333',
+                  fontWeight: 500
+                }
+              }}
+            />
+            <IconButton onClick={onRefresh} sx={{ color: 'white' }}>
               <Refresh fontSize="large" />
             </IconButton>
-            <IconButton onClick={handleFullscreen} sx={{ color: 'white', mr: 1 }}>
+            <IconButton onClick={handleFullscreen} sx={{ color: 'white' }}>
               <Fullscreen fontSize="large" />
             </IconButton>
             <IconButton onClick={onClose} sx={{ color: 'white' }}>
@@ -69,27 +98,30 @@ const TVModal = ({ open, onClose, events, onRefresh, loading }) => {
         </Box>
 
         <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-          {new Date().toLocaleDateString('pt-BR', { 
+          {new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR', { 
             weekday: 'long', 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
-          })} - {todayEvents.length} agendamentos
+          })} - {filteredEvents.length} agendamentos
         </Typography>
 
-        {loading ? (
+        {(loading || isLoading) ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
             <CircularProgress size={60} sx={{ color: 'white' }} />
           </Box>
-        ) : todayEvents.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           <Box sx={{ textAlign: 'center', mt: 8 }}>
             <Typography variant="h4" sx={{ opacity: 0.7 }}>
-              Nenhum agendamento para hoje
+              {selectedDate === new Date().toISOString().split('T')[0] 
+                ? 'Nenhum agendamento para hoje' 
+                : 'Nenhum agendamento para esta data'
+              }
             </Typography>
           </Box>
         ) : (
           <Grid container spacing={3}>
-            {todayEvents.map((event) => (
+            {filteredEvents.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
                 <Card sx={{
                   background: 'rgba(255, 255, 255, 0.95)',

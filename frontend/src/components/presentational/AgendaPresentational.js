@@ -92,25 +92,8 @@ const AgendaPresentational = ({
             <Card sx={agendaStyles.mainCard}>
               <Typography variant="h6" sx={agendaStyles.sectionTitle}>
                 <CalendarToday sx={agendaStyles.calendarIcon} />
-                Google Calendar
+                Agendamentos
               </Typography>
-            
-              <TextField
-                type="date"
-                label="Data Selecionada"
-                value={selectedDate.toISOString().split('T')[0]}
-                onChange={(e) => onDateChange(new Date(e.target.value))}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                sx={{ 
-                  ...agendaStyles.textField, 
-                  mb: 2,
-                  '& .MuiInputBase-input': {
-                    backgroundColor: isDateScheduled(selectedDate) ? 'rgba(102, 126, 234, 0.1)' : 'transparent'
-                  }
-                }}
-              />
-              
               <TextField
                 fullWidth
                 label="Buscar agendamentos"
@@ -238,8 +221,23 @@ const AgendaPresentational = ({
                   <List sx={{ 
                     maxHeight: { xs: '250px', sm: '600px' }, 
                     overflow: 'auto',
+                    overflowY: 'scroll',
                     border: { xs: '1px solid #e0e0e0', sm: 'none' },
-                    borderRadius: { xs: 1, sm: 0 }
+                    borderRadius: { xs: 1, sm: 0 },
+                    '&::-webkit-scrollbar': {
+                      width: '8px'
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: '#f1f1f1',
+                      borderRadius: '4px'
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: '#c1c1c1',
+                      borderRadius: '4px',
+                      '&:hover': {
+                        background: '#a8a8a8'
+                      }
+                    }
                   }}>
                     {contacts.map((contact) => (
                       <ListItem
