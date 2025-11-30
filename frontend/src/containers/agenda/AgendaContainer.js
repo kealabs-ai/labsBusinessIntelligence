@@ -360,7 +360,6 @@ const AgendaContainer = () => {
   const menuItems = [
     { id: 'agendamentos', label: 'Agendamentos', icon: <CalendarToday /> },
     { id: 'clientes', label: 'Clientes', icon: <People /> },
-    { id: 'comunicacao', label: 'Comunicação', icon: <WhatsApp /> },
     { id: 'caixa', label: 'Caixa e Transações', icon: <AccountBalance /> },
     { id: 'relatorios', label: 'Relatórios', icon: <Assessment /> }
   ];
@@ -374,7 +373,13 @@ const AgendaContainer = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: 1201 }}>
+      <AppBar position="fixed" sx={{ 
+        zIndex: 1201,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -464,7 +469,13 @@ const AgendaContainer = () => {
         </List>
       </Drawer>
       
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ 
+        flexGrow: 1, 
+        p: 3, 
+        minHeight: '100vh',
+        width: '100%',
+        backgroundColor: '#f5f5f5'
+      }}>
         <Toolbar />
         {currentView === 'agendamentos' ? (
           <AgendaPresentational
