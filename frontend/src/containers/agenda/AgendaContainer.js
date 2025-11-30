@@ -47,12 +47,31 @@ const AgendaContainer = () => {
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const [allEvents, setAllEvents] = useState([]);
+  const [lastMessageId, setLastMessageId] = useState(null);
+  const [pollingActive, setPollingActive] = useState(false);
+  const [chatPollingInterval, setChatPollingInterval] = useState(null);
 
   useEffect(() => {
     loadAgendamentos();
     loadAllEvents();
     loadContacts();
   }, []);
+  
+  useEffect(() => {
+    return () => {
+      setPollingActive(false);
+      if (chatPollingInterval) {
+        clearInterval(chatPollingInterval);
+      }
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Restart auto-update when selectedContact changes
+    if (selectedContact && pollingActive) {
+      startChatAutoUpdate(selectedContact);
+    }
+  }, [selectedContact, pollingActive]);
 
   const loadAgendamentos = async (page = 1) => {
     try {
@@ -261,24 +280,57 @@ const AgendaContainer = () => {
     
     try {
       const response = await agendaService.getChatMessages(contact.phone.replace(/\D/g, ''));
+      
       if (response.success && response.messages && response.messages.records) {
-        const chatMessages = response.messages.records.map((msg, index) => ({
-          id: msg.key?.id || index,
-          contactId: contact.id,
-          message: msg.message?.conversation || msg.message?.extendedTextMessage?.text || 'Mensagem não suportada',
-          sent: msg.key?.fromMe || false,
-          timestamp: new Date(msg.messageTimestamp * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        }));
+        const chatMessages = response.messages.records
+          .map((msg, index) => ({
+            id: msg.key?.id || `${msg.messageTimestamp}-${index}`,
+            contactId: contact.id,
+            message: msg.message?.conversation || msg.message?.extendedTextMessage?.text || 'Mensagem não suportada',
+            sent: msg.key?.fromMe || false,
+            timestamp: new Date(msg.messageTimestamp * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            messageTimestamp: msg.messageTimestamp
+          }))
+          .sort((a, b) => b.messageTimestamp - a.messageTimestamp);
+        
         setMessages(chatMessages);
+        if (chatMessages.length > 0) {
+          setLastMessageId(chatMessages[0].id);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
     }
   };
+  
+  const startChatAutoUpdate = (contact) => {
+    if (chatPollingInterval) {
+      clearInterval(chatPollingInterval);
+    }
+    
+    const interval = setInterval(async () => {
+      if (contact && pollingActive) {
+        console.log('Auto-updating chat for:', contact.name);
+        await loadChatMessages(contact);
+      }
+    }, 3000); // Update every 3 seconds
+    
+    setChatPollingInterval(interval);
+  };
 
   const handleSelectContact = (contact) => {
+    if (chatPollingInterval) {
+      clearInterval(chatPollingInterval);
+    }
+    
     setSelectedContact(contact);
+    setLastMessageId(null);
+    setMessages([]);
+    
     loadChatMessages(contact);
+    
+    setPollingActive(true);
+    startChatAutoUpdate(contact);
   };
 
   const handleSendMessage = async (contactId, message) => {
@@ -289,20 +341,22 @@ const AgendaContainer = () => {
       const result = await agendaService.sendWhatsAppMessage(contact.phone, message);
       
       if (result.success) {
+        const now = Date.now();
         const newMessage = {
-          id: Date.now(),
+          id: now,
           contactId,
           message,
           sent: true,
-          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          messageTimestamp: Math.floor(now / 1000)
         };
-        setMessages(prev => [...prev, newMessage]);
-      } else {
-        alert('Erro ao enviar mensagem WhatsApp');
+        setMessages(prev => [newMessage, ...prev]);
+        
+        // Reload chat after sending message
+        setTimeout(() => loadChatMessages(contact), 1000);
       }
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
-      alert('Erro ao enviar mensagem. Tente novamente.');
     }
   };
 
@@ -491,6 +545,7 @@ const AgendaContainer = () => {
         onOpenModal={handleOpenModal}
         onSelectContact={handleSelectContact}
         onSendMessage={handleSendMessage}
+        pollingActive={pollingActive}
         onEditEvent={handleEditEvent}
         onDeleteEvent={handleDeleteEvent}
         onPageChange={handlePageChange}
