@@ -21,22 +21,33 @@ class AgendamentoRepository(BaseRepository):
                 hora TIME NOT NULL,
                 whatsapp_number VARCHAR(20),
                 custom_message TEXT,
-                enable_notification BOOLEAN DEFAULT FALSE,
-                notification_sent BOOLEAN DEFAULT FALSE,
+                enable_notification TINYINT(1) DEFAULT 0,
+                notification_sent TINYINT(1) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                ativo TINYINT(1) DEFAULT 1,
+                user_id INT,
+                client_id INT UNSIGNED NOT NULL,
+                valor DECIMAL(10,2),
+                notification_quantity INT DEFAULT 1,
+                notification_unit ENUM('dias', 'semanas', 'meses') DEFAULT 'dias',
+                notification_date DATETIME,
+                INDEX idx_agendamentos_data (data),
+                INDEX idx_agendamentos_enable_notification (enable_notification),
+                INDEX idx_agendamentos_user_id (user_id)
             )
         """)
         self.connection.commit()
     
-    def create(self, agendamento: Agendamento, user_id: int) -> Agendamento:
+    def create(self, agendamento: Agendamento, user_id: int, client_id: int = None) -> Agendamento:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
                 INSERT INTO agendamentos (cliente, servico, data, hora, valor, whatsapp_number, 
                                         custom_message, enable_notification, notification_quantity, 
-                                        notification_unit, notification_date, user_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                        notification_unit, notification_date, user_id, client_id, 
+                                        notification_sent, ativo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -47,11 +58,14 @@ class AgendamentoRepository(BaseRepository):
                 agendamento.valor,
                 agendamento.whatsapp_number,
                 agendamento.custom_message,
-                agendamento.enable_notification,
+                int(agendamento.enable_notification),
                 agendamento.notification_quantity,
                 agendamento.notification_unit,
                 agendamento.notification_date,
-                user_id
+                user_id,
+                client_id or 0,
+                int(agendamento.notification_sent),
+                1
             ))
             
             agendamento.id = cursor.lastrowid
@@ -112,6 +126,9 @@ class AgendamentoRepository(BaseRepository):
                     custom_message=row['custom_message'],
                     enable_notification=bool(row['enable_notification']),
                     notification_sent=bool(row.get('notification_sent', False)),
+                    notification_quantity=row.get('notification_quantity', 1),
+                    notification_unit=row.get('notification_unit', 'dias'),
+                    notification_date=row.get('notification_date'),
                     created_at=row.get('created_at'),
                     updated_at=row.get('updated_at')
                 ))
@@ -127,16 +144,16 @@ class AgendamentoRepository(BaseRepository):
             cursor.close()
     
     def get_pending_notifications(self) -> List[Agendamento]:
-        """Buscar agendamentos que precisam de notificação (24h antes)"""
-        cursor = self.connection.cursor()
+        """Buscar agendamentos que precisam de notificação"""
+        cursor = self.connection.cursor(dictionary=True)
         
         query = """
             SELECT * FROM agendamentos 
-            WHERE enable_notification = TRUE 
-            AND notification_sent = FALSE
+            WHERE enable_notification = 1 
+            AND notification_sent = 0
             AND whatsapp_number IS NOT NULL
-            AND CONCAT(data, ' ', hora) BETWEEN NOW() + INTERVAL 23 HOUR 
-            AND NOW() + INTERVAL 25 HOUR
+            AND ativo = 1
+            ORDER BY data ASC, hora ASC
         """
         
         cursor.execute(query)
@@ -144,29 +161,34 @@ class AgendamentoRepository(BaseRepository):
         agendamentos = []
         for row in cursor.fetchall():
             agendamentos.append(Agendamento(
-                id=row[0],
-                cliente=row[1],
-                servico=row[2],
-                data=str(row[3]),
-                hora=str(row[4]),
-                whatsapp_number=row[5],
-                custom_message=row[6],
-                enable_notification=bool(row[7]),
-                notification_sent=bool(row[8]),
-                created_at=row[9],
-                updated_at=row[10]
+                id=row['id'],
+                cliente=row['cliente'],
+                servico=row['servico'],
+                data=str(row['data']),
+                hora=str(row['hora']),
+                valor=float(row['valor']) if row.get('valor') else None,
+                whatsapp_number=row['whatsapp_number'],
+                custom_message=row['custom_message'],
+                enable_notification=bool(row['enable_notification']),
+                notification_sent=bool(row.get('notification_sent', False)),
+                notification_quantity=row.get('notification_quantity', 1),
+                notification_unit=row.get('notification_unit', 'dias'),
+                notification_date=row.get('notification_date'),
+                created_at=row.get('created_at'),
+                updated_at=row.get('updated_at')
             ))
         
         return agendamentos
     
     def update(self, agendamento_id: int, agendamento: Agendamento, user_id: int) -> Agendamento:
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor(dictionary=True)
         
         query = """
             UPDATE agendamentos SET 
             cliente = %s, servico = %s, data = %s, hora = %s, valor = %s,
             whatsapp_number = %s, custom_message = %s, enable_notification = %s,
-            notification_quantity = %s, notification_unit = %s, notification_date = %s
+            notification_quantity = %s, notification_unit = %s, notification_date = %s,
+            notification_sent = %s
             WHERE id = %s AND user_id = %s
         """
         
@@ -178,10 +200,11 @@ class AgendamentoRepository(BaseRepository):
             agendamento.valor,
             agendamento.whatsapp_number,
             agendamento.custom_message,
-            agendamento.enable_notification,
+            int(agendamento.enable_notification),
             agendamento.notification_quantity,
             agendamento.notification_unit,
             agendamento.notification_date,
+            int(agendamento.notification_sent),
             agendamento_id,
             user_id
         ))
@@ -194,35 +217,32 @@ class AgendamentoRepository(BaseRepository):
         """Inativar agendamento (soft delete)"""
         cursor = self.connection.cursor()
         
-        # Adicionar coluna ativo se não existir
-        try:
-            cursor.execute("ALTER TABLE agendamentos ADD COLUMN ativo BOOLEAN DEFAULT TRUE")
-            self.connection.commit()
-        except:
-            pass  # Coluna já existe
-        
-        query = "UPDATE agendamentos SET ativo = FALSE WHERE id = %s"
+        query = "UPDATE agendamentos SET ativo = 0 WHERE id = %s"
         cursor.execute(query, (agendamento_id,))
         self.connection.commit()
     
     def get_by_id(self, agendamento_id: int) -> Optional[Agendamento]:
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM agendamentos WHERE id = %s", (agendamento_id,))
+        cursor = self.connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM agendamentos WHERE id = %s AND ativo = 1", (agendamento_id,))
         
         row = cursor.fetchone()
         if row:
             return Agendamento(
-                id=row[0],
-                cliente=row[1],
-                servico=row[2],
-                data=str(row[3]),
-                hora=str(row[4]),
-                whatsapp_number=row[5],
-                custom_message=row[6],
-                enable_notification=bool(row[7]),
-                notification_sent=bool(row[8]),
-                created_at=row[9],
-                updated_at=row[10]
+                id=row['id'],
+                cliente=row['cliente'],
+                servico=row['servico'],
+                data=str(row['data']),
+                hora=str(row['hora']),
+                valor=float(row['valor']) if row.get('valor') else None,
+                whatsapp_number=row['whatsapp_number'],
+                custom_message=row['custom_message'],
+                enable_notification=bool(row['enable_notification']),
+                notification_sent=bool(row.get('notification_sent', False)),
+                notification_quantity=row.get('notification_quantity', 1),
+                notification_unit=row.get('notification_unit', 'dias'),
+                notification_date=row.get('notification_date'),
+                created_at=row.get('created_at'),
+                updated_at=row.get('updated_at')
             )
         return None
     
@@ -230,7 +250,7 @@ class AgendamentoRepository(BaseRepository):
         """Marcar notificação como enviada"""
         cursor = self.connection.cursor()
         
-        query = "UPDATE agendamentos SET notification_sent = TRUE WHERE id = %s"
+        query = "UPDATE agendamentos SET notification_sent = 1, updated_at = CURRENT_TIMESTAMP WHERE id = %s"
         
         cursor.execute(query, (agendamento_id,))
         self.connection.commit()
