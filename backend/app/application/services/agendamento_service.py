@@ -151,9 +151,14 @@ class AgendamentoService:
         try:
             import httpx
             
-            current_api_key = env.get_required("API_KEY")
-            current_instance = env.get_required("INSTANCE")
-            url_evolution_api = env.get_required("URL_EVOLUTION_API")
+            current_api_key = env.get("API_KEY")
+            current_instance = env.get("INSTANCE")
+            url_evolution_api = env.get("URL_EVOLUTION_API")
+            
+            # Se credenciais não estão configuradas, apenas retorna False
+            if not current_api_key or not current_instance or not url_evolution_api:
+                print("Evolution API credentials not configured, skipping WhatsApp confirmation")
+                return False
             
             headers = {
                 "Content-Type": "application/json",
