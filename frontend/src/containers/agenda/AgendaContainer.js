@@ -305,9 +305,15 @@ const AgendaContainer = () => {
         if (chatMessages.length > 0) {
           setLastMessageId(chatMessages[0].id);
         }
+      } else {
+        // Se a resposta não tem sucesso, limpa as mensagens
+        console.warn('Chat messages not available:', response.error || 'Unknown error');
+        setMessages([]);
       }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
+      // Não lança erro, apenas limpa as mensagens
+      setMessages([]);
     }
   };
   
@@ -348,7 +354,7 @@ const AgendaContainer = () => {
       
       const result = await agendaService.sendWhatsAppMessage(contact.phone, message);
       
-      if (result.success) {
+      if (result && result.success) {
         const now = Date.now();
         const newMessage = {
           id: now,

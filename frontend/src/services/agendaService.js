@@ -93,10 +93,21 @@ class AgendaService {
   }
 
   async sendWhatsAppMessage(number, text) {
-    return this.request('/communication/send-message-client', {
-      method: 'POST',
-      body: JSON.stringify({ number, text })
-    });
+    try {
+      return await this.request('/communication/send-message-client', {
+        method: 'POST',
+        body: JSON.stringify({ number, text })
+      });
+    } catch (error) {
+      if (error.message.includes('503')) {
+        console.warn('Communication service not available (503), cannot send message');
+        return {
+          success: false,
+          error: 'Serviço de comunicação não disponível'
+        };
+      }
+      throw error;
+    }
   }
 
   async getContacts() {
@@ -115,16 +126,30 @@ class AgendaService {
   }
 
   async getChatMessages(contactPhone) {
-    return this.request('/communication/chat-client', {
-      method: 'POST',
-      body: JSON.stringify({
-        where: {
-          key: {
-            remoteJid: `${contactPhone}@s.whatsapp.net`
+    try {
+      return await this.request('/communication/chat-client', {
+        method: 'POST',
+        body: JSON.stringify({
+          where: {
+            key: {
+              remoteJid: `${contactPhone}@s.whatsapp.net`
+            }
           }
-        }
-      })
-    });
+        })
+      });
+    } catch (error) {
+      if (error.message.includes('503')) {
+        console.warn('Communication service not available (503), returning empty messages');
+        return {
+          success: false,
+          error: 'Serviço de comunicação não disponível',
+          messages: {
+            records: []
+          }
+        };
+      }
+      throw error;
+    }
   }
 }
 
