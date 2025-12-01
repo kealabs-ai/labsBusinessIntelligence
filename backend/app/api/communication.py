@@ -99,9 +99,9 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         # Log minimal info about credentials (do NOT log secret values)
         logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
 
-        if not api_key_str or not instance_str:
-            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
-            raise HTTPException(status_code=503, detail="Evolution API service not configured")
+      #  if not api_key_str or not instance_str:
+      #      logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
+       #     raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
             "Content-Type": "application/json",
@@ -177,9 +177,9 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         # Log minimal info about credentials (do NOT log secret values)
         logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
 
-  #      if not api_key_str or not instance_str:
-  #        logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
-  #          raise HTTPException(status_code=503, detail="Evolution API service not configured")
+        if not api_key_str or not instance_str:
+            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
+            raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
             "Content-Type": "application/json",
