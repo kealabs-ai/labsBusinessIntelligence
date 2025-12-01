@@ -93,30 +93,30 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY")
         current_instance = env.get("INSTANCE")
-        # Normalize and minimal validation
-        api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
-        instance_str = current_instance.strip() if isinstance(current_instance, str) else ""
-        # Log minimal info about credentials (do NOT log secret values)
-        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
 
-      #  if not api_key_str or not instance_str:
-      #      logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
-       #     raise HTTPException(status_code=503, detail="Evolution API service not configured")
-        
+        # Validate environment variables
+        if not current_api_key or not current_instance:
+            logger.error("Missing required environment variables: API_KEY or INSTANCE")
+            raise HTTPException(status_code=503, detail="Evolution API service not configured")
+
+        # Normalize and minimal validation
+        api_key_str = current_api_key.strip()
+        instance_str = current_instance.strip()
+
         headers = {
             "Content-Type": "application/json",
-            "apikey": current_api_key,
-            "instance": current_instance
+            "apikey": api_key_str,
+            "instance": instance_str
         }
-        
-        url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/chat/findMessages/{current_instance}"
+
+        url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/chat/findMessages/{instance_str}"
         logger.info(f"Making request to: {url}")
         logger.info(f"Request payload: {request.dict()}")
-        
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await _post_with_retry(client, url, request.dict(), headers)
             logger.info(f"Response status: {response.status_code}")
-            # Do not raise here; handle non-200/2xx explicitly so we can forward body
+            # Handle non-200/2xx responses
             if response.status_code < 200 or response.status_code >= 300:
                 text = None
                 try:
@@ -127,7 +127,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
                 raise HTTPException(status_code=response.status_code, detail={"external_error": text})
             data = response.json()
             logger.info(f"Response data keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
-            
+
             # Tratar estrutura de response esperada
             if isinstance(data, dict) and "messages" in data:
                 return {
@@ -141,7 +141,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
                 }
             else:
                 return {"success": False, "data": data}
-                
+
     except httpx.TimeoutException as e:
         logger.error(f"Timeout Error: {str(e)}")
         raise HTTPException(status_code=408, detail="Request timeout")
