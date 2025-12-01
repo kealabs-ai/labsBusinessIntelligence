@@ -21,6 +21,21 @@ CREATE TABLE chart_data (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS clients (
+    client_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    phone_whatsapp VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    birth_date DATE,
+    note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status BOOLEAN DEFAULT TRUE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
+);
+
 -- Dados de exemplo (senha: admin123)
 INSERT INTO users (username, email, password_hash) VALUES 
 ('admin', 'admin@labsbi.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9');

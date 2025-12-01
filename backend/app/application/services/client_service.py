@@ -38,3 +38,6 @@ class ClientService:
     async def check_phone_exists(self, phone: str, exclude_id: int = None) -> bool:
         existing_client = await self.client_repository.get_client_by_phone(phone, exclude_id)
         return existing_client is not None
+    
+    async def update_client_status(self, client_id: int, status: bool) -> bool:
+        return await self.client_repository.update_client_status(client_id, status)
