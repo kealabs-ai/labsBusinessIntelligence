@@ -67,6 +67,8 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY")
         current_instance = env.get("INSTANCE")
+        # Log minimal info about credentials (do NOT log secret values)
+        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(current_api_key)}, API_KEY_len={len(current_api_key) if current_api_key else 0}, INSTANCE={current_instance}")
         
         if not current_api_key or not current_instance:
             logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")
@@ -131,6 +133,8 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY")
         current_instance = env.get("INSTANCE")
+        # Log minimal info about credentials (do NOT log secret values)
+        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(current_api_key)}, API_KEY_len={len(current_api_key) if current_api_key else 0}, INSTANCE={current_instance}")
         
         if not current_api_key or not current_instance:
             logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")

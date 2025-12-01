@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 from dotenv import load_dotenv
+import os
+import logging
 
 class EnvManager:
     _instance = None
@@ -13,7 +15,19 @@ class EnvManager:
     
     def __init__(self):
         if not self._loaded:
-            load_dotenv()
+            # Try to load the project's backend `.env` first (robust when running
+            # from a different working directory). Fall back to default behavior
+            # so `load_dotenv()` can pick up environment files elsewhere.
+            try:
+                base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+                dotenv_path = os.path.join(base_dir, '.env')
+                if os.path.exists(dotenv_path):
+                    load_dotenv(dotenv_path)
+                else:
+                    load_dotenv()
+            except Exception:
+                # Ensure we still attempt a generic load if anything unexpected happens
+                load_dotenv()
             self._loaded = True
     
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
