@@ -1,8 +1,10 @@
 import os
 from typing import Optional
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
 import logging
+
+logger = logging.getLogger(__name__)
 
 class EnvManager:
     _instance = None
@@ -19,14 +21,24 @@ class EnvManager:
             # from a different working directory). Fall back to default behavior
             # so `load_dotenv()` can pick up environment files elsewhere.
             try:
+                # First try explicit backend/.env relative to this file
                 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
                 dotenv_path = os.path.join(base_dir, '.env')
                 if os.path.exists(dotenv_path):
                     load_dotenv(dotenv_path)
+                    logger.info(f"Loaded dotenv from: {dotenv_path}")
                 else:
-                    load_dotenv()
+                    # Fallback to find_dotenv which searches parent dirs
+                    found = find_dotenv()
+                    if found:
+                        load_dotenv(found)
+                        logger.info(f"Loaded dotenv from: {found}")
+                    else:
+                        # Generic attempt
+                        load_dotenv()
+                        logger.info("Loaded dotenv using generic load_dotenv()")
             except Exception:
-                # Ensure we still attempt a generic load if anything unexpected happens
+                logger.exception("Failed to load .env via env_manager; falling back to generic load_dotenv")
                 load_dotenv()
             self._loaded = True
     

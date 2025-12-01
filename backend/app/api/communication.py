@@ -67,11 +67,14 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY")
         current_instance = env.get("INSTANCE")
+        # Normalize and minimal validation
+        api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
+        instance_str = current_instance.strip() if isinstance(current_instance, str) else ""
         # Log minimal info about credentials (do NOT log secret values)
-        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(current_api_key)}, API_KEY_len={len(current_api_key) if current_api_key else 0}, INSTANCE={current_instance}")
-        
-        if not current_api_key or not current_instance:
-            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")
+        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
+
+        if not api_key_str or not instance_str:
+            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
             raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
@@ -133,11 +136,14 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY")
         current_instance = env.get("INSTANCE")
+        # Normalize and minimal validation
+        api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
+        instance_str = current_instance.strip() if isinstance(current_instance, str) else ""
         # Log minimal info about credentials (do NOT log secret values)
-        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(current_api_key)}, API_KEY_len={len(current_api_key) if current_api_key else 0}, INSTANCE={current_instance}")
-        
-        if not current_api_key or not current_instance:
-            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")
+        logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
+
+        if not api_key_str or not instance_str:
+            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing or empty)")
             raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
