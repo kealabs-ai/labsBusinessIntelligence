@@ -94,7 +94,15 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
                 headers=headers
             )
             logger.info(f"Response status: {response.status_code}")
-            response.raise_for_status()
+            # Do not raise here; handle non-200/2xx explicitly so we can forward body
+            if response.status_code < 200 or response.status_code >= 300:
+                text = None
+                try:
+                    text = response.json()
+                except Exception:
+                    text = response.text
+                logger.error(f"Evolution API returned error {response.status_code}: {text}")
+                raise HTTPException(status_code=response.status_code, detail={"external_error": text})
             data = response.json()
             logger.info(f"Response data keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
             
@@ -119,8 +127,13 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         logger.error(f"Request Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP Status Error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail=f"HTTP error: {str(e)}")
+        body = None
+        try:
+            body = e.response.json()
+        except Exception:
+            body = e.response.text
+        logger.error(f"HTTP Status Error: {e.response.status_code} - {body}")
+        raise HTTPException(status_code=e.response.status_code, detail={"external_error": body})
     except HTTPException:
         raise
     except Exception as e:
@@ -172,14 +185,14 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
             )
             logger.info(f"Response status: {response.status_code}")
             
-            if response.status_code != 200:
-                error_text = response.text
-                logger.error(f"Evolution API Error: {response.status_code} - {error_text}")
+            if response.status_code < 200 or response.status_code >= 300:
+                error_text = None
                 try:
-                    error_json = response.json()
-                    return {"success": False, "error": error_json, "status_code": response.status_code}
-                except:
-                    return {"success": False, "error": error_text, "status_code": response.status_code}
+                    error_text = response.json()
+                except Exception:
+                    error_text = response.text
+                logger.error(f"Evolution API Error: {response.status_code} - {error_text}")
+                raise HTTPException(status_code=response.status_code, detail={"external_error": error_text})
             
             data = response.json()
             logger.info(f"Response data: {data}")
