@@ -169,8 +169,8 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
 async def send_message_client(request: SendMessageRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get("API_KEY")
-        current_instance = env.get("INSTANCE")
+        current_api_key = env.get("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
+        current_instance = env.get("INSTANCE", "kealabs_comunication")
         # Normalize and minimal validation
         api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
         instance_str = current_instance.strip() if isinstance(current_instance, str) else ""
