@@ -65,8 +65,12 @@ async def check_environment():
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get_required("API_KEY")
-        current_instance = env.get_required("INSTANCE")
+        current_api_key = env.get("API_KEY")
+        current_instance = env.get("INSTANCE")
+        
+        if not current_api_key or not current_instance:
+            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")
+            raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
             "Content-Type": "application/json",
@@ -125,8 +129,12 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
 async def send_message_client(request: SendMessageRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get_required("API_KEY")
-        current_instance = env.get_required("INSTANCE")
+        current_api_key = env.get("API_KEY")
+        current_instance = env.get("INSTANCE")
+        
+        if not current_api_key or not current_instance:
+            logger.error("Evolution API credentials not configured (API_KEY or INSTANCE missing)")
+            raise HTTPException(status_code=503, detail="Evolution API service not configured")
         
         headers = {
             "Content-Type": "application/json",

@@ -18,9 +18,9 @@ app = FastAPI(title="LabsBusinessIntelligence API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://72.60.140.128:3002", "http://localhost:3002"],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"]
 )
 
