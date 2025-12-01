@@ -1,4 +1,5 @@
 # Environment files
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -10,6 +11,9 @@ backend/*.pyc
 backend/*.pyo
 backend/*.pyd
 backend/.Python
+backend/env/
+backend/venv/
+backend/.venv/
 backend/pip-log.txt
 backend/pip-delete-this-directory.txt
 backend/.pytest_cache/
