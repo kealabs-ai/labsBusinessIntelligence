@@ -91,8 +91,8 @@ async def check_environment():
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get("API_KEY")
-        current_instance = env.get("INSTANCE")
+        current_api_key = env.get("API_KEY","4EE9A4660493-4696-99FD-A4C9D2F59E6C")
+        current_instance = env.get("INSTANCE","kealabs_comunication")
 
         # Validate environment variables
         if not current_api_key or not current_instance:
