@@ -24,11 +24,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Add OPTIONS handler for preflight requests
-@app.options("/{path:path}")
-async def options_handler(path: str):
-    return {"message": "OK"}
-
 
 
 # Initialize database
