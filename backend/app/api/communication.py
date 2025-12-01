@@ -5,6 +5,7 @@ from typing import Optional
 from application.services.auth_service import AuthService
 from infrastructure.config.env_manager import env
 import httpx
+import asyncio
 import logging
 import traceback
 
@@ -12,6 +13,31 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 security = HTTPBearer()
+
+
+async def _post_with_retry(client: httpx.AsyncClient, url: str, json_body: dict, headers: dict, retries: int = 3, backoff: float = 0.5):
+    last_exc = None
+    for attempt in range(1, retries + 1):
+        try:
+            resp = await client.post(url, json=json_body, headers=headers)
+            # Retry on 5xx (server) errors
+            if 500 <= resp.status_code < 600 and attempt < retries:
+                logger.warning(f"Attempt {attempt} got {resp.status_code}; retrying after {backoff} seconds")
+                await asyncio.sleep(backoff)
+                backoff *= 2
+                continue
+            return resp
+        except httpx.RequestError as e:
+            last_exc = e
+            if attempt < retries:
+                logger.warning(f"Request error on attempt {attempt}: {e}; retrying after {backoff} seconds")
+                await asyncio.sleep(backoff)
+                backoff *= 2
+                continue
+            raise
+    if last_exc:
+        raise last_exc
+    return None
 
 class ChatClientRequest(BaseModel):
     where: dict
@@ -88,11 +114,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         logger.info(f"Request payload: {request.dict()}")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json=request.dict(),
-                headers=headers
-            )
+            response = await _post_with_retry(client, url, request.dict(), headers)
             logger.info(f"Response status: {response.status_code}")
             # Do not raise here; handle non-200/2xx explicitly so we can forward body
             if response.status_code < 200 or response.status_code >= 300:
@@ -178,11 +200,7 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         logger.info(f"Request payload: {payload}")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                url,
-                json=payload,
-                headers=headers
-            )
+            response = await _post_with_retry(client, url, payload, headers)
             logger.info(f"Response status: {response.status_code}")
             
             if response.status_code < 200 or response.status_code >= 300:
@@ -206,8 +224,13 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         logger.error(f"Request Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP Status Error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail=f"HTTP error: {str(e)}")
+        body = None
+        try:
+            body = e.response.json()
+        except Exception:
+            body = e.response.text
+        logger.error(f"HTTP Status Error: {e.response.status_code} - {body}")
+        raise HTTPException(status_code=e.response.status_code, detail={"external_error": body})
     except HTTPException:
         raise
     except Exception as e:
