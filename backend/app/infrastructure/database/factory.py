@@ -1,6 +1,6 @@
 import os
-from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository
-from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository
+from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository, MySQLTransacaoRepository
+from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository
 
 try:
     from infrastructure.repositories.sqlserver_repository import SQLServerUserRepository, SQLServerChartRepository, SQLServerClientRepository
@@ -12,6 +12,7 @@ class DatabaseFactory:
     _user_repository: IUserRepository = None
     _chart_repository: IChartRepository = None
     _client_repository: IClientRepository = None
+    _transacao_repository: ITransacaoRepository = None
     
     @classmethod
     def initialize(cls):
@@ -21,12 +22,14 @@ class DatabaseFactory:
             cls._user_repository = MySQLUserRepository()
             cls._chart_repository = MySQLChartRepository()
             cls._client_repository = MySQLClientRepository()
+            cls._transacao_repository = MySQLTransacaoRepository()
         elif db_engine == 'sqlserver':
             if not SQLSERVER_AVAILABLE:
                 raise ValueError("SQL Server support not available. Install pyodbc and ODBC drivers.")
             cls._user_repository = SQLServerUserRepository()
             cls._chart_repository = SQLServerChartRepository()
             cls._client_repository = SQLServerClientRepository()
+            # cls._transacao_repository = SQLServerTransacaoRepository()
         else:
             raise ValueError(f"Unsupported database engine: {db_engine}")
     
@@ -47,3 +50,9 @@ class DatabaseFactory:
         if cls._client_repository is None:
             cls.initialize()
         return cls._client_repository
+    
+    @classmethod
+    def get_transacao_repository(cls) -> ITransacaoRepository:
+        if cls._transacao_repository is None:
+            cls.initialize()
+        return cls._transacao_repository

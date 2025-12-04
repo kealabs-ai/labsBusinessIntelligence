@@ -8,6 +8,7 @@ import ChartsContainer from './containers/charts/ChartsContainer';
 import AIPromptContainer from './containers/ai-prompt/AIPromptContainer';
 import AgendaContainer from './containers/agenda/AgendaContainer';
 import AdminContainer from './containers/admin/AdminContainer';
+import CaixaContainer from './containers/caixa/CaixaContainer';
 import { AuthProvider, useAuth } from './services/AuthContext';
 
 const theme = createTheme({
@@ -57,6 +58,11 @@ function App() {
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminContainer />
+              </ProtectedRoute>
+            } />
+            <Route path="/caixa" element={
+              <ProtectedRoute>
+                <CaixaContainer />
               </ProtectedRoute>
             } />
             <Route path="/" element={<Navigate to="/menu" />} />

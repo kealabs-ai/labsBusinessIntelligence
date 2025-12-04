@@ -20,15 +20,18 @@ import {
   People, 
   WhatsApp, 
   AccountBalance, 
-  Assessment,
-  Settings,
-  ExpandLess,
-  ExpandMore
+  Build,
+  Group,
+  Settings
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import AgendaPresentational from '../../components/presentational/AgendaPresentational';
 import AgendaModal from '../../components/presentational/AgendaModal';
 import ClientsContainer from '../clients/ClientsContainer';
+import CaixaContainer from '../caixa/CaixaContainer';
+import ServicosContainer from '../servicos/ServicosContainer';
+import RecursosContainer from '../recursos/RecursosContainer';
+import ConfiguracoesPresentational from '../../components/presentational/ConfiguracoesPresentational';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { agendaService } from '../../services/agendaService';
 
@@ -36,7 +39,7 @@ const AgendaContainer = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('agendamentos');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [configOpen, setConfigOpen] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -435,13 +438,9 @@ const AgendaContainer = () => {
     { id: 'agendamentos', label: 'Agendamentos', icon: <CalendarToday /> },
     { id: 'clientes', label: 'Clientes', icon: <People /> },
     { id: 'caixa', label: 'Caixa e Transações', icon: <AccountBalance /> },
-    { id: 'relatorios', label: 'Relatórios', icon: <Assessment /> }
-  ];
-
-  const configSubItems = [
-    { title: 'Serviços', action: () => handleMenuClick('config-servicos') },
-    { title: 'Recursos e Profissionais', action: () => handleMenuClick('config-recursos') },
-    { title: 'Configurações da Unidade', action: () => handleMenuClick('config-unidade') }
+    { id: 'servicos', label: 'Serviços', icon: <Build /> },
+    { id: 'recursos', label: 'Recursos', icon: <Group /> },
+    { id: 'configuracoes', label: 'Configurações da Unidade', icon: <Settings /> }
   ];
 
   return (
@@ -514,32 +513,6 @@ const AgendaContainer = () => {
               </ListItemButton>
             </ListItem>
           ))}
-          
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => setConfigOpen(!configOpen)}>
-              <ListItemIcon sx={{ color: 'white' }}>
-                <Settings />
-              </ListItemIcon>
-              <ListItemText primary="Configurações" />
-              {configOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-          </ListItem>
-          
-          <Collapse in={configOpen} timeout="auto" unmountOnExit>
-            {configSubItems.map((subItem, subIndex) => (
-              <ListItem key={subIndex} disablePadding sx={{ pl: 4 }}>
-                <ListItemButton 
-                  onClick={subItem.action}
-                  sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
-                >
-                  <ListItemText 
-                    primary={subItem.title}
-                    sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem' } }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </Collapse>
         </List>
       </Drawer>
       
@@ -575,12 +548,24 @@ const AgendaContainer = () => {
           />
         ) : currentView === 'clientes' ? (
           <ClientsContainer />
+        ) : currentView === 'caixa' ? (
+          <CaixaContainer />
+        ) : currentView === 'servicos' ? (
+          <ServicosContainer />
+        ) : currentView === 'recursos' ? (
+          <RecursosContainer />
+        ) : currentView === 'configuracoes' ? (
+          <ConfiguracoesPresentational
+            configuracoes={{}}
+            loading={false}
+            onSaveConfiguracoes={() => {}}
+          />
         ) : (
-          <Box>
-            <Typography variant="h4" sx={{ mb: 2 }}>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
               {currentView.charAt(0).toUpperCase() + currentView.slice(1)}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" color="textSecondary">
               Módulo em desenvolvimento...
             </Typography>
           </Box>

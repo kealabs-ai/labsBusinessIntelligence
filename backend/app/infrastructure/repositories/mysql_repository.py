@@ -2,9 +2,11 @@ import mysql.connector
 from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 from domain.entities.client import Client
-from .interfaces import IUserRepository, IChartRepository, IClientRepository
+from domain.entities.transacao import Transacao
+from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository
 from infrastructure.config.env_manager import env
 from datetime import datetime
+from decimal import Decimal
 
 class MySQLUserRepository(IUserRepository):
     def __init__(self):
@@ -178,6 +180,137 @@ class MySQLClientRepository(IClientRepository):
                 cursor.execute("SELECT * FROM clients WHERE phone_whatsapp = %s", (phone,))
             result = cursor.fetchone()
             return Client(**result) if result else None
+        finally:
+            cursor.close()
+            conn.close()
+
+class MySQLTransacaoRepository(ITransacaoRepository):
+    def __init__(self):
+        db_config = env.get_database_config()
+        self.connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
+    
+    async def create_transacao(self, transacao: Transacao) -> Transacao:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            query = """
+                INSERT INTO transacoes (user_id, tipo, categoria, descricao, valor, data_transacao, 
+                                      metodo_pagamento, observacoes, created_at, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                transacao.user_id, transacao.tipo, transacao.categoria, transacao.descricao,
+                transacao.valor, transacao.data_transacao, transacao.metodo_pagamento,
+                transacao.observacoes, datetime.now(), transacao.status
+            )
+            cursor.execute(query, values)
+            conn.commit()
+            transacao.id = cursor.lastrowid
+            transacao.created_at = datetime.now()
+            return transacao
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_transacoes_by_user(self, user_id: int, page: int = 1, limit: int = 10) -> Dict[str, Any]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT COUNT(*) as total FROM transacoes WHERE user_id = %s AND status = 1", (user_id,))
+            total = cursor.fetchone()['total']
+            
+            offset = (page - 1) * limit
+            cursor.execute("""
+                SELECT * FROM transacoes WHERE user_id = %s AND status = 1 
+                ORDER BY data_transacao DESC, created_at DESC 
+                LIMIT %s OFFSET %s
+            """, (user_id, limit, offset))
+            
+            results = cursor.fetchall()
+            transacoes = [Transacao(**row) for row in results]
+            
+            return {
+                "items": transacoes,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "pages": (total + limit - 1) // limit
+            }
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_transacao_by_id(self, transacao_id: int) -> Optional[Transacao]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM transacoes WHERE id = %s", (transacao_id,))
+            result = cursor.fetchone()
+            return Transacao(**result) if result else None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def update_transacao(self, transacao_id: int, transacao: Transacao) -> Optional[Transacao]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            query = """
+                UPDATE transacoes SET tipo = %s, categoria = %s, descricao = %s, valor = %s,
+                data_transacao = %s, metodo_pagamento = %s, observacoes = %s, status = %s
+                WHERE id = %s
+            """
+            values = (
+                transacao.tipo, transacao.categoria, transacao.descricao, transacao.valor,
+                transacao.data_transacao, transacao.metodo_pagamento, transacao.observacoes,
+                transacao.status, transacao_id
+            )
+            cursor.execute(query, values)
+            conn.commit()
+            return await self.get_transacao_by_id(transacao_id) if cursor.rowcount > 0 else None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def delete_transacao(self, transacao_id: int) -> bool:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE transacoes SET status = 0 WHERE id = %s", (transacao_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_resumo_financeiro(self, user_id: int) -> Dict[str, Any]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT 
+                    SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE 0 END) as total_entradas,
+                    SUM(CASE WHEN tipo = 'saida' THEN valor ELSE 0 END) as total_saidas,
+                    COUNT(*) as total_transacoes
+                FROM transacoes WHERE user_id = %s AND status = 1
+            """, (user_id,))
+            
+            result = cursor.fetchone()
+            total_entradas = float(result['total_entradas'] or 0)
+            total_saidas = float(result['total_saidas'] or 0)
+            
+            return {
+                "total_entradas": total_entradas,
+                "total_saidas": total_saidas,
+                "saldo": total_entradas - total_saidas,
+                "total_transacoes": result['total_transacoes']
+            }
         finally:
             cursor.close()
             conn.close()
