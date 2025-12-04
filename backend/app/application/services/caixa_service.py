@@ -1,8 +1,8 @@
 from typing import List, Optional
-from ...infrastructure.repositories.caixa_repository import CashRegisterRepository
-from ...infrastructure.repositories.transacao_repository import TransactionRepository
-from ...domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
-from ...domain.entities.transacao import Transaction, TransactionCreate
+from infrastructure.repositories.caixa_repository import CashRegisterRepository
+from infrastructure.repositories.transacao_repository import TransactionRepository
+from domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from domain.entities.transacao import Transacao, TransacaoCreate
 
 class CashRegisterService:
     def __init__(self):
@@ -24,10 +24,10 @@ class CashRegisterService:
     def delete_cash_register(self, cash_register_id: int, user_id: int) -> None:
         self.cash_register_repository.delete(cash_register_id, user_id)
 
-    def add_transaction(self, transaction: TransactionCreate) -> Transaction:
+    def add_transaction(self, transaction: TransacaoCreate) -> Transacao:
         return self.transaction_repository.create(transaction)
 
-    def get_transactions_from_cash_register(self, cash_register_id: int) -> List[Transaction]:
+    def get_transactions_from_cash_register(self, cash_register_id: int) -> List[Transacao]:
         return self.transaction_repository.get_all_from_cash_register(cash_register_id)
 
     def delete_transaction(self, transaction_id: int) -> None:
