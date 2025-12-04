@@ -44,13 +44,13 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
   useEffect(() => {
     if (editingTransacao) {
       setFormData({
-        tipo: editingTransacao.tipo || 'entrada',
-        categoria: editingTransacao.categoria || '',
-        descricao: editingTransacao.descricao || '',
-        valor: editingTransacao.valor || '',
-        data_transacao: editingTransacao.data_transacao ? 
-          new Date(editingTransacao.data_transacao).toISOString().split('T')[0] : '',
-        metodo_pagamento: editingTransacao.metodo_pagamento || '',
+        tipo: editingTransacao.transaction_type || editingTransacao.tipo || 'entrada',
+        categoria: editingTransacao.category || editingTransacao.categoria || '',
+        descricao: editingTransacao.description || editingTransacao.descricao || '',
+        valor: editingTransacao.amount || editingTransacao.valor || '',
+        data_transacao: editingTransacao.transaction_date || editingTransacao.data_transacao ? 
+          new Date(editingTransacao.transaction_date || editingTransacao.data_transacao).toISOString().split('T')[0] : '',
+        metodo_pagamento: editingTransacao.payment_method || editingTransacao.metodo_pagamento || '',
         observacoes: editingTransacao.observacoes || '',
         status: editingTransacao.status !== undefined ? editingTransacao.status : true
       });
@@ -114,9 +114,13 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       const submitData = {
-        ...formData,
-        valor: parseFloat(formData.valor),
-        data_transacao: new Date(formData.data_transacao).toISOString()
+        cash_register_id: 1, // Default cash register ID
+        transaction_type: formData.tipo,
+        amount: parseFloat(formData.valor),
+        description: formData.descricao,
+        transaction_date: new Date(formData.data_transacao).toISOString(),
+        category: formData.categoria,
+        payment_method: formData.metodo_pagamento
       };
       onSave(submitData);
       onClose();
