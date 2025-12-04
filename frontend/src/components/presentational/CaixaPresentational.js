@@ -35,10 +35,12 @@ const CaixaPresentational = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredTransacoes = transacoes.filter(transacao =>
-    transacao.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transacao.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTransacoes = transacoes.filter(transacao => {
+    const descricao = transacao.description || transacao.descricao || '';
+    const categoria = transacao.category || transacao.categoria || '';
+    return descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           categoria.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -51,7 +53,8 @@ const CaixaPresentational = ({
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const getTransacaoIcon = (tipo) => {
+  const getTransacaoIcon = (transacao) => {
+    const tipo = transacao.transaction_type || transacao.tipo;
     return tipo === 'entrada' ? <TrendingUp sx={{ color: '#4caf50' }} /> : <TrendingDown sx={{ color: '#f44336' }} />;
   };
 
@@ -172,7 +175,7 @@ const CaixaPresentational = ({
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                    {getTransacaoIcon(transacao.tipo)}
+                    {getTransacaoIcon(transacao)}
                   </Box>
                   
                   <ListItemText
@@ -180,17 +183,17 @@ const CaixaPresentational = ({
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {transacao.descricao}
+                          {transacao.description || transacao.descricao}
                         </Typography>
                         <Chip
-                          label={transacao.categoria}
+                          label={transacao.category || transacao.categoria}
                           size="small"
                           sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
                         />
                         <Chip
-                          label={transacao.tipo}
+                          label={transacao.transaction_type || transacao.tipo}
                           size="small"
-                          color={transacao.tipo === 'entrada' ? 'success' : 'error'}
+                          color={(transacao.transaction_type || transacao.tipo) === 'entrada' ? 'success' : 'error'}
                         />
                       </Box>
                     }
@@ -198,15 +201,15 @@ const CaixaPresentational = ({
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                           <Typography variant="body2" color="textSecondary">
-                            <strong>Valor:</strong> {formatCurrency(transacao.valor)}
+                            <strong>Valor:</strong> {formatCurrency(transacao.amount || transacao.valor)}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            <strong>Data:</strong> {formatDate(transacao.data_transacao)}
+                            <strong>Data:</strong> {formatDate(transacao.transaction_date || transacao.data_transacao)}
                           </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6}>
                           <Typography variant="body2" color="textSecondary">
-                            <strong>Método:</strong> {transacao.metodo_pagamento}
+                            <strong>Método:</strong> {transacao.payment_method || transacao.metodo_pagamento}
                           </Typography>
                           {transacao.observacoes && (
                             <Typography variant="body2" color="textSecondary">
