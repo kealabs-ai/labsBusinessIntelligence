@@ -3,20 +3,24 @@ from typing import Optional, Literal
 from datetime import datetime
 from decimal import Decimal
 
-class Transaction(BaseModel):
+class Transacao(BaseModel):
     id: Optional[int] = None
-    cash_register_id: int
-    transaction_type: str = Field(..., description="Transaction type")
-    amount: float = Field(..., gt=0, description="Amount must be greater than zero")
-    description: Optional[str] = Field(None, max_length=255)
-    transaction_date: datetime
-    category: Optional[str] = Field(None, max_length=100)
-    payment_method: Optional[str] = Field(None, max_length=100)
+    user_id: int
+    tipo: str = Field(..., description="Tipo da transação (entrada/saida)")
+    categoria: str = Field(..., max_length=100)
+    descricao: str = Field(..., max_length=255)
+    valor: Decimal = Field(..., gt=0, description="Valor deve ser maior que zero")
+    data_transacao: datetime
+    metodo_pagamento: str = Field(..., max_length=100)
+    observacoes: Optional[str] = Field(None, max_length=500)
+    status: bool = Field(default=True)
+    created_at: Optional[datetime] = None
 
-class TransactionCreate(BaseModel):
-    cash_register_id: int
-    transaction_type: str
-    amount: float
-    description: Optional[str] = None
-    category: Optional[str] = None
-    payment_method: Optional[str] = None
+class TransacaoCreate(BaseModel):
+    tipo: str
+    categoria: str
+    descricao: str
+    valor: Decimal
+    data_transacao: datetime
+    metodo_pagamento: str
+    observacoes: Optional[str] = None
