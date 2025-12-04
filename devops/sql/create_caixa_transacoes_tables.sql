@@ -1,23 +1,25 @@
-CREATE TABLE caixa (
+CREATE TABLE cash_register (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    saldo_inicial DECIMAL(10, 2) NOT NULL,
-    saldo_atual DECIMAL(10, 2) NOT NULL,
-    data_abertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    data_fechamento DATETIME,
+    name VARCHAR(255) NOT NULL,
+    initial_balance DECIMAL(10,2) NOT NULL,
+    current_balance DECIMAL(10,2) NOT NULL,
+    opening_date DATETIME NOT NULL,
+    closing_date DATETIME NULL,
     status VARCHAR(50) NOT NULL,
-    usuario_id INT,
-    FOREIGN KEY (usuario_id) REFERENCES users(id)
+    user_id BIGINT NOT NULL,
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE transacoes (
+CREATE TABLE transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    caixa_id INT NOT NULL,
-    tipo VARCHAR(50) NOT NULL, -- 'entrada' ou 'saida'
-    valor DECIMAL(10, 2) NOT NULL,
-    descricao VARCHAR(255),
-    data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    categoria VARCHAR(100),
-    metodo_pagamento VARCHAR(100),
-    FOREIGN KEY (caixa_id) REFERENCES caixa(id)
+    cash_register_id INT NOT NULL,
+    transaction_type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    description VARCHAR(255) NULL,
+    transaction_date DATETIME NOT NULL,
+    category VARCHAR(100) NULL,
+    payment_method VARCHAR(100) NULL,
+    INDEX idx_cash_register_id (cash_register_id),
+    FOREIGN KEY (cash_register_id) REFERENCES cash_register(id)
 );

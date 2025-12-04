@@ -1,77 +1,77 @@
 from typing import List, Optional
 from ..database.factory import get_repository
-from ...domain.entities.transacao import Transacao, TransacaoCreate
+from ...domain.entities.transacao import Transaction, TransactionCreate
 
-class TransacaoRepository:
+class TransactionRepository:
     def __init__(self):
         self.repository = get_repository()
 
-    def get_all_from_caixa(self, caixa_id: int) -> List[Transacao]:
-        query = "SELECT * FROM transacoes WHERE caixa_id = %s"
-        params = (caixa_id,)
+    def get_all_from_cash_register(self, cash_register_id: int) -> List[Transaction]:
+        query = "SELECT * FROM transactions WHERE cash_register_id = %s"
+        params = (cash_register_id,)
         result = self.repository.fetchall(query, params)
-        return [Transacao(**row) for row in result] if result else []
+        return [Transaction(**row) for row in result] if result else []
 
-    def get_by_id(self, transacao_id: int) -> Optional[Transacao]:
-        query = "SELECT * FROM transacoes WHERE id = %s"
-        params = (transacao_id,)
+    def get_by_id(self, transaction_id: int) -> Optional[Transaction]:
+        query = "SELECT * FROM transactions WHERE id = %s"
+        params = (transaction_id,)
         row = self.repository.fetchone(query, params)
-        return Transacao(**row) if row else None
+        return Transaction(**row) if row else None
 
-    def create(self, transacao: TransacaoCreate) -> Transacao:
+    def create(self, transaction: TransactionCreate) -> Transaction:
         query = """
-            INSERT INTO transacoes (caixa_id, tipo, valor, descricao, categoria, metodo_pagamento)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO transactions (cash_register_id, transaction_type, amount, description, category, payment_method, transaction_date)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW())
         """
         params = (
-            transacao.caixa_id,
-            transacao.tipo,
-            transacao.valor,
-            transacao.descricao,
-            transacao.categoria,
-            transacao.metodo_pagamento
+            transaction.cash_register_id,
+            transaction.transaction_type,
+            transaction.amount,
+            transaction.description,
+            transaction.category,
+            transaction.payment_method
         )
-        transacao_id = self.repository.execute(query, params)
+        transaction_id = self.repository.execute(query, params)
         
-        # Update saldo do caixa
-        caixa_repo = get_repository()
-        caixa_query = "SELECT saldo_atual FROM caixa WHERE id = %s"
-        caixa_params = (transacao.caixa_id,)
-        caixa = caixa_repo.fetchone(caixa_query, caixa_params)
+        # Update cash register balance
+        cash_register_repo = get_repository()
+        cash_register_query = "SELECT current_balance FROM cash_register WHERE id = %s"
+        cash_register_params = (transaction.cash_register_id,)
+        cash_register = cash_register_repo.fetchone(cash_register_query, cash_register_params)
         
-        if caixa:
-            saldo_atual = caixa['saldo_atual']
-            if transacao.tipo.lower() == 'entrada':
-                novo_saldo = saldo_atual + transacao.valor
+        if cash_register:
+            current_balance = cash_register['current_balance']
+            if transaction.transaction_type.lower() == 'income':
+                new_balance = current_balance + transaction.amount
             else:
-                novo_saldo = saldo_atual - transacao.valor
+                new_balance = current_balance - transaction.amount
             
-            update_query = "UPDATE caixa SET saldo_atual = %s WHERE id = %s"
-            update_params = (novo_saldo, transacao.caixa_id)
-            caixa_repo.execute(update_query, update_params)
+            update_query = "UPDATE cash_register SET current_balance = %s WHERE id = %s"
+            update_params = (new_balance, transaction.cash_register_id)
+            cash_register_repo.execute(update_query, update_params)
 
-        return self.get_by_id(transacao_id)
+        return self.get_by_id(transaction_id)
 
-    def delete(self, transacao_id: int) -> None:
-        # Before deleting, we might need to revert the transaction effect on the caixa balance.
-        transacao_to_delete = self.get_by_id(transacao_id)
-        if transacao_to_delete:
-            caixa_repo = get_repository()
-            caixa_query = "SELECT saldo_atual FROM caixa WHERE id = %s"
-            caixa_params = (transacao_to_delete.caixa_id,)
-            caixa = caixa_repo.fetchone(caixa_query, caixa_params)
+    def delete(self, transaction_id: int) -> None:
+        # Before deleting, revert the transaction effect on the cash register balance
+        transaction_to_delete = self.get_by_id(transaction_id)
+        if transaction_to_delete:
+            cash_register_repo = get_repository()
+            cash_register_query = "SELECT current_balance FROM cash_register WHERE id = %s"
+            cash_register_params = (transaction_to_delete.cash_register_id,)
+            cash_register = cash_register_repo.fetchone(cash_register_query, cash_register_params)
 
-            if caixa:
-                saldo_atual = caixa['saldo_atual']
-                if transacao_to_delete.tipo.lower() == 'entrada':
-                    novo_saldo = saldo_atual - transacao_to_delete.valor
+            if cash_register:
+                current_balance = cash_register['current_balance']
+                if transaction_to_delete.transaction_type.lower() == 'income':
+                    new_balance = current_balance - transaction_to_delete.amount
                 else:
-                    novo_saldo = saldo_atual + transacao_to_delete.valor
+                    new_balance = current_balance + transaction_to_delete.amount
                 
-                update_query = "UPDATE caixa SET saldo_atual = %s WHERE id = %s"
-                update_params = (novo_saldo, transacao_to_delete.caixa_id)
-                caixa_repo.execute(update_query, update_params)
+                update_query = "UPDATE cash_register SET current_balance = %s WHERE id = %s"
+                update_params = (new_balance, transaction_to_delete.cash_register_id)
+                cash_register_repo.execute(update_query, update_params)
 
-        query = "DELETE FROM transacoes WHERE id = %s"
-        params = (transacao_id,)
+        query = "DELETE FROM transactions WHERE id = %s"
+        params = (transaction_id,)
         self.repository.execute(query, params)

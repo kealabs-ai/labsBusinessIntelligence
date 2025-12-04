@@ -1,69 +1,67 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from ....application.services.caixa_service import CaixaService
+from ....application.services.caixa_service import CashRegisterService
 from ....application.services.token_manager import TokenManager
-from ....domain.entities.caixa import Caixa, CaixaCreate, CaixaUpdate
-from ....domain.entities.transacao import Transacao, TransacaoCreate
+from ....domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from ....domain.entities.transacao import Transaction, TransactionCreate
 
 router = APIRouter()
-caixa_service = CaixaService()
+cash_register_service = CashRegisterService()
 token_manager = TokenManager()
 
-@router.get("/caixas", response_model=List[Caixa])
-def get_all_caixas(current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    return caixa_service.get_all_caixas(usuario_id)
+@router.get("/cash-registers", response_model=List[CashRegister])
+def get_all_cash_registers(current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    return cash_register_service.get_all_cash_registers(user_id)
 
-@router.get("/caixas/{caixa_id}", response_model=Caixa)
-def get_caixa(caixa_id: int, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    caixa = caixa_service.get_caixa_by_id(caixa_id, usuario_id)
-    if not caixa:
-        raise HTTPException(status_code=404, detail="Caixa not found")
-    return caixa
+@router.get("/cash-registers/{cash_register_id}", response_model=CashRegister)
+def get_cash_register(cash_register_id: int, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    cash_register = cash_register_service.get_cash_register_by_id(cash_register_id, user_id)
+    if not cash_register:
+        raise HTTPException(status_code=404, detail="Cash register not found")
+    return cash_register
 
-@router.post("/caixas", response_model=Caixa, status_code=status.HTTP_201_CREATED)
-def create_caixa(caixa: CaixaCreate, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    caixa.usuario_id = usuario_id
-    return caixa_service.create_caixa(caixa)
+@router.post("/cash-registers", response_model=CashRegister, status_code=status.HTTP_201_CREATED)
+def create_cash_register(cash_register: CashRegisterCreate, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    cash_register.user_id = user_id
+    return cash_register_service.create_cash_register(cash_register)
 
-@router.put("/caixas/{caixa_id}", response_model=Caixa)
-def update_caixa(caixa_id: int, caixa_update: CaixaUpdate, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    updated_caixa = caixa_service.update_caixa(caixa_id, caixa_update, usuario_id)
-    if not updated_caixa:
-        raise HTTPException(status_code=404, detail="Caixa not found")
-    return updated_caixa
+@router.put("/cash-registers/{cash_register_id}", response_model=CashRegister)
+def update_cash_register(cash_register_id: int, cash_register_update: CashRegisterUpdate, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    updated_cash_register = cash_register_service.update_cash_register(cash_register_id, cash_register_update, user_id)
+    if not updated_cash_register:
+        raise HTTPException(status_code=404, detail="Cash register not found")
+    return updated_cash_register
 
-@router.delete("/caixas/{caixa_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_caixa(caixa_id: int, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    caixa = caixa_service.get_caixa_by_id(caixa_id, usuario_id)
-    if not caixa:
-        raise HTTPException(status_code=404, detail="Caixa not found")
-    caixa_service.delete_caixa(caixa_id, usuario_id)
+@router.delete("/cash-registers/{cash_register_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_cash_register(cash_register_id: int, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    cash_register = cash_register_service.get_cash_register_by_id(cash_register_id, user_id)
+    if not cash_register:
+        raise HTTPException(status_code=404, detail="Cash register not found")
+    cash_register_service.delete_cash_register(cash_register_id, user_id)
     return
 
-@router.get("/caixas/{caixa_id}/transacoes", response_model=List[Transacao])
-def get_transacoes_from_caixa(caixa_id: int, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    caixa = caixa_service.get_caixa_by_id(caixa_id, usuario_id)
-    if not caixa:
-        raise HTTPException(status_code=404, detail="Caixa not found")
-    return caixa_service.get_transacoes_from_caixa(caixa_id)
+@router.get("/cash-registers/{cash_register_id}/transactions", response_model=List[Transaction])
+def get_transactions_from_cash_register(cash_register_id: int, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    cash_register = cash_register_service.get_cash_register_by_id(cash_register_id, user_id)
+    if not cash_register:
+        raise HTTPException(status_code=404, detail="Cash register not found")
+    return cash_register_service.get_transactions_from_cash_register(cash_register_id)
 
-@router.post("/transacoes", response_model=Transacao, status_code=status.HTTP_201_CREATED)
-def add_transacao(transacao: TransacaoCreate, current_user: dict = Depends(token_manager.get_current_user)):
-    usuario_id = current_user.get("user_id")
-    caixa = caixa_service.get_caixa_by_id(transacao.caixa_id, usuario_id)
-    if not caixa:
-        raise HTTPException(status_code=404, detail="Caixa not found")
-    return caixa_service.add_transacao(transacao)
+@router.post("/transactions", response_model=Transaction, status_code=status.HTTP_201_CREATED)
+def add_transaction(transaction: TransactionCreate, current_user: dict = Depends(token_manager.get_current_user)):
+    user_id = current_user.get("user_id")
+    cash_register = cash_register_service.get_cash_register_by_id(transaction.cash_register_id, user_id)
+    if not cash_register:
+        raise HTTPException(status_code=404, detail="Cash register not found")
+    return cash_register_service.add_transaction(transaction)
 
-@router.delete("/transacoes/{transacao_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transacao(transacao_id: int, current_user: dict = Depends(token_manager.get_current_user)):
-    # Here we should verify if the user has permission to delete this transaction
-    # For simplicity, we are not doing it now.
-    caixa_service.delete_transacao(transacao_id)
+@router.delete("/transactions/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(transaction_id: int, current_user: dict = Depends(token_manager.get_current_user)):
+    cash_register_service.delete_transaction(transaction_id)
     return

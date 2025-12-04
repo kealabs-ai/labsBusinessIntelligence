@@ -1,58 +1,58 @@
 from typing import List, Optional
 from ..database.factory import get_repository
-from ...domain.entities.caixa import Caixa, CaixaCreate, CaixaUpdate
+from ...domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
 
-class CaixaRepository:
+class CashRegisterRepository:
     def __init__(self):
         self.repository = get_repository()
 
-    def get_all(self, usuario_id: int) -> List[Caixa]:
-        query = "SELECT * FROM caixa WHERE usuario_id = %s"
-        params = (usuario_id,)
+    def get_all(self, user_id: int) -> List[CashRegister]:
+        query = "SELECT * FROM cash_register WHERE user_id = %s"
+        params = (user_id,)
         result = self.repository.fetchall(query, params)
-        return [Caixa(**row) for row in result] if result else []
+        return [CashRegister(**row) for row in result] if result else []
 
-    def get_by_id(self, caixa_id: int, usuario_id: int) -> Optional[Caixa]:
-        query = "SELECT * FROM caixa WHERE id = %s AND usuario_id = %s"
-        params = (caixa_id, usuario_id)
+    def get_by_id(self, cash_register_id: int, user_id: int) -> Optional[CashRegister]:
+        query = "SELECT * FROM cash_register WHERE id = %s AND user_id = %s"
+        params = (cash_register_id, user_id)
         row = self.repository.fetchone(query, params)
-        return Caixa(**row) if row else None
+        return CashRegister(**row) if row else None
 
-    def create(self, caixa: CaixaCreate) -> Caixa:
+    def create(self, cash_register: CashRegisterCreate) -> CashRegister:
         query = """
-            INSERT INTO caixa (nome, saldo_inicial, saldo_atual, status, usuario_id)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO cash_register (name, initial_balance, current_balance, status, user_id, opening_date)
+            VALUES (%s, %s, %s, %s, %s, NOW())
         """
-        params = (caixa.nome, caixa.saldo_inicial, caixa.saldo_inicial, 'aberto', caixa.usuario_id)
-        caixa_id = self.repository.execute(query, params)
-        return self.get_by_id(caixa_id, caixa.usuario_id)
+        params = (cash_register.name, cash_register.initial_balance, cash_register.initial_balance, 'open', cash_register.user_id)
+        cash_register_id = self.repository.execute(query, params)
+        return self.get_by_id(cash_register_id, cash_register.user_id)
 
-    def update(self, caixa_id: int, caixa_update: CaixaUpdate, usuario_id: int) -> Optional[Caixa]:
+    def update(self, cash_register_id: int, cash_register_update: CashRegisterUpdate, user_id: int) -> Optional[CashRegister]:
         query_parts = []
         params = []
-        if caixa_update.nome is not None:
-            query_parts.append("nome = %s")
-            params.append(caixa_update.nome)
-        if caixa_update.saldo_atual is not None:
-            query_parts.append("saldo_atual = %s")
-            params.append(caixa_update.saldo_atual)
-        if caixa_update.status is not None:
+        if cash_register_update.name is not None:
+            query_parts.append("name = %s")
+            params.append(cash_register_update.name)
+        if cash_register_update.current_balance is not None:
+            query_parts.append("current_balance = %s")
+            params.append(cash_register_update.current_balance)
+        if cash_register_update.status is not None:
             query_parts.append("status = %s")
-            params.append(caixa_update.status)
-        if caixa_update.data_fechamento is not None:
-            query_parts.append("data_fechamento = %s")
-            params.append(caixa_update.data_fechamento)
+            params.append(cash_register_update.status)
+        if cash_register_update.closing_date is not None:
+            query_parts.append("closing_date = %s")
+            params.append(cash_register_update.closing_date)
 
         if not query_parts:
-            return self.get_by_id(caixa_id, usuario_id)
+            return self.get_by_id(cash_register_id, user_id)
 
-        query = f"UPDATE caixa SET {', '.join(query_parts)} WHERE id = %s AND usuario_id = %s"
-        params.extend([caixa_id, usuario_id])
+        query = f"UPDATE cash_register SET {', '.join(query_parts)} WHERE id = %s AND user_id = %s"
+        params.extend([cash_register_id, user_id])
         
         self.repository.execute(query, tuple(params))
-        return self.get_by_id(caixa_id, usuario_id)
+        return self.get_by_id(cash_register_id, user_id)
 
-    def delete(self, caixa_id: int, usuario_id: int) -> None:
-        query = "DELETE FROM caixa WHERE id = %s AND usuario_id = %s"
-        params = (caixa_id, usuario_id)
+    def delete(self, cash_register_id: int, user_id: int) -> None:
+        query = "DELETE FROM cash_register WHERE id = %s AND user_id = %s"
+        params = (cash_register_id, user_id)
         self.repository.execute(query, params)

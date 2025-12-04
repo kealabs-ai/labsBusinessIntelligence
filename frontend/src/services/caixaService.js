@@ -4,64 +4,74 @@ import { env } from '../utils/envManager';
 
 const API_URL = `${env.apiBaseUrl}/caixa`;
 
-export const getAllCaixas = async () => {
+export const getAllCashRegisters = async () => {
     const token = getAuthToken();
-    const response = await axios.get(`${API_URL}/caixas`, {
+    const response = await axios.get(`${API_URL}/cash-registers`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const getCaixaById = async (id) => {
+export const getCashRegisterById = async (id) => {
     const token = getAuthToken();
-    const response = await axios.get(`${API_URL}/caixas/${id}`, {
+    const response = await axios.get(`${API_URL}/cash-registers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const createCaixa = async (caixaData) => {
+export const createCashRegister = async (cashRegisterData) => {
     const token = getAuthToken();
-    const response = await axios.post(`${API_URL}/caixas`, caixaData, {
+    const response = await axios.post(`${API_URL}/cash-registers`, cashRegisterData, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const updateCaixa = async (id, caixaData) => {
+export const updateCashRegister = async (id, cashRegisterData) => {
     const token = getAuthToken();
-    const response = await axios.put(`${API_URL}/caixas/${id}`, caixaData, {
+    const response = await axios.put(`${API_URL}/cash-registers/${id}`, cashRegisterData, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const deleteCaixa = async (id) => {
+export const deleteCashRegister = async (id) => {
     const token = getAuthToken();
-    await axios.delete(`${API_URL}/caixas/${id}`, {
+    await axios.delete(`${API_URL}/cash-registers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
 };
 
-export const getTransacoesFromCaixa = async (caixaId) => {
+export const getTransactionsFromCashRegister = async (cashRegisterId) => {
     const token = getAuthToken();
-    const response = await axios.get(`${API_URL}/caixas/${caixaId}/transacoes`, {
+    const response = await axios.get(`${API_URL}/cash-registers/${cashRegisterId}/transactions`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const addTransacao = async (transacaoData) => {
+export const addTransaction = async (transactionData) => {
     const token = getAuthToken();
-    const response = await axios.post(`${API_URL}/transacoes`, transacaoData, {
+    const response = await axios.post(`${API_URL}/transactions`, transactionData, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
-export const deleteTransacao = async (id) => {
+export const deleteTransaction = async (id) => {
     const token = getAuthToken();
-    await axios.delete(`${API_URL}/transacoes/${id}`, {
+    await axios.delete(`${API_URL}/transactions/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
 };
+
+// Backward compatibility exports
+export const getAllCaixas = getAllCashRegisters;
+export const getCaixaById = getCashRegisterById;
+export const createCaixa = createCashRegister;
+export const updateCaixa = updateCashRegister;
+export const deleteCaixa = deleteCashRegister;
+export const getTransacoesFromCaixa = getTransactionsFromCashRegister;
+export const addTransacao = addTransaction;
+export const deleteTransacao = deleteTransaction;

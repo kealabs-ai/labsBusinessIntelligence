@@ -1,37 +1,34 @@
 from typing import List, Optional
-from ...infrastructure.repositories.caixa_repository import CaixaRepository
-from ...infrastructure.repositories.transacao_repository import TransacaoRepository
-from ...domain.entities.caixa import Caixa, CaixaCreate, CaixaUpdate
-from ...domain.entities.transacao import Transacao, TransacaoCreate
+from ...infrastructure.repositories.caixa_repository import CashRegisterRepository
+from ...infrastructure.repositories.transacao_repository import TransactionRepository
+from ...domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from ...domain.entities.transacao import Transaction, TransactionCreate
 
-class CaixaService:
+class CashRegisterService:
     def __init__(self):
-        self.caixa_repository = CaixaRepository()
-        self.transacao_repository = TransacaoRepository()
+        self.cash_register_repository = CashRegisterRepository()
+        self.transaction_repository = TransactionRepository()
 
-    def get_all_caixas(self, usuario_id: int) -> List[Caixa]:
-        return self.caixa_repository.get_all(usuario_id)
+    def get_all_cash_registers(self, user_id: int) -> List[CashRegister]:
+        return self.cash_register_repository.get_all(user_id)
 
-    def get_caixa_by_id(self, caixa_id: int, usuario_id: int) -> Optional[Caixa]:
-        return self.caixa_repository.get_by_id(caixa_id, usuario_id)
+    def get_cash_register_by_id(self, cash_register_id: int, user_id: int) -> Optional[CashRegister]:
+        return self.cash_register_repository.get_by_id(cash_register_id, user_id)
 
-    def create_caixa(self, caixa: CaixaCreate) -> Caixa:
-        return self.caixa_repository.create(caixa)
+    def create_cash_register(self, cash_register: CashRegisterCreate) -> CashRegister:
+        return self.cash_register_repository.create(cash_register)
 
-    def update_caixa(self, caixa_id: int, caixa_update: CaixaUpdate, usuario_id: int) -> Optional[Caixa]:
-        # You can add business logic here, e.g. checking if a caixa can be closed
-        return self.caixa_repository.update(caixa_id, caixa_update, usuario_id)
+    def update_cash_register(self, cash_register_id: int, cash_register_update: CashRegisterUpdate, user_id: int) -> Optional[CashRegister]:
+        return self.cash_register_repository.update(cash_register_id, cash_register_update, user_id)
 
-    def delete_caixa(self, caixa_id: int, usuario_id: int) -> None:
-        # Business logic: maybe you can only delete a caixa if it's empty and closed
-        self.caixa_repository.delete(caixa_id, usuario_id)
+    def delete_cash_register(self, cash_register_id: int, user_id: int) -> None:
+        self.cash_register_repository.delete(cash_register_id, user_id)
 
-    def add_transacao(self, transacao: TransacaoCreate) -> Transacao:
-        # Business logic can be added here, for example, validating the transaction
-        return self.transacao_repository.create(transacao)
+    def add_transaction(self, transaction: TransactionCreate) -> Transaction:
+        return self.transaction_repository.create(transaction)
 
-    def get_transacoes_from_caixa(self, caixa_id: int) -> List[Transacao]:
-        return self.transacao_repository.get_all_from_caixa(caixa_id)
+    def get_transactions_from_cash_register(self, cash_register_id: int) -> List[Transaction]:
+        return self.transaction_repository.get_all_from_cash_register(cash_register_id)
 
-    def delete_transacao(self, transacao_id: int) -> None:
-        self.transacao_repository.delete(transacao_id)
+    def delete_transaction(self, transaction_id: int) -> None:
+        self.transaction_repository.delete(transaction_id)
