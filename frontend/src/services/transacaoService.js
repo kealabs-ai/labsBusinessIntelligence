@@ -1,53 +1,66 @@
-import axios from 'axios';
-
 const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
 class TransacaoService {
   constructor() {
-    this.api = axios.create({
-      baseURL: `${API_BASE_URL}/transacoes`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    this.baseURL = `${API_BASE_URL}/transacoes`;
+  }
 
-    this.api.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  }
+
+  async request(url, options = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, {
+        headers: this.getHeaders(),
+        ...options
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return config;
-    });
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Request error:', error);
+      throw error;
+    }
   }
 
   async getTransacoes(page = 1, limit = 10) {
-    const response = await this.api.get(`/?page=${page}&limit=${limit}`);
-    return response.data;
+    return this.request(`/?page=${page}&limit=${limit}`);
   }
 
   async getTransacao(transacaoId) {
-    const response = await this.api.get(`/${transacaoId}`);
-    return response.data;
+    return this.request(`/${transacaoId}`);
   }
 
   async createTransacao(transacaoData) {
-    const response = await this.api.post('/', transacaoData);
-    return response.data;
+    return this.request('/', {
+      method: 'POST',
+      body: JSON.stringify(transacaoData)
+    });
   }
 
   async updateTransacao(transacaoId, transacaoData) {
-    const response = await this.api.post(`/${transacaoId}/update`, transacaoData);
-    return response.data;
+    return this.request(`/${transacaoId}/update`, {
+      method: 'POST',
+      body: JSON.stringify(transacaoData)
+    });
   }
 
   async deleteTransacao(transacaoId) {
-    const response = await this.api.delete(`/${transacaoId}`);
-    return response.data;
+    return this.request(`/${transacaoId}`, {
+      method: 'DELETE'
+    });
   }
 
   async getResumoFinanceiro() {
-    const response = await this.api.get('/resumo');
-    return response.data;
+    return this.request('/resumo');
   }
 }
 
