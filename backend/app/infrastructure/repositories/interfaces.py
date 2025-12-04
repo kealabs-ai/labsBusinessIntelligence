@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 from domain.entities.client import Client
 from domain.entities.transacao import Transacao
+from domain.entities.cash_register import CashRegister, CashRegisterCreate, CashRegisterUpdate
 
 class BaseRepository(ABC):
     pass
@@ -73,4 +74,25 @@ class ITransacaoRepository(ABC):
     
     @abstractmethod
     async def get_resumo_financeiro(self, user_id: int) -> Dict[str, Any]:
+        pass
+
+class ICashRegisterRepository(ABC):
+    @abstractmethod
+    async def create_cash_register(self, cash_register: CashRegisterCreate) -> CashRegister:
+        pass
+    
+    @abstractmethod
+    async def get_cash_registers_by_user(self, user_id: int) -> List[CashRegister]:
+        pass
+    
+    @abstractmethod
+    async def get_cash_register_by_id(self, cash_register_id: int) -> Optional[CashRegister]:
+        pass
+    
+    @abstractmethod
+    async def update_cash_register(self, cash_register_id: int, cash_register: CashRegisterUpdate) -> Optional[CashRegister]:
+        pass
+    
+    @abstractmethod
+    async def get_or_create_default_cash_register(self, user_id: int) -> CashRegister:
         pass

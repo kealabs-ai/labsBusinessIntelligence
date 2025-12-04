@@ -114,7 +114,6 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       const submitData = {
-        cash_register_id: 1, // Default cash register ID
         transaction_type: formData.tipo,
         amount: parseFloat(formData.valor),
         description: formData.descricao,

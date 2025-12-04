@@ -3,7 +3,8 @@ from typing import Optional, List, Dict, Any
 from domain.entities.user import User
 from domain.entities.client import Client
 from domain.entities.transacao import Transacao
-from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository
+from domain.entities.cash_register import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository
 from infrastructure.config.env_manager import env
 from datetime import datetime
 from decimal import Decimal
@@ -317,6 +318,111 @@ class MySQLTransacaoRepository(ITransacaoRepository):
                 "saldo": total_entradas - total_saidas,
                 "total_transacoes": result['total_transacoes']
             }
+        finally:
+            cursor.close()
+            conn.close()
+
+class MySQLCashRegisterRepository(ICashRegisterRepository):
+    def __init__(self):
+        db_config = env.get_database_config()
+        self.connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
+    
+    async def create_cash_register(self, cash_register: CashRegisterCreate) -> CashRegister:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            query = """
+                INSERT INTO cash_register (name, initial_balance, current_balance, opening_date, status, user_id)
+                VALUES (%s, %s, %s, NOW(), %s, %s)
+            """
+            values = (
+                cash_register.name, cash_register.initial_balance, cash_register.initial_balance,
+                'open', cash_register.user_id
+            )
+            cursor.execute(query, values)
+            conn.commit()
+            cash_register_id = cursor.lastrowid
+            return await self.get_cash_register_by_id(cash_register_id)
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_cash_registers_by_user(self, user_id: int) -> List[CashRegister]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM cash_register WHERE user_id = %s ORDER BY opening_date DESC", (user_id,))
+            results = cursor.fetchall()
+            return [CashRegister(**row) for row in results]
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_cash_register_by_id(self, cash_register_id: int) -> Optional[CashRegister]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM cash_register WHERE id = %s", (cash_register_id,))
+            result = cursor.fetchone()
+            return CashRegister(**result) if result else None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def update_cash_register(self, cash_register_id: int, cash_register: CashRegisterUpdate) -> Optional[CashRegister]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            updates = []
+            values = []
+            
+            if cash_register.name is not None:
+                updates.append("name = %s")
+                values.append(cash_register.name)
+            if cash_register.current_balance is not None:
+                updates.append("current_balance = %s")
+                values.append(cash_register.current_balance)
+            if cash_register.closing_date is not None:
+                updates.append("closing_date = %s")
+                values.append(cash_register.closing_date)
+            if cash_register.status is not None:
+                updates.append("status = %s")
+                values.append(cash_register.status)
+            
+            if updates:
+                query = f"UPDATE cash_register SET {', '.join(updates)} WHERE id = %s"
+                values.append(cash_register_id)
+                cursor.execute(query, values)
+                conn.commit()
+            
+            return await self.get_cash_register_by_id(cash_register_id)
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_or_create_default_cash_register(self, user_id: int) -> CashRegister:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM cash_register WHERE user_id = %s ORDER BY opening_date ASC LIMIT 1", (user_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                return CashRegister(**result)
+            
+            # Create default cash register
+            cash_register_create = CashRegisterCreate(
+                name=f"Caixa Principal - User {user_id}",
+                initial_balance=Decimal('0.00'),
+                user_id=user_id
+            )
+            return await self.create_cash_register(cash_register_create)
         finally:
             cursor.close()
             conn.close()

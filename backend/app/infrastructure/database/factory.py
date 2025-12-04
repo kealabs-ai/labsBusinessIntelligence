@@ -1,6 +1,6 @@
 import os
-from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository, MySQLTransacaoRepository
-from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository
+from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository, MySQLTransacaoRepository, MySQLCashRegisterRepository
+from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository
 
 try:
     from infrastructure.repositories.sqlserver_repository import SQLServerUserRepository, SQLServerChartRepository, SQLServerClientRepository
@@ -13,6 +13,7 @@ class DatabaseFactory:
     _chart_repository: IChartRepository = None
     _client_repository: IClientRepository = None
     _transacao_repository: ITransacaoRepository = None
+    _cash_register_repository: ICashRegisterRepository = None
     
     @classmethod
     def initialize(cls):
@@ -23,6 +24,7 @@ class DatabaseFactory:
             cls._chart_repository = MySQLChartRepository()
             cls._client_repository = MySQLClientRepository()
             cls._transacao_repository = MySQLTransacaoRepository()
+            cls._cash_register_repository = MySQLCashRegisterRepository()
         elif db_engine == 'sqlserver':
             if not SQLSERVER_AVAILABLE:
                 raise ValueError("SQL Server support not available. Install pyodbc and ODBC drivers.")
@@ -56,3 +58,9 @@ class DatabaseFactory:
         if cls._transacao_repository is None:
             cls.initialize()
         return cls._transacao_repository
+    
+    @classmethod
+    def get_cash_register_repository(cls) -> ICashRegisterRepository:
+        if cls._cash_register_repository is None:
+            cls.initialize()
+        return cls._cash_register_repository

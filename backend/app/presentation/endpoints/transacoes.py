@@ -6,13 +6,13 @@ from datetime import datetime
 from decimal import Decimal
 from domain.entities.transacao import Transacao
 from application.services.transacao_service import TransacaoService
+from application.services.cash_register_service import CashRegisterService
 from application.services.auth_service import AuthService
 
 router = APIRouter()
 security = HTTPBearer()
 
 class TransacaoCreateRequest(BaseModel):
-    cash_register_id: int
     transaction_type: Literal['entrada', 'saida']
     amount: Decimal
     description: Optional[str] = None
@@ -41,8 +41,13 @@ async def create_transacao(
     user_id: int = Depends(get_current_user_id)
 ):
     transacao_service = TransacaoService()
+    cash_register_service = CashRegisterService()
+    
+    # Get or create default cash register for user
+    cash_register = await cash_register_service.get_or_create_default_cash_register(user_id)
+    
     transacao = Transacao(
-        cash_register_id=request.cash_register_id,
+        cash_register_id=cash_register.id,
         transaction_type=request.transaction_type,
         amount=request.amount,
         description=request.description,
