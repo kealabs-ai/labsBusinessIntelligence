@@ -200,19 +200,18 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         cursor = conn.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO transacoes (user_id, tipo, categoria, descricao, valor, data_transacao, 
-                                      metodo_pagamento, observacoes, created_at, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO transactions (cash_register_id, transaction_type, amount, description, 
+                                        transaction_date, category, payment_method)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             values = (
-                transacao.user_id, transacao.tipo, transacao.categoria, transacao.descricao,
-                transacao.valor, transacao.data_transacao, transacao.metodo_pagamento,
-                transacao.observacoes, datetime.now(), transacao.status
+                transacao.cash_register_id, transacao.transaction_type, transacao.amount, 
+                transacao.description, transacao.transaction_date, transacao.category, 
+                transacao.payment_method
             )
             cursor.execute(query, values)
             conn.commit()
             transacao.id = cursor.lastrowid
-            transacao.created_at = datetime.now()
             return transacao
         finally:
             cursor.close()
@@ -222,13 +221,19 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT COUNT(*) as total FROM transacoes WHERE user_id = %s AND status = 1", (user_id,))
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM transactions t 
+                JOIN cash_register cr ON t.cash_register_id = cr.id 
+                WHERE cr.user_id = %s
+            """, (user_id,))
             total = cursor.fetchone()['total']
             
             offset = (page - 1) * limit
             cursor.execute("""
-                SELECT * FROM transacoes WHERE user_id = %s AND status = 1 
-                ORDER BY data_transacao DESC, created_at DESC 
+                SELECT t.* FROM transactions t 
+                JOIN cash_register cr ON t.cash_register_id = cr.id 
+                WHERE cr.user_id = %s 
+                ORDER BY t.transaction_date DESC 
                 LIMIT %s OFFSET %s
             """, (user_id, limit, offset))
             
@@ -250,7 +255,7 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT * FROM transacoes WHERE id = %s", (transacao_id,))
+            cursor.execute("SELECT * FROM transactions WHERE id = %s", (transacao_id,))
             result = cursor.fetchone()
             return Transacao(**result) if result else None
         finally:
@@ -262,14 +267,13 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         cursor = conn.cursor()
         try:
             query = """
-                UPDATE transacoes SET tipo = %s, categoria = %s, descricao = %s, valor = %s,
-                data_transacao = %s, metodo_pagamento = %s, observacoes = %s, status = %s
+                UPDATE transactions SET transaction_type = %s, category = %s, description = %s, 
+                amount = %s, transaction_date = %s, payment_method = %s
                 WHERE id = %s
             """
             values = (
-                transacao.tipo, transacao.categoria, transacao.descricao, transacao.valor,
-                transacao.data_transacao, transacao.metodo_pagamento, transacao.observacoes,
-                transacao.status, transacao_id
+                transacao.transaction_type, transacao.category, transacao.description, 
+                transacao.amount, transacao.transaction_date, transacao.payment_method, transacao_id
             )
             cursor.execute(query, values)
             conn.commit()
@@ -282,7 +286,7 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor()
         try:
-            cursor.execute("UPDATE transacoes SET status = 0 WHERE id = %s", (transacao_id,))
+            cursor.execute("DELETE FROM transactions WHERE id = %s", (transacao_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:
@@ -295,10 +299,12 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         try:
             cursor.execute("""
                 SELECT 
-                    SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE 0 END) as total_entradas,
-                    SUM(CASE WHEN tipo = 'saida' THEN valor ELSE 0 END) as total_saidas,
+                    SUM(CASE WHEN t.transaction_type = 'entrada' THEN t.amount ELSE 0 END) as total_entradas,
+                    SUM(CASE WHEN t.transaction_type = 'saida' THEN t.amount ELSE 0 END) as total_saidas,
                     COUNT(*) as total_transacoes
-                FROM transacoes WHERE user_id = %s AND status = 1
+                FROM transactions t
+                JOIN cash_register cr ON t.cash_register_id = cr.id
+                WHERE cr.user_id = %s
             """, (user_id,))
             
             result = cursor.fetchone()

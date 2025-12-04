@@ -12,23 +12,21 @@ router = APIRouter()
 security = HTTPBearer()
 
 class TransacaoCreateRequest(BaseModel):
-    tipo: Literal['entrada', 'saida']
-    categoria: str
-    descricao: str
-    valor: Decimal
-    data_transacao: datetime
-    metodo_pagamento: str
-    observacoes: Optional[str] = None
+    cash_register_id: int
+    transaction_type: Literal['entrada', 'saida']
+    amount: Decimal
+    description: Optional[str] = None
+    transaction_date: datetime
+    category: Optional[str] = None
+    payment_method: Optional[str] = None
 
 class TransacaoUpdateRequest(BaseModel):
-    tipo: Literal['entrada', 'saida']
-    categoria: str
-    descricao: str
-    valor: Decimal
-    data_transacao: datetime
-    metodo_pagamento: str
-    observacoes: Optional[str] = None
-    status: bool
+    transaction_type: Literal['entrada', 'saida']
+    amount: Decimal
+    description: Optional[str] = None
+    transaction_date: datetime
+    category: Optional[str] = None
+    payment_method: Optional[str] = None
 
 async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
     auth_service = AuthService()
@@ -44,14 +42,13 @@ async def create_transacao(
 ):
     transacao_service = TransacaoService()
     transacao = Transacao(
-        user_id=user_id,
-        tipo=request.tipo,
-        categoria=request.categoria,
-        descricao=request.descricao,
-        valor=request.valor,
-        data_transacao=request.data_transacao,
-        metodo_pagamento=request.metodo_pagamento,
-        observacoes=request.observacoes
+        cash_register_id=request.cash_register_id,
+        transaction_type=request.transaction_type,
+        amount=request.amount,
+        description=request.description,
+        transaction_date=request.transaction_date,
+        category=request.category,
+        payment_method=request.payment_method
     )
     return await transacao_service.create_transacao(transacao)
 
@@ -77,7 +74,7 @@ async def get_transacao(
     transacao_service = TransacaoService()
     transacao = await transacao_service.get_transacao_by_id(transacao_id)
     
-    if not transacao or transacao.user_id != user_id:
+    if not transacao:
         raise HTTPException(status_code=404, detail="Transacao not found")
     
     return transacao
@@ -91,20 +88,18 @@ async def update_transacao(
     transacao_service = TransacaoService()
     
     existing_transacao = await transacao_service.get_transacao_by_id(transacao_id)
-    if not existing_transacao or existing_transacao.user_id != user_id:
+    if not existing_transacao:
         raise HTTPException(status_code=404, detail="Transacao not found")
     
     transacao = Transacao(
         id=transacao_id,
-        user_id=user_id,
-        tipo=request.tipo,
-        categoria=request.categoria,
-        descricao=request.descricao,
-        valor=request.valor,
-        data_transacao=request.data_transacao,
-        metodo_pagamento=request.metodo_pagamento,
-        observacoes=request.observacoes,
-        status=request.status
+        cash_register_id=existing_transacao.cash_register_id,
+        transaction_type=request.transaction_type,
+        amount=request.amount,
+        description=request.description,
+        transaction_date=request.transaction_date,
+        category=request.category,
+        payment_method=request.payment_method
     )
     
     updated_transacao = await transacao_service.update_transacao(transacao_id, transacao)
@@ -121,7 +116,7 @@ async def delete_transacao(
     transacao_service = TransacaoService()
     
     existing_transacao = await transacao_service.get_transacao_by_id(transacao_id)
-    if not existing_transacao or existing_transacao.user_id != user_id:
+    if not existing_transacao:
         raise HTTPException(status_code=404, detail="Transacao not found")
     
     success = await transacao_service.delete_transacao(transacao_id)
