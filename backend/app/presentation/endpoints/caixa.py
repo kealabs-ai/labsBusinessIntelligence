@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from ....application.services.caixa_service import CashRegisterService
-from ....application.services.token_manager import TokenManager
-from ....domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
-from ....domain.entities.transacao import Transaction, TransactionCreate
+from application.services.caixa_service import CashRegisterService
+from application.services.token_manager import TokenManager
+from domain.entities.caixa import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from domain.entities.transacao import Transacao, TransacaoCreate
 
 router = APIRouter()
 cash_register_service = CashRegisterService()
@@ -45,7 +45,7 @@ def delete_cash_register(cash_register_id: int, current_user: dict = Depends(tok
     cash_register_service.delete_cash_register(cash_register_id, user_id)
     return
 
-@router.get("/cash-registers/{cash_register_id}/transactions", response_model=List[Transaction])
+@router.get("/cash-registers/{cash_register_id}/transactions", response_model=List[Transacao])
 def get_transactions_from_cash_register(cash_register_id: int, current_user: dict = Depends(token_manager.get_current_user)):
     user_id = current_user.get("user_id")
     cash_register = cash_register_service.get_cash_register_by_id(cash_register_id, user_id)
@@ -53,8 +53,8 @@ def get_transactions_from_cash_register(cash_register_id: int, current_user: dic
         raise HTTPException(status_code=404, detail="Cash register not found")
     return cash_register_service.get_transactions_from_cash_register(cash_register_id)
 
-@router.post("/transactions", response_model=Transaction, status_code=status.HTTP_201_CREATED)
-def add_transaction(transaction: TransactionCreate, current_user: dict = Depends(token_manager.get_current_user)):
+@router.post("/transactions", response_model=Transacao, status_code=status.HTTP_201_CREATED)
+def add_transaction(transaction: TransacaoCreate, current_user: dict = Depends(token_manager.get_current_user)):
     user_id = current_user.get("user_id")
     cash_register = cash_register_service.get_cash_register_by_id(transaction.cash_register_id, user_id)
     if not cash_register:
