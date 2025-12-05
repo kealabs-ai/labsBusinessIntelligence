@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthToken } from './authService';
 import { env } from '../utils/envManager';
 
-const API_URL = `${env.apiBaseUrl}/api/v1/resources`;
+const API_URL = `http://72.60.140.128:6002/api/v1/resources`;
 
 export const getAllResources = async () => {
     const token = getAuthToken();
