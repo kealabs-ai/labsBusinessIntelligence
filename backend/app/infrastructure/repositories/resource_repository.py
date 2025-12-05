@@ -7,10 +7,13 @@ class ResourceRepository:
         self.repository = MySQLResourceRepository()
 
     def get_all(self, user_id: int) -> List[Resource]:
-        query = "SELECT * FROM resources WHERE user_id = %s ORDER BY created_at DESC"
-        params = (user_id,)
-        result = self.repository.fetchall(query, params)
-        return [Resource(**row) for row in result] if result else []
+        try:
+            query = "SELECT * FROM resources WHERE user_id = %s ORDER BY created_at DESC"
+            params = (user_id,)
+            result = self.repository.fetchall(query, params)
+            return [Resource(**row) for row in result] if result else []
+        except Exception:
+            return []
 
     def get_by_id(self, resource_id: int, user_id: int) -> Optional[Resource]:
         query = "SELECT * FROM resources WHERE id = %s AND user_id = %s"
