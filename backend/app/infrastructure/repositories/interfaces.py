@@ -4,6 +4,7 @@ from domain.entities.user import User
 from domain.entities.client import Client
 from domain.entities.transacao import Transacao
 from domain.entities.cash_register import CashRegister, CashRegisterCreate, CashRegisterUpdate
+from domain.entities.service import Service, ServiceCreate, ServiceUpdate
 
 class BaseRepository(ABC):
     pass
@@ -95,4 +96,25 @@ class ICashRegisterRepository(ABC):
     
     @abstractmethod
     async def get_or_create_default_cash_register(self, user_id: int) -> CashRegister:
+        pass
+
+class IServiceRepository(ABC):
+    @abstractmethod
+    async def create_service(self, service: Service) -> Service:
+        pass
+    
+    @abstractmethod
+    async def update_service(self, service_id: int, service: Service) -> Optional[Service]:
+        pass
+    
+    @abstractmethod
+    async def get_service_by_id(self, service_id: int) -> Optional[Service]:
+        pass
+    
+    @abstractmethod
+    async def get_services_by_user(self, user_id: int) -> List[Service]:
+        pass
+    
+    @abstractmethod
+    async def update_service_status(self, service_id: int, status: bool) -> bool:
         pass

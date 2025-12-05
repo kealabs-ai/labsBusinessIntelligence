@@ -37,11 +37,11 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
   useEffect(() => {
     if (editingServico) {
       setFormData({
-        nome: editingServico.nome || '',
-        categoria: editingServico.categoria || '',
-        descricao: editingServico.descricao || '',
-        preco: editingServico.preco || '',
-        duracao: editingServico.duracao || '',
+        nome: editingServico.name || editingServico.nome || '',
+        categoria: editingServico.category || editingServico.categoria || '',
+        descricao: editingServico.description || editingServico.descricao || '',
+        preco: editingServico.price || editingServico.preco || '',
+        duracao: editingServico.duration || editingServico.duracao || '',
         status: editingServico.status !== undefined ? editingServico.status : true
       });
     } else {
@@ -98,9 +98,12 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       const submitData = {
-        ...formData,
-        preco: parseFloat(formData.preco),
-        duracao: parseInt(formData.duracao)
+        name: formData.nome,
+        category: formData.categoria,
+        description: formData.descricao,
+        price: parseFloat(formData.preco),
+        duration: parseInt(formData.duracao),
+        status: formData.status
       };
       onSave(submitData);
       onClose();

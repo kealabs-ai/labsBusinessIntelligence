@@ -426,3 +426,89 @@ class MySQLCashRegisterRepository(ICashRegisterRepository):
         finally:
             cursor.close()
             conn.close()
+
+class MySQLServiceRepository(IServiceRepository):
+    def __init__(self):
+        db_config = env.get_database_config()
+        self.connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
+    
+    async def create_service(self, service: Service) -> Service:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            query = """
+                INSERT INTO services (user_id, name, category, description, price, duration, status, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                service.user_id, service.name, service.category, service.description,
+                service.price, service.duration, service.status, datetime.now(), datetime.now()
+            )
+            cursor.execute(query, values)
+            conn.commit()
+            service.service_id = cursor.lastrowid
+            service.created_at = datetime.now()
+            service.updated_at = datetime.now()
+            return service
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def update_service(self, service_id: int, service: Service) -> Optional[Service]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            query = """
+                UPDATE services SET name = %s, category = %s, description = %s, price = %s,
+                duration = %s, status = %s, updated_at = %s
+                WHERE service_id = %s
+            """
+            values = (
+                service.name, service.category, service.description, service.price,
+                service.duration, service.status, datetime.now(), service_id
+            )
+            cursor.execute(query, values)
+            conn.commit()
+            return await self.get_service_by_id(service_id) if cursor.rowcount > 0 else None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_service_by_id(self, service_id: int) -> Optional[Service]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM services WHERE service_id = %s", (service_id,))
+            result = cursor.fetchone()
+            return Service(**result) if result else None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def get_services_by_user(self, user_id: int) -> List[Service]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM services WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+            results = cursor.fetchall()
+            return [Service(**row) for row in results]
+        finally:
+            cursor.close()
+            conn.close()
+    
+    async def update_service_status(self, service_id: int, status: bool) -> bool:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE services SET status = %s, updated_at = %s WHERE service_id = %s", (status, datetime.now(), service_id))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            cursor.close()
+            conn.close()

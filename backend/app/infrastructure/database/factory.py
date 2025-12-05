@@ -1,6 +1,6 @@
 import os
-from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository, MySQLTransacaoRepository, MySQLCashRegisterRepository
-from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository
+from infrastructure.repositories.mysql_repository import MySQLUserRepository, MySQLChartRepository, MySQLClientRepository, MySQLTransacaoRepository, MySQLCashRegisterRepository, MySQLServiceRepository
+from infrastructure.repositories.interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository, IServiceRepository
 
 try:
     from infrastructure.repositories.sqlserver_repository import SQLServerUserRepository, SQLServerChartRepository, SQLServerClientRepository
@@ -14,6 +14,7 @@ class DatabaseFactory:
     _client_repository: IClientRepository = None
     _transacao_repository: ITransacaoRepository = None
     _cash_register_repository: ICashRegisterRepository = None
+    _service_repository: IServiceRepository = None
     
     @classmethod
     def initialize(cls):
@@ -25,6 +26,7 @@ class DatabaseFactory:
             cls._client_repository = MySQLClientRepository()
             cls._transacao_repository = MySQLTransacaoRepository()
             cls._cash_register_repository = MySQLCashRegisterRepository()
+            cls._service_repository = MySQLServiceRepository()
         elif db_engine == 'sqlserver':
             if not SQLSERVER_AVAILABLE:
                 raise ValueError("SQL Server support not available. Install pyodbc and ODBC drivers.")
@@ -64,3 +66,9 @@ class DatabaseFactory:
         if cls._cash_register_repository is None:
             cls.initialize()
         return cls._cash_register_repository
+    
+    @classmethod
+    def get_service_repository(cls) -> IServiceRepository:
+        if cls._service_repository is None:
+            cls.initialize()
+        return cls._service_repository

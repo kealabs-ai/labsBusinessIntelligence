@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import ServicosPresentational from '../../components/presentational/ServicosPresentational';
 import ServicoModal from '../../components/presentational/ServicoModal';
+import { serviceService } from '../../services/serviceService';
 
 const ServicosContainer = () => {
   const [servicos, setServicos] = useState([]);
@@ -11,18 +12,21 @@ const ServicosContainer = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
-    setServicos([
-      {
-        id: 1,
-        nome: 'Consulta Médica',
-        categoria: 'Consulta',
-        descricao: 'Consulta médica geral',
-        preco: 150.00,
-        duracao: 30,
-        status: true
-      }
-    ]);
+    loadServicos();
   }, []);
+
+  const loadServicos = async () => {
+    try {
+      setLoading(true);
+      const data = await serviceService.getServices();
+      setServicos(data);
+    } catch (error) {
+      console.error('Erro ao carregar serviços:', error);
+      showSnackbar('Erro ao carregar serviços', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -47,23 +51,41 @@ const ServicosContainer = () => {
     setEditingServico(null);
   };
 
-  const handleSaveServico = (servicoData) => {
-    if (editingServico) {
-      setServicos(prev => prev.map(s => 
-        s.id === editingServico.id ? { ...servicoData, id: editingServico.id } : s
-      ));
-      showSnackbar('Serviço atualizado com sucesso!');
-    } else {
-      const newServico = { ...servicoData, id: Date.now() };
-      setServicos(prev => [...prev, newServico]);
-      showSnackbar('Serviço criado com sucesso!');
+  const handleSaveServico = async (servicoData) => {
+    try {
+      setLoading(true);
+      
+      if (editingServico) {
+        await serviceService.updateService(editingServico.service_id, servicoData);
+        showSnackbar('Serviço atualizado com sucesso!');
+      } else {
+        await serviceService.createService(servicoData);
+        showSnackbar('Serviço criado com sucesso!');
+      }
+      
+      await loadServicos();
+    } catch (error) {
+      console.error('Erro ao salvar serviço:', error);
+      const message = editingServico ? 'Erro ao atualizar serviço' : 'Erro ao criar serviço';
+      showSnackbar(message, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteServico = (servicoId) => {
-    if (window.confirm('Tem certeza que deseja excluir este serviço?')) {
-      setServicos(prev => prev.filter(s => s.id !== servicoId));
-      showSnackbar('Serviço excluído com sucesso!');
+  const handleDeleteServico = async (servicoId) => {
+    if (window.confirm('Tem certeza que deseja inativar este serviço?')) {
+      try {
+        setLoading(true);
+        await serviceService.updateServiceStatus(servicoId, false);
+        showSnackbar('Serviço inativado com sucesso!');
+        await loadServicos();
+      } catch (error) {
+        console.error('Erro ao inativar serviço:', error);
+        showSnackbar('Erro ao inativar serviço', 'error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
