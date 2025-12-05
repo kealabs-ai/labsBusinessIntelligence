@@ -1,34 +1,33 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional
 from datetime import datetime
 
 class Resource(BaseModel):
     id: Optional[int] = None
     user_id: int
-    name: str = Field(..., min_length=1, max_length=255)
+    name: str
     type: str
-    specialty: Optional[str] = Field(None, max_length=100)
-    email: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = Field(None, max_length=20)
+    specialty: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
     notes: Optional[str] = None
-    status: bool = True
+    status: Optional[bool] = True
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
 class ResourceCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
+    name: str
     type: str
-    specialty: Optional[str] = Field(None, max_length=100)
-    email: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = Field(None, max_length=20)
+    specialty: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
     notes: Optional[str] = None
-    status: bool = True
 
 class ResourceUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    name: Optional[str] = None
     type: Optional[str] = None
-    specialty: Optional[str] = Field(None, max_length=100)
-    email: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = Field(None, max_length=20)
+    specialty: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
     notes: Optional[str] = None
     status: Optional[bool] = None

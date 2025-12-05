@@ -34,7 +34,7 @@ class ResourceRepository:
             resource.email,
             resource.phone,
             resource.notes,
-            resource.status
+            1
         )
         resource_id = self.repository.execute(query, params)
         return self.get_by_id(resource_id, user_id)
