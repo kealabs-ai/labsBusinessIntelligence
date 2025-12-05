@@ -8,11 +8,22 @@ class ResourceRepository:
 
     def get_all(self, user_id: int) -> List[Resource]:
         try:
-            query = "SELECT * FROM resources WHERE user_id = %s ORDER BY created_at DESC"
+            query = "SELECT * FROM resources WHERE user_id = %s ORDER BY id DESC"
             params = (user_id,)
             result = self.repository.fetchall(query, params)
-            return [Resource(**row) for row in result] if result else []
-        except Exception:
+            print(f"Query result for user {user_id}: {result}")
+            if result:
+                resources = []
+                for row in result:
+                    try:
+                        resource = Resource(**row)
+                        resources.append(resource)
+                    except Exception as e:
+                        print(f"Error creating resource from row {row}: {e}")
+                return resources
+            return []
+        except Exception as e:
+            print(f"Error in get_all: {e}")
             return []
 
     def get_by_id(self, resource_id: int, user_id: int) -> Optional[Resource]:

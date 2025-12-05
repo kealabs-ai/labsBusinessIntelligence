@@ -19,7 +19,10 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 @router.get("/", response_model=List[Resource])
 def get_all_resources(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("user_id")
-    return resource_service.get_all_resources(user_id)
+    print(f"Getting resources for user_id: {user_id}")
+    resources = resource_service.get_all_resources(user_id)
+    print(f"Found {len(resources)} resources")
+    return resources
 
 @router.get("/{resource_id}", response_model=Resource)
 def get_resource(resource_id: int, current_user: dict = Depends(get_current_user)):
