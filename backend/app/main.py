@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from presentation.endpoints import auth, charts, agendamentos, contacts, admin, database_config, config, transacoes, cash_register, services
+from presentation.endpoints import auth, charts, agendamentos, contacts, admin, database_config, config, transacoes, cash_register, services, resources
 try:
     from presentation.endpoints import clients
     print("Clients module imported successfully")
@@ -52,6 +52,7 @@ app.include_router(config.router, prefix="/api", tags=["config"])
 app.include_router(transacoes.router, prefix="/api/v1/transacoes", tags=["transacoes"])
 app.include_router(cash_register.router, prefix="/api/v1/cash-register", tags=["cash-register"])
 app.include_router(services.router, prefix="/api/v1/services", tags=["services"])
+app.include_router(resources.router, prefix="/api/v1/resources", tags=["resources"])
 app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
 
 @app.get("/")

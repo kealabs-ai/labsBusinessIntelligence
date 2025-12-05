@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import RecursosPresentational from '../../components/presentational/RecursosPresentational';
 import RecursoModal from '../../components/presentational/RecursoModal';
+import { getAllResources, createResource, updateResource, deleteResource } from '../../services/resourceService';
 
 const RecursosContainer = () => {
   const [recursos, setRecursos] = useState([]);
@@ -9,21 +10,23 @@ const RecursosContainer = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecurso, setEditingRecurso] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, resourceId: null });
 
   useEffect(() => {
-    setRecursos([
-      {
-        id: 1,
-        nome: 'Dr. João Silva',
-        tipo: 'profissional',
-        especialidade: 'Cardiologia',
-        email: 'joao@exemplo.com',
-        telefone: '(11) 99999-9999',
-        observacoes: 'Especialista em cardiologia',
-        status: true
-      }
-    ]);
+    loadRecursos();
   }, []);
+
+  const loadRecursos = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllResources();
+      setRecursos(data);
+    } catch (error) {
+      showSnackbar('Erro ao carregar recursos', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -48,25 +51,48 @@ const RecursosContainer = () => {
     setEditingRecurso(null);
   };
 
-  const handleSaveRecurso = (recursoData) => {
-    if (editingRecurso) {
-      setRecursos(prev => prev.map(r => 
-        r.id === editingRecurso.id ? { ...recursoData, id: editingRecurso.id } : r
-      ));
-      showSnackbar('Recurso atualizado com sucesso!');
-    } else {
-      const newRecurso = { ...recursoData, id: Date.now() };
-      setRecursos(prev => [...prev, newRecurso]);
-      showSnackbar('Recurso criado com sucesso!');
+  const handleSaveRecurso = async (recursoData) => {
+    try {
+      setLoading(true);
+      if (editingRecurso) {
+        await updateResource(editingRecurso.id, recursoData);
+        showSnackbar('Recurso atualizado com sucesso!');
+      } else {
+        await createResource(recursoData);
+        showSnackbar('Recurso criado com sucesso!');
+      }
+      handleCloseModal();
+      loadRecursos();
+    } catch (error) {
+      showSnackbar('Erro ao salvar recurso', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteRecurso = (recursoId) => {
-    if (window.confirm('Tem certeza que deseja excluir este recurso?')) {
-      setRecursos(prev => prev.filter(r => r.id !== recursoId));
+    setConfirmDialog({ open: true, resourceId: recursoId });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      await deleteResource(confirmDialog.resourceId);
       showSnackbar('Recurso excluído com sucesso!');
+      loadRecursos();
+    } catch (error) {
+      showSnackbar('Erro ao excluir recurso', 'error');
+    } finally {
+      setLoading(false);
+      setConfirmDialog({ open: false, resourceId: null });
     }
   };
+
+  const handleCancelDelete = () => {
+    setConfirmDialog({ open: false, resourceId: null });
+  };
+
+
 
   return (
     <Box>
@@ -85,6 +111,26 @@ const RecursosContainer = () => {
         editingRecurso={editingRecurso}
       />
       
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCancelDelete}
+      >
+        <DialogTitle>
+          Confirmar Exclusão
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Tem certeza que deseja excluir este recurso? Esta ação não pode ser desfeita.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete}>Cancelar</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Excluir
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
