@@ -4,7 +4,8 @@ from domain.entities.user import User
 from domain.entities.client import Client
 from domain.entities.transacao import Transacao
 from domain.entities.cash_register import CashRegister, CashRegisterCreate, CashRegisterUpdate
-from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository
+from domain.entities.service import Service
+from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository, IServiceRepository
 from infrastructure.config.env_manager import env
 from datetime import datetime
 from decimal import Decimal
