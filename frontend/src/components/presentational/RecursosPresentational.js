@@ -32,12 +32,12 @@ const RecursosPresentational = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredRecursos = recursos.filter(recurso =>
-    recurso.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recurso.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+    (recurso.name || recurso.nome || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recurso.type || recurso.tipo || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getRecursoIcon = (tipo) => {
-    return tipo === 'profissional' ? <Person /> : <Business />;
+    return tipo === 'profissional' || tipo === 'professional' ? <Person /> : <Business />;
   };
 
   return (
@@ -112,10 +112,10 @@ const RecursosPresentational = ({
                   }}
                 >
                   <Avatar sx={{ 
-                    bgcolor: recurso.tipo === 'profissional' ? '#4caf50' : '#2196f3',
+                    bgcolor: (recurso.type || recurso.tipo) === 'professional' || (recurso.type || recurso.tipo) === 'profissional' ? '#4caf50' : '#2196f3',
                     mr: 2
                   }}>
-                    {getRecursoIcon(recurso.tipo)}
+                    {getRecursoIcon(recurso.type || recurso.tipo)}
                   </Avatar>
                   
                   <ListItemText
@@ -123,12 +123,12 @@ const RecursosPresentational = ({
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {recurso.nome}
+                          {recurso.name || recurso.nome}
                         </Typography>
                         <Chip
-                          label={recurso.tipo}
+                          label={recurso.type || recurso.tipo}
                           size="small"
-                          color={recurso.tipo === 'profissional' ? 'success' : 'primary'}
+                          color={(recurso.type || recurso.tipo) === 'professional' || (recurso.type || recurso.tipo) === 'profissional' ? 'success' : 'primary'}
                         />
                         <Chip
                           label={recurso.status ? 'Ativo' : 'Inativo'}
@@ -140,9 +140,9 @@ const RecursosPresentational = ({
                     secondary={
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                          {recurso.especialidade && (
+                          {(recurso.specialty || recurso.especialidade) && (
                             <Typography variant="body2" color="textSecondary">
-                              <strong>Especialidade:</strong> {recurso.especialidade}
+                              <strong>Especialidade:</strong> {recurso.specialty || recurso.especialidade}
                             </Typography>
                           )}
                           {recurso.email && (
@@ -152,14 +152,14 @@ const RecursosPresentational = ({
                           )}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                          {recurso.telefone && (
+                          {(recurso.phone || recurso.telefone) && (
                             <Typography variant="body2" color="textSecondary">
-                              <strong>Telefone:</strong> {recurso.telefone}
+                              <strong>Telefone:</strong> {recurso.phone || recurso.telefone}
                             </Typography>
                           )}
-                          {recurso.observacoes && (
+                          {(recurso.notes || recurso.observacoes) && (
                             <Typography variant="body2" color="textSecondary">
-                              <strong>Obs:</strong> {recurso.observacoes}
+                              <strong>Obs:</strong> {recurso.notes || recurso.observacoes}
                             </Typography>
                           )}
                         </Grid>
