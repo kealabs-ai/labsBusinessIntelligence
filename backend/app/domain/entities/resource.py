@@ -18,10 +18,10 @@ class Resource(BaseModel):
 class ResourceCreate(BaseModel):
     name: str
     type: str
-    specialty: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    specialty: Optional[str] = ""
+    email: Optional[str] = ""
+    phone: Optional[str] = ""
+    notes: Optional[str] = ""
 
 class ResourceUpdate(BaseModel):
     name: Optional[str] = None

@@ -22,22 +22,26 @@ class ResourceRepository:
         return Resource(**row) if row else None
 
     def create(self, resource: ResourceCreate, user_id: int) -> Resource:
-        query = """
-            INSERT INTO resources (user_id, name, type, specialty, email, phone, notes, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = (
-            user_id,
-            resource.name,
-            resource.type,
-            resource.specialty,
-            resource.email,
-            resource.phone,
-            resource.notes,
-            1
-        )
-        resource_id = self.repository.execute(query, params)
-        return self.get_by_id(resource_id, user_id)
+        try:
+            query = """
+                INSERT INTO resources (user_id, name, type, specialty, email, phone, notes, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (
+                user_id,
+                resource.name,
+                resource.type,
+                resource.specialty,
+                resource.email,
+                resource.phone,
+                resource.notes,
+                resource.status if hasattr(resource, 'status') else True,
+            )
+            resource_id = self.repository.execute(query, params)
+            return self.get_by_id(resource_id, user_id)
+        except Exception as e:
+            print(f"Error creating resource: {e}")
+            raise e
 
     def update(self, resource_id: int, resource_update: ResourceUpdate, user_id: int) -> Optional[Resource]:
         query_parts = []

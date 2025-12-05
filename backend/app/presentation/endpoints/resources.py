@@ -31,10 +31,13 @@ def get_resource(resource_id: int, current_user: dict = Depends(get_current_user
 
 @router.post("/", response_model=Resource, status_code=status.HTTP_201_CREATED)
 def create_resource(resource: ResourceCreate, current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("user_id")
-    return resource_service.create_resource(resource, user_id)
+    try:
+        user_id = current_user.get("user_id")
+        return resource_service.create_resource(resource, user_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.put("/{resource_id}", response_model=Resource)
+@router.post("/{resource_id}/update", response_model=Resource)
 def update_resource(resource_id: int, resource_update: ResourceUpdate, current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("user_id")
     updated_resource = resource_service.update_resource(resource_id, resource_update, user_id)
@@ -42,7 +45,7 @@ def update_resource(resource_id: int, resource_update: ResourceUpdate, current_u
         raise HTTPException(status_code=404, detail="Resource not found")
     return updated_resource
 
-@router.delete("/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/{resource_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_resource(resource_id: int, current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("user_id")
     resource = resource_service.get_resource_by_id(resource_id, user_id)
