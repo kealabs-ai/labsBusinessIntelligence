@@ -1,10 +1,10 @@
 from typing import List, Optional
-from infrastructure.database.factory import get_repository
+from infrastructure.database.factory import DatabaseFactory
 from domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
 
 class ResourceRepository:
     def __init__(self):
-        self.repository = get_repository()
+        self.repository = DatabaseFactory.get_service_repository()
 
     def get_all(self, user_id: int) -> List[Resource]:
         query = "SELECT * FROM resources WHERE user_id = %s ORDER BY created_at DESC"
