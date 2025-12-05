@@ -54,11 +54,22 @@ const RecursosContainer = () => {
   const handleSaveRecurso = async (recursoData) => {
     try {
       setLoading(true);
+      
+      // Map Portuguese field names to English
+      const mappedData = {
+        name: recursoData.nome,
+        type: recursoData.tipo,
+        specialty: recursoData.especialidade || '',
+        email: recursoData.email || '',
+        phone: recursoData.telefone || '',
+        notes: recursoData.observacoes || ''
+      };
+      
       if (editingRecurso) {
-        await updateResource(editingRecurso.id, recursoData);
+        await updateResource(editingRecurso.id, mappedData);
         showSnackbar('Recurso atualizado com sucesso!');
       } else {
-        await createResource(recursoData);
+        await createResource(mappedData);
         showSnackbar('Recurso criado com sucesso!');
       }
       handleCloseModal();
