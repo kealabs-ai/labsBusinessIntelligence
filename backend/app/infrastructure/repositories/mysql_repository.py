@@ -5,6 +5,7 @@ from domain.entities.client import Client
 from domain.entities.transacao import Transacao
 from domain.entities.cash_register import CashRegister, CashRegisterCreate, CashRegisterUpdate
 from domain.entities.service import Service
+from domain.entities.resource import Resource
 from .interfaces import IUserRepository, IChartRepository, IClientRepository, ITransacaoRepository, ICashRegisterRepository, IServiceRepository
 from infrastructure.config.env_manager import env
 from datetime import datetime
@@ -510,6 +511,48 @@ class MySQLServiceRepository(IServiceRepository):
             cursor.execute("UPDATE services SET status = %s, updated_at = %s WHERE service_id = %s", (status, datetime.now(), service_id))
             conn.commit()
             return cursor.rowcount > 0
+        finally:
+            cursor.close()
+            conn.close()
+
+class MySQLResourceRepository:
+    def __init__(self):
+        db_config = env.get_database_config()
+        self.connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
+    
+    def fetchall(self, query: str, params: tuple) -> List[Dict[str, Any]]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute(query, params)
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+            conn.close()
+    
+    def fetchone(self, query: str, params: tuple) -> Optional[Dict[str, Any]]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute(query, params)
+            return cursor.fetchone()
+        finally:
+            cursor.close()
+            conn.close()
+    
+    def execute(self, query: str, params: tuple) -> int:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, params)
+            conn.commit()
+            return cursor.lastrowid
         finally:
             cursor.close()
             conn.close()
