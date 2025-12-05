@@ -6,7 +6,7 @@ class Resource(BaseModel):
     id: Optional[int] = None
     user_id: int
     name: str = Field(..., min_length=1, max_length=255)
-    type: Literal['professional', 'equipment', 'room']
+    type: str = Field(..., min_length=1, max_length=255)
     specialty: Optional[str] = Field(None, max_length=100)
     email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=20)
@@ -17,7 +17,7 @@ class Resource(BaseModel):
 
 class ResourceCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
-    type: Literal['professional', 'equipment', 'room']
+    type: str = Field(..., min_length=1, max_length=255)
     specialty: Optional[str] = Field(None, max_length=100)
     email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=20)
@@ -26,7 +26,7 @@ class ResourceCreate(BaseModel):
 
 class ResourceUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
-    type: Optional[Literal['professional', 'equipment', 'room']] = None
+    type: str = Field(..., min_length=1, max_length=255)
     specialty: Optional[str] = Field(None, max_length=100)
     email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=20)
