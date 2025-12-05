@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from ....application.services.resource_service import ResourceService
-from ....application.services.token_manager import TokenManager
-from ....domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
+from application.services.resource_service import ResourceService
+from application.services.token_manager import TokenManager
+from domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
 
 router = APIRouter()
 resource_service = ResourceService()

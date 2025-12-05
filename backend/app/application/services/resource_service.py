@@ -1,6 +1,6 @@
 from typing import List, Optional
-from ...infrastructure.repositories.resource_repository import ResourceRepository
-from ...domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
+from infrastructure.repositories.resource_repository import ResourceRepository
+from domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
 
 class ResourceService:
     def __init__(self):

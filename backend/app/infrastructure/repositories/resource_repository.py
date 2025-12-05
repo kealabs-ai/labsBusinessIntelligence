@@ -1,6 +1,6 @@
 from typing import List, Optional
-from ..database.factory import get_repository
-from ...domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
+from infrastructure.database.factory import get_repository
+from domain.entities.resource import Resource, ResourceCreate, ResourceUpdate
 
 class ResourceRepository:
     def __init__(self):
