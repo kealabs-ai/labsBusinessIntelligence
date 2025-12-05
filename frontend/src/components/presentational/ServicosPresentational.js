@@ -30,10 +30,12 @@ const ServicosPresentational = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredServicos = servicos.filter(servico =>
-    servico.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    servico.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredServicos = servicos.filter(servico => {
+    const nome = servico.nome || servico.name || '';
+    const categoria = servico.categoria || servico.category || '';
+    return nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           categoria.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -122,10 +124,10 @@ const ServicosPresentational = ({
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {servico.nome}
+                          {servico.nome || servico.name}
                         </Typography>
                         <Chip
-                          label={servico.categoria}
+                          label={servico.categoria || servico.category}
                           size="small"
                           sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
                         />
@@ -140,16 +142,16 @@ const ServicosPresentational = ({
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                           <Typography variant="body2" color="textSecondary">
-                            <strong>Preço:</strong> {formatCurrency(servico.preco)}
+                            <strong>Preço:</strong> {formatCurrency(servico.preco || servico.price)}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            <strong>Duração:</strong> {servico.duracao} min
+                            <strong>Duração:</strong> {servico.duracao || servico.duration} min
                           </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                          {servico.descricao && (
+                          {(servico.descricao || servico.description) && (
                             <Typography variant="body2" color="textSecondary">
-                              <strong>Descrição:</strong> {servico.descricao}
+                              <strong>Descrição:</strong> {servico.descricao || servico.description}
                             </Typography>
                           )}
                         </Grid>
