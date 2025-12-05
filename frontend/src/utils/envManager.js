@@ -35,7 +35,7 @@ class EnvManager {
 
   // API configurations
   get apiBaseUrl() {
-    return this.get('REACT_APP_API_BASE_URL', 'http://localhost:8000');
+    return this.get('REACT_APP_API_URL', 'http://localhost:8000');
   }
 
   get apiTimeout() {
