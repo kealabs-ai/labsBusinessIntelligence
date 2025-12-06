@@ -34,8 +34,10 @@ class UnitResponse(BaseModel):
     created_at: str = None
     updated_at: str = None
 
-def get_current_user(token: str = Depends(auth_service.get_current_user)):
-    return token
+async def get_current_user(token: str = Depends(auth_service.get_current_user)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    return {"user_id": token.id}
 
 @router.post("/units", response_model=UnitResponse)
 async def create_unit(unit_data: UnitCreate, current_user: dict = Depends(get_current_user)):

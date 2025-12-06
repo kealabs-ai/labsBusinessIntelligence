@@ -53,7 +53,7 @@ app.include_router(transacoes.router, prefix="/api/v1/transacoes", tags=["transa
 app.include_router(cash_register.router, prefix="/api/v1/cash-register", tags=["cash-register"])
 app.include_router(services.router, prefix="/api/v1/services", tags=["services"])
 app.include_router(resources.router, prefix="/api/v1/resources", tags=["resources"])
-app.include_router(units.router, prefix="/api/v1/units", tags=["units"])
+app.include_router(units.router, prefix="/api/v1", tags=["units"])
 app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
 
 @app.get("/")
