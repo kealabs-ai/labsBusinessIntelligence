@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from pydantic import BaseModel
-from app.application.services.unit_service import UnitService
-from app.application.services.auth_service import AuthService
+from application.services.unit_service import UnitService
+from application.services.auth_service import AuthService
 
 router = APIRouter()
 unit_service = UnitService()

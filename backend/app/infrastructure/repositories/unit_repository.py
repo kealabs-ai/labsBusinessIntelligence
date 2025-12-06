@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import time
-from app.infrastructure.database.factory import DatabaseFactory
-from app.domain.entities.unit import Unit
+from infrastructure.database.factory import DatabaseFactory
+from domain.entities.unit import Unit
 
 class UnitRepository:
     def __init__(self):

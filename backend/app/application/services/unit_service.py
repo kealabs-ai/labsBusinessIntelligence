@@ -1,7 +1,7 @@
 from typing import List
 from datetime import time
-from app.domain.entities.unit import Unit
-from app.infrastructure.repositories.unit_repository import UnitRepository
+from domain.entities.unit import Unit
+from infrastructure.repositories.unit_repository import UnitRepository
 
 class UnitService:
     def __init__(self):
