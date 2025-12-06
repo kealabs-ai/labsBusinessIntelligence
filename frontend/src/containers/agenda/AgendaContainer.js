@@ -25,6 +25,7 @@ import {
   Settings
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import UnitsContainer from '../units/UnitsContainer';
 import AgendaPresentational from '../../components/presentational/AgendaPresentational';
 import AgendaModal from '../../components/presentational/AgendaModal';
 import ClientsContainer from '../clients/ClientsContainer';
@@ -555,11 +556,7 @@ const AgendaContainer = () => {
         ) : currentView === 'recursos' ? (
           <RecursosContainer />
         ) : currentView === 'configuracoes' ? (
-          <ConfiguracoesPresentational
-            configuracoes={{}}
-            loading={false}
-            onSaveConfiguracoes={() => {}}
-          />
+          <UnitsContainer />
         ) : (
           <Box sx={{ p: 3 }}>
             <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>

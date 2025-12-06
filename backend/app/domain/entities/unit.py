@@ -1,0 +1,36 @@
+from dataclasses import dataclass
+from typing import Optional
+from datetime import time
+
+@dataclass
+class Unit:
+    id: Optional[int] = None
+    user_id: int = None
+    unit_name: str = ""
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    opening_time: time = time(8, 0)
+    closing_time: time = time(18, 0)
+    appointment_interval: int = 30
+    notifications_enabled: bool = True
+    notification_advance_hours: int = 24
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'unit_name': self.unit_name,
+            'address': self.address,
+            'phone': self.phone,
+            'email': self.email,
+            'opening_time': self.opening_time.strftime('%H:%M:%S') if self.opening_time else None,
+            'closing_time': self.closing_time.strftime('%H:%M:%S') if self.closing_time else None,
+            'appointment_interval': self.appointment_interval,
+            'notifications_enabled': self.notifications_enabled,
+            'notification_advance_hours': self.notification_advance_hours,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }

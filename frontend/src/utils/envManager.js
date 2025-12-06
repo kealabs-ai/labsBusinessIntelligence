@@ -54,3 +54,6 @@ class EnvManager {
 
 // Global instance
 export const env = new EnvManager();
+
+// Export getApiUrl function for backward compatibility
+export const getApiUrl = () => env.apiBaseUrl;

@@ -27,12 +27,7 @@ const MenuContainer = () => {
       path: '/agenda',
       icon: 'CalendarToday'
     },
-    {
-      title: 'Caixa e Transações',
-      description: 'Gerencie o fluxo de caixa e transações financeiras',
-      path: '/caixa',
-      icon: 'MonetizationOn'
-    },
+
     {
       title: 'Administrador',
       description: 'Gerencie usuários, permissões e módulos do sistema',

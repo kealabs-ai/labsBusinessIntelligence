@@ -9,6 +9,7 @@ import AIPromptContainer from './containers/ai-prompt/AIPromptContainer';
 import AgendaContainer from './containers/agenda/AgendaContainer';
 import AdminContainer from './containers/admin/AdminContainer';
 import CaixaContainer from './containers/caixa/CaixaContainer';
+import UnitsContainer from './containers/units/UnitsContainer';
 import { AuthProvider, useAuth } from './services/AuthContext';
 
 const theme = createTheme({
@@ -63,6 +64,11 @@ function App() {
             <Route path="/caixa" element={
               <ProtectedRoute>
                 <CaixaContainer />
+              </ProtectedRoute>
+            } />
+            <Route path="/units" element={
+              <ProtectedRoute>
+                <UnitsContainer />
               </ProtectedRoute>
             } />
             <Route path="/" element={<Navigate to="/menu" />} />

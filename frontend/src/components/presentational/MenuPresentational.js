@@ -7,7 +7,7 @@ import {
   Typography,
   Box
 } from '@mui/material';
-import { BarChart, SmartToy, CalendarToday, AdminPanelSettings } from '@mui/icons-material';
+import { BarChart, SmartToy, CalendarToday, AdminPanelSettings, Business } from '@mui/icons-material';
 import { menuStyles } from './MenuPresentational.styles';
 
 const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
@@ -21,6 +21,8 @@ const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
         return <CalendarToday sx={{ fontSize: 32 }} />;
       case 'AdminPanelSettings':
         return <AdminPanelSettings sx={{ fontSize: 32 }} />;
+      case 'Business':
+        return <Business sx={{ fontSize: 32 }} />;
       default:
         return <BarChart sx={{ fontSize: 32 }} />;
     }
