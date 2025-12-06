@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from application.services.unit_service import UnitService
 from application.services.auth_service import AuthService
@@ -33,8 +33,8 @@ class UnitResponse(BaseModel):
     appointment_interval: int
     notifications_enabled: bool
     notification_advance_hours: int
-    created_at: str = None
-    updated_at: str = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     user = await auth_service.get_current_user(credentials.credentials)

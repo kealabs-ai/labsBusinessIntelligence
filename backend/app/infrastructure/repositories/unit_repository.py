@@ -63,9 +63,9 @@ class UnitRepository:
         
         try:
             if self.db_type == "mysql":
-                query = "SELECT * FROM unit_settings WHERE user_id = %s ORDER BY created_at DESC"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE user_id = %s ORDER BY created_at DESC"
             else:
-                query = "SELECT * FROM unit_settings WHERE user_id = ? ORDER BY created_at DESC"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE user_id = ? ORDER BY created_at DESC"
             
             cursor.execute(query, (user_id,))
             rows = cursor.fetchall()
@@ -81,9 +81,9 @@ class UnitRepository:
                     email=row[5],
                     opening_time=row[6] if row[6] else time(8, 0),
                     closing_time=row[7] if row[7] else time(18, 0),
-                    appointment_interval=row[8],
-                    notifications_enabled=bool(row[9]),
-                    notification_advance_hours=row[10],
+                    appointment_interval=row[8] if row[8] else 30,
+                    notifications_enabled=bool(row[9]) if row[9] is not None else True,
+                    notification_advance_hours=row[10] if row[10] else 24,
                     created_at=str(row[11]) if row[11] else None,
                     updated_at=str(row[12]) if row[12] else None
                 )
