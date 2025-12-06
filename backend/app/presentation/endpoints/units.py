@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List
 from pydantic import BaseModel
 from application.services.unit_service import UnitService
 from application.services.auth_service import AuthService
 
 router = APIRouter()
+security = HTTPBearer()
 unit_service = UnitService()
 auth_service = AuthService()
 
@@ -34,10 +36,11 @@ class UnitResponse(BaseModel):
     created_at: str = None
     updated_at: str = None
 
-async def get_current_user(token: str = Depends(auth_service.get_current_user)):
-    if not token:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    user = await auth_service.get_current_user(credentials.credentials)
+    if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
-    return {"user_id": token.id}
+    return {"user_id": user.id}
 
 @router.post("/units", response_model=UnitResponse)
 async def create_unit(unit_data: UnitCreate, current_user: dict = Depends(get_current_user)):
