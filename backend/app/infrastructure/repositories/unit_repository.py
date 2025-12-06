@@ -1,16 +1,24 @@
 from typing import List, Optional
 from datetime import time
-from infrastructure.repositories.mysql_repository import MySQLUserRepository
 from domain.entities.unit import Unit
+from infrastructure.config.env_manager import env
+import mysql.connector
 import os
 
 class UnitRepository:
     def __init__(self):
-        self.mysql_repo = MySQLUserRepository()
+        db_config = env.get_database_config()
+        self.connection_config = {
+            'host': db_config['host'],
+            'port': db_config['port'],
+            'user': env.get_required('MYSQL_USER'),
+            'password': env.get_required('MYSQL_PASSWORD'),
+            'database': db_config['database']
+        }
         self.db_type = os.getenv('DB_ENGINE', 'mysql').lower()
     
     def get_connection(self):
-        return self.mysql_repo.get_connection()
+        return mysql.connector.connect(**self.connection_config)
 
     def create_unit(self, unit: Unit) -> Unit:
         connection = self.get_connection()
