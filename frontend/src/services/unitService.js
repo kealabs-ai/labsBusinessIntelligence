@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { getApiUrl } from '../utils/envManager';
 
-const API_URL = getApiUrl();
+const API_URL = 'http://72.60.140.128:6002';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
