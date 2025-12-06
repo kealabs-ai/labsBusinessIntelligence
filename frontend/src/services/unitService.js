@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
 export const unitService = {
   async createUnit(unitData) {
     try {
-      const response = await axios.post(`${API_URL}/api/v1/units/units`, unitData, {
+      const response = await axios.post(`${API_URL}/api/v1/units`, unitData, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -26,7 +26,7 @@ export const unitService = {
 
   async getUnits() {
     try {
-      const response = await axios.get(`${API_URL}/api/v1/units/units`, {
+      const response = await axios.get(`${API_URL}/api/v1/units`, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -38,7 +38,7 @@ export const unitService = {
 
   async updateUnit(unitId, unitData) {
     try {
-      const response = await axios.put(`${API_URL}/api/v1/units/units/${unitId}`, unitData, {
+      const response = await axios.put(`${API_URL}/api/v1/units/${unitId}`, unitData, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -50,7 +50,7 @@ export const unitService = {
 
   async deleteUnit(unitId) {
     try {
-      const response = await axios.delete(`${API_URL}/api/v1/units/units/${unitId}`, {
+      const response = await axios.delete(`${API_URL}/api/v1/units/${unitId}`, {
         headers: getAuthHeaders()
       });
       return response.data;
