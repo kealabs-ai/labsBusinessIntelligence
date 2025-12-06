@@ -51,37 +51,44 @@ const ClientsPresentational = ({
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 3,
-        flexDirection: { xs: 'column', sm: 'row' },
-        gap: 2
-      }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 600,
-          color: '#333'
-        }}>
-          Gerenciamento de Clientes
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={onOpenModal}
-          sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-            },
-            borderRadius: 2,
-            px: 3,
-            py: 1
-          }}
-        >
-          Novo Cliente
-        </Button>
-      </Box>
+    <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Person sx={{ fontSize: 32, color: 'white' }} />
+              <Typography variant="h4" component="h1" sx={{ 
+                fontWeight: 600,
+                color: 'white'
+              }}>
+                Gerenciamento de Clientes
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={onOpenModal}
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                },
+                borderRadius: 2,
+                px: 3,
+                py: 1
+              }}
+            >
+              Novo Cliente
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
 
       <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
         <CardContent>

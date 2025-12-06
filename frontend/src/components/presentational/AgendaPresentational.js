@@ -77,14 +77,17 @@ const AgendaPresentational = ({
   };
 
   return (
-    <Box sx={agendaStyles.container}>
-      <Box sx={agendaStyles.content}>
-        <Box sx={agendaStyles.header}>
-          <CalendarToday sx={agendaStyles.headerIcon} />
-          <Typography variant="h4" component="h1" sx={agendaStyles.title}>
-            Gerenciamento de Agenda
-          </Typography>
-        </Box>
+    <Box sx={{ p: 3 }}>
+        <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <CalendarToday sx={{ fontSize: 32, color: 'white' }} />
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: 'white' }}>
+                Gerenciamento de Agenda
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
         <Grid container spacing={3}>
           {/* Google Calendar */}
@@ -381,7 +384,6 @@ const AgendaPresentational = ({
             </Card>
           </Grid>
         </Grid>
-      </Box>
       
       <TVModal
         open={tvModalOpen}
