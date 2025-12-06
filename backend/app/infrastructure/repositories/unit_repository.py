@@ -1,18 +1,23 @@
 from typing import List, Optional
 from datetime import time
-from infrastructure.database.factory import DatabaseFactory
+from infrastructure.repositories.mysql_repository import MySQLUserRepository
 from domain.entities.unit import Unit
+import os
 
 class UnitRepository:
     def __init__(self):
-        self.db_factory = DatabaseFactory()
+        self.mysql_repo = MySQLUserRepository()
+        self.db_type = os.getenv('DB_ENGINE', 'mysql').lower()
+    
+    def get_connection(self):
+        return self.mysql_repo.get_connection()
 
     def create_unit(self, unit: Unit) -> Unit:
-        connection = self.db_factory.get_connection()
+        connection = self.get_connection()
         cursor = connection.cursor()
         
         try:
-            if self.db_factory.db_type == "mysql":
+            if self.db_type == "mysql":
                 query = """
                 INSERT INTO unit_settings (user_id, unit_name, address, phone, email, 
                                          opening_time, closing_time, appointment_interval, 
@@ -45,11 +50,11 @@ class UnitRepository:
             connection.close()
 
     def get_units_by_user(self, user_id: int) -> List[Unit]:
-        connection = self.db_factory.get_connection()
+        connection = self.get_connection()
         cursor = connection.cursor()
         
         try:
-            if self.db_factory.db_type == "mysql":
+            if self.db_type == "mysql":
                 query = "SELECT * FROM unit_settings WHERE user_id = %s ORDER BY created_at DESC"
             else:
                 query = "SELECT * FROM unit_settings WHERE user_id = ? ORDER BY created_at DESC"
@@ -83,11 +88,11 @@ class UnitRepository:
             connection.close()
 
     def update_unit(self, unit: Unit) -> Unit:
-        connection = self.db_factory.get_connection()
+        connection = self.get_connection()
         cursor = connection.cursor()
         
         try:
-            if self.db_factory.db_type == "mysql":
+            if self.db_type == "mysql":
                 query = """
                 UPDATE unit_settings 
                 SET unit_name = %s, address = %s, phone = %s, email = %s,
@@ -122,11 +127,11 @@ class UnitRepository:
             connection.close()
 
     def delete_unit(self, unit_id: int, user_id: int) -> bool:
-        connection = self.db_factory.get_connection()
+        connection = self.get_connection()
         cursor = connection.cursor()
         
         try:
-            if self.db_factory.db_type == "mysql":
+            if self.db_type == "mysql":
                 query = "DELETE FROM unit_settings WHERE id = %s AND user_id = %s"
             else:
                 query = "DELETE FROM unit_settings WHERE id = ? AND user_id = ?"
