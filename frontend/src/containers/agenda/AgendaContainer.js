@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../services/authContext';
 import { 
   Box, 
   Drawer, 
@@ -38,6 +39,7 @@ import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
   const [currentView, setCurrentView] = useState('agendamentos');
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -435,7 +437,7 @@ const AgendaContainer = () => {
     console.log('Navegando para:', option);
   };
 
-  const menuItems = [
+  const allMenuItems = [
     { id: 'agendamentos', label: 'Agendamentos', icon: <CalendarToday /> },
     { id: 'clientes', label: 'Clientes', icon: <People /> },
     { id: 'caixa', label: 'Caixa e Transações', icon: <AccountBalance /> },
@@ -443,6 +445,8 @@ const AgendaContainer = () => {
     { id: 'recursos', label: 'Recursos', icon: <Group /> },
     { id: 'configuracoes', label: 'Configurações da Unidade', icon: <Settings /> }
   ];
+
+  const menuItems = allMenuItems.filter(item => hasPermission(item.id));
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -525,7 +529,7 @@ const AgendaContainer = () => {
         backgroundColor: '#f5f5f5'
       }}>
         <Toolbar />
-        {currentView === 'agendamentos' ? (
+        {currentView === 'agendamentos' && hasPermission('agendamentos') ? (
           <AgendaPresentational
         selectedDate={selectedDate}
         events={events}
@@ -547,23 +551,23 @@ const AgendaContainer = () => {
             onRefreshEvents={handleRefreshEvents}
             loading={loading}
           />
-        ) : currentView === 'clientes' ? (
+        ) : currentView === 'clientes' && hasPermission('clientes') ? (
           <ClientsContainer />
-        ) : currentView === 'caixa' ? (
+        ) : currentView === 'caixa' && hasPermission('caixa') ? (
           <CaixaContainer />
-        ) : currentView === 'servicos' ? (
+        ) : currentView === 'servicos' && hasPermission('servicos') ? (
           <ServicosContainer />
-        ) : currentView === 'recursos' ? (
+        ) : currentView === 'recursos' && hasPermission('recursos') ? (
           <RecursosContainer />
-        ) : currentView === 'configuracoes' ? (
+        ) : currentView === 'configuracoes' && hasPermission('configuracoes') ? (
           <UnitsContainer />
         ) : (
-          <Box sx={{ p: 3 }}>
+          <Box sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
-              {currentView.charAt(0).toUpperCase() + currentView.slice(1)}
+              Acesso Negado
             </Typography>
             <Typography variant="body1" color="textSecondary">
-              Módulo em desenvolvimento...
+              Você não tem permissão para acessar este módulo.
             </Typography>
           </Box>
         )}

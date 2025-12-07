@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkSession = () => {
+    const checkSession = async () => {
       const token = localStorage.getItem('token');
       const loginTime = localStorage.getItem('loginTime');
       
@@ -30,11 +30,15 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         
-        const userData = decodeToken(token);
-        if (userData) {
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
+        try {
+          const userData = await authService.getCurrentUser();
+          if (userData) {
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            logout();
+          }
+        } catch (error) {
           logout();
         }
         setLoading(false);
@@ -68,7 +72,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('loginTime', Date.now().toString());
       
-      const userData = decodeToken(response.access_token);
+      const userData = await authService.getCurrentUser();
       setUser(userData);
       setIsAuthenticated(true);
       return true;
@@ -84,12 +88,26 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const hasPermission = (moduleId) => {
+    if (!user || !user.role_id) return false;
+    
+    const permissions = {
+      1: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'configuracoes'], // Administrador
+      2: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos'], // Gerente
+      3: ['agendamentos', 'clientes', 'caixa'], // Recepcionista
+      4: ['agendamentos'] // Profissional
+    };
+    
+    return permissions[user.role_id]?.includes(moduleId) || false;
+  };
+
   const value = {
     isAuthenticated,
     user,
     login,
     logout,
-    loading
+    loading,
+    hasPermission
   };
 
   return (
