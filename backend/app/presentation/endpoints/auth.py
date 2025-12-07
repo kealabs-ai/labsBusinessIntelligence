@@ -37,4 +37,4 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
     
-    return {"id": user.id, "username": user.username, "email": user.email}
+    return {"id": user.id, "username": user.username, "email": user.email, "role_id": user.role_id, "kea_client_id": user.kea_client_id}
