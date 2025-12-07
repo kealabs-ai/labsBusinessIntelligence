@@ -13,18 +13,20 @@ class UserCreateRequest(BaseModel):
     username: str
     email: str
     password: str
-    role: str = 'user'
+    role: str = '4'
+    kea_client_id: int = None
 
 class UserUpdateRequest(BaseModel):
     username: str = None
     email: str = None
     role: str = None
+    kea_client_id: int = None
     is_active: bool = None
 
 async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     auth_service = AuthService()
     user = await auth_service.get_current_user(credentials.credentials)
-    if not user or user.role != 'admin':
+    if not user or user.role_id != 1:
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 

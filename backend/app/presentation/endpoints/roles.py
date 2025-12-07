@@ -19,11 +19,11 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await auth_service.get_current_user(credentials.credentials)
     if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
-    return {"user_id": user.id, "role": user.role}
+    return {"user_id": user.id, "role_id": user.role_id, "role": user.role}
 
 @router.get("/roles", response_model=List[RoleResponse])
 async def get_roles(current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
+    if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:

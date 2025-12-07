@@ -46,11 +46,11 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await auth_service.get_current_user(credentials.credentials)
     if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
-    return {"user_id": user.id, "role": user.role}
+    return {"user_id": user.id, "role_id": user.role_id, "role": user.role}
 
 @router.post("/kea-clients", response_model=KeaClientResponse)
 async def create_kea_client(client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
+    if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
@@ -61,7 +61,7 @@ async def create_kea_client(client_data: KeaClientCreate, current_user: dict = D
 
 @router.get("/kea-clients", response_model=List[KeaClientResponse])
 async def get_kea_clients(current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
+    if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
@@ -72,7 +72,7 @@ async def get_kea_clients(current_user: dict = Depends(get_current_user)):
 
 @router.put("/kea-clients/{client_id}", response_model=KeaClientResponse)
 async def update_kea_client(client_id: int, client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
+    if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
@@ -83,7 +83,7 @@ async def update_kea_client(client_id: int, client_data: KeaClientCreate, curren
 
 @router.delete("/kea-clients/{client_id}")
 async def delete_kea_client(client_id: int, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
+    if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:

@@ -9,7 +9,7 @@ class Role:
 
     def to_dict(self):
         return {
-            'value': self.name,
-            'label': self.name.title(),
+            'value': str(self.role_id),
+            'label': self.name,
             'description': self.description
         }
