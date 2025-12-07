@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
-import { People, Security, Settings } from '@mui/icons-material';
+import { People, Security, Settings, Business } from '@mui/icons-material';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
 import UserManagement from './UserManagement';
 import PermissionManagement from './PermissionManagement';
 import DatabaseConfigContainer from './DatabaseConfigContainer';
+import KeaClientsManagement from './KeaClientsManagement';
 
 const AdminContainer = () => {
   const [currentModule, setCurrentModule] = useState(null);
@@ -20,6 +21,12 @@ const AdminContainer = () => {
       description: 'Configurar permissões e níveis de acesso',
       icon: <Security sx={{ fontSize: 48, color: '#764ba2' }} />,
       action: () => setCurrentModule('permissions')
+    },
+    {
+      title: 'Clientes Kealabs',
+      description: 'Gerenciar clientes da Kealabs',
+      icon: <Business sx={{ fontSize: 48, color: '#FF9800' }} />,
+      action: () => setCurrentModule('kea-clients')
     },
     {
       title: 'Configurações',
@@ -103,7 +110,6 @@ const AdminContainer = () => {
       
       {currentModule === 'users' && (
         <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'white', zIndex: 1300 }}>
-          <ToolbarContainer />
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -131,7 +137,6 @@ const AdminContainer = () => {
       
       {currentModule === 'permissions' && (
         <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'white', zIndex: 1300 }}>
-          <ToolbarContainer />
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -157,9 +162,35 @@ const AdminContainer = () => {
         </Box>
       )}
       
+      {currentModule === 'kea-clients' && (
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'white', zIndex: 1300 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            p: 3, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>Clientes Kealabs</Typography>
+            <Button 
+              onClick={() => setCurrentModule(null)}
+              sx={{ 
+                color: 'white', 
+                borderColor: 'white',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+              }}
+              variant="outlined"
+            >
+              Voltar
+            </Button>
+          </Box>
+          <KeaClientsManagement />
+        </Box>
+      )}
+      
       {currentModule === 'settings' && (
         <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'white', zIndex: 1300 }}>
-          <ToolbarContainer />
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
