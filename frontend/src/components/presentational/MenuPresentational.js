@@ -41,7 +41,7 @@ const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
         </Box>
         
         <Grid container spacing={4}>
-          {menuItems.filter(item => !item.adminOnly || (user && user.role === 'admin')).map((item, index) => (
+          {menuItems.filter(item => !item.adminOnly || (user && user.role_id === 1)).map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={menuStyles.menuCard}>
                 <CardContent sx={menuStyles.cardContent}>
