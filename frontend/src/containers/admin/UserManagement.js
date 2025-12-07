@@ -17,18 +17,21 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [roles, setRoles] = useState([]);
   const [keaClients, setKeaClients] = useState([]);
+  const [units, setUnits] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     role: 'user',
-    kea_client_id: ''
+    kea_client_id: '',
+    unit_id: ''
   });
 
   useEffect(() => {
     loadUsers();
     loadRoles();
     loadKeaClients();
+    loadUnits();
   }, [pagination.page]);
 
   const loadRoles = async () => {
@@ -46,6 +49,15 @@ const UserManagement = () => {
       setKeaClients(data);
     } catch (error) {
       console.error('Erro ao carregar clientes KEA:', error);
+    }
+  };
+
+  const loadUnits = async () => {
+    try {
+      const response = await adminService.getUnits();
+      setUnits(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar unidades:', error);
     }
   };
 
@@ -72,7 +84,7 @@ const UserManagement = () => {
       }
       setModalOpen(false);
       setEditingUser(null);
-      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '' });
+      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '', unit_id: '' });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
@@ -86,7 +98,8 @@ const UserManagement = () => {
       email: user.email,
       password: '',
       role: user.role,
-      kea_client_id: user.kea_client_id || ''
+      kea_client_id: user.kea_client_id || '',
+      unit_id: user.unit_id || ''
     });
     setModalOpen(true);
   };
@@ -253,6 +266,22 @@ const UserManagement = () => {
               {keaClients.map((client) => (
                 <MenuItem key={client.id} value={client.id}>
                   {client.name} ({client.kea_identifier})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Unidade</InputLabel>
+            <Select
+              value={formData.unit_id}
+              onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })}
+            >
+              <MenuItem value="">
+                <em>Nenhuma unidade</em>
+              </MenuItem>
+              {units.map((unit) => (
+                <MenuItem key={unit.id} value={unit.id}>
+                  {unit.unit_name}
                 </MenuItem>
               ))}
             </Select>

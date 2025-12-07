@@ -46,3 +46,11 @@ class AdminService:
 
     def update_user_permissions(self, user_id: int, permissions: dict):
         return self.repository.update_user_permissions(user_id, permissions)
+
+    def get_all_units(self):
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT id, unit_name FROM unit_settings WHERE is_active = 1")
+            return cursor.fetchall()
+        finally:
+            cursor.close()

@@ -60,6 +60,10 @@ class AdminService {
       body: JSON.stringify(permissions)
     });
   }
+
+  async getUnits() {
+    return this.request('/admin/units');
+  }
 }
 
 export const adminService = new AdminService();

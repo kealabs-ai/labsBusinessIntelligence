@@ -14,13 +14,15 @@ class UserCreateRequest(BaseModel):
     email: str
     password: str
     role: str = '4'
-    kea_client_id: int = None
+    kea_client_id: str = None
+    unit_id: int = None
 
 class UserUpdateRequest(BaseModel):
     username: str = None
     email: str = None
     role: str = None
-    kea_client_id: int = None
+    kea_client_id: str = None
+    unit_id: int = None
     is_active: bool = None
 
 async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -103,4 +105,14 @@ async def update_user_permissions(user_id: int, permissions: dict, admin=Depends
         return {"success": True, "message": "Permissions updated"}
     except Exception as e:
         logger.error(f"Error updating permissions: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/units")
+async def get_units(admin=Depends(get_current_admin)):
+    try:
+        service = AdminService()
+        units = service.get_all_units()
+        return {"success": True, "data": units}
+    except Exception as e:
+        logger.error(f"Error fetching units: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

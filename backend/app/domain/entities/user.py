@@ -10,6 +10,7 @@ class User(BaseModel):
     role_id: int = Field(default=4, description="User role ID")
     role: Optional[str] = Field(default=None, description="User role name")
     kea_client_id: Optional[str] = Field(default=None, description="KEA Client ID")
+    unit_id: Optional[int] = Field(default=None, description="Unit ID")
     is_active: bool = True
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
