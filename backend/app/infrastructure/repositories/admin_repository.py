@@ -16,7 +16,7 @@ class AdminRepository:
             # Get paginated users
             offset = (page - 1) * limit
             cursor.execute("""
-                SELECT id, username, email, role, is_active, created_at, updated_at 
+                SELECT id, username, email, role_id, kea_client_id, is_active, created_at, updated_at 
                 FROM users ORDER BY created_at DESC LIMIT %s OFFSET %s
             """, (limit, offset))
             
@@ -35,9 +35,9 @@ class AdminRepository:
         cursor = self.connection.cursor(dictionary=True)
         try:
             cursor.execute("""
-                INSERT INTO users (username, email, password_hash, role, is_active)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (user.username, user.email, user.password_hash, user.role, user.is_active))
+                INSERT INTO users (username, email, password_hash, role_id, kea_client_id, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user.username, user.email, user.password_hash, user.role_id, user.kea_client_id, user.is_active))
             
             user.id = cursor.lastrowid
             self.connection.commit()
@@ -63,7 +63,7 @@ class AdminRepository:
                 self.connection.commit()
             
             # Return updated user
-            cursor.execute("SELECT id, username, email, role, is_active, created_at, updated_at FROM users WHERE id = %s", (user_id,))
+            cursor.execute("SELECT id, username, email, role_id, kea_client_id, is_active, created_at, updated_at FROM users WHERE id = %s", (user_id,))
             result = cursor.fetchone()
             return User(**result, password_hash='') if result else None
         finally:

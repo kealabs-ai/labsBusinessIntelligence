@@ -9,6 +9,7 @@ class User(BaseModel):
     password_hash: str
     role_id: int = Field(default=4, description="User role ID")
     role: Optional[str] = Field(default=None, description="User role name")
+    kea_client_id: Optional[str] = Field(default=None, description="KEA Client ID")
     is_active: bool = True
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
