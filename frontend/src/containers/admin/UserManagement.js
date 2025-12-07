@@ -5,24 +5,49 @@ import {
   DialogTitle, DialogContent, DialogActions, TextField, Select,
   MenuItem, FormControl, InputLabel, Chip, IconButton, Pagination
 } from '@mui/material';
-import { Add, Edit, Delete } from '@mui/icons-material';
+import { Add, Edit, Delete, People } from '@mui/icons-material';
 import { adminService } from '../../services/adminService';
+import { roleService } from '../../services/roleService';
+import { keaClientService } from '../../services/keaClientService';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [keaClients, setKeaClients] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    role: 'user'
+    role: 'user',
+    kea_client_id: ''
   });
 
   useEffect(() => {
     loadUsers();
+    loadRoles();
+    loadKeaClients();
   }, [pagination.page]);
+
+  const loadRoles = async () => {
+    try {
+      const data = await roleService.getRoles();
+      setRoles(data);
+    } catch (error) {
+      console.error('Erro ao carregar roles:', error);
+    }
+  };
+
+  const loadKeaClients = async () => {
+    try {
+      const data = await keaClientService.getKeaClients();
+      setKeaClients(data);
+    } catch (error) {
+      console.error('Erro ao carregar clientes KEA:', error);
+    }
+  };
 
   const loadUsers = async () => {
     try {
@@ -47,7 +72,7 @@ const UserManagement = () => {
       }
       setModalOpen(false);
       setEditingUser(null);
-      setFormData({ username: '', email: '', password: '', role: 'user' });
+      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '' });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
@@ -60,7 +85,8 @@ const UserManagement = () => {
       username: user.username,
       email: user.email,
       password: '',
-      role: user.role
+      role: user.role,
+      kea_client_id: user.kea_client_id || ''
     });
     setModalOpen(true);
   };
@@ -78,17 +104,44 @@ const UserManagement = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5">Gestão de Usuários</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setModalOpen(true)}
-          sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
-        >
-          Novo Usuário
-        </Button>
-      </Box>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <People sx={{ fontSize: 32, color: 'white' }} />
+              <Typography variant="h4" component="h1" sx={{ 
+                fontWeight: 600,
+                color: 'white'
+              }}>
+                Gestão de Usuários
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setModalOpen(true)}
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                },
+                borderRadius: 2,
+                px: 3,
+                py: 1
+              }}
+            >
+              Novo Usuário
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent>
@@ -176,13 +229,32 @@ const UserManagement = () => {
             helperText={editingUser ? "Deixe em branco para manter a senha atual" : ""}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel>Role</InputLabel>
+            <InputLabel>Perfil</InputLabel>
             <Select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
             >
-              <MenuItem value="user">Usuário</MenuItem>
-              <MenuItem value="admin">Administrador</MenuItem>
+              {roles.map((role) => (
+                <MenuItem key={role.value} value={role.value}>
+                  {role.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Cliente</InputLabel>
+            <Select
+              value={formData.kea_client_id}
+              onChange={(e) => setFormData({ ...formData, kea_client_id: e.target.value })}
+            >
+              <MenuItem value="">
+                <em>Nenhum cliente</em>
+              </MenuItem>
+              {keaClients.map((client) => (
+                <MenuItem key={client.id} value={client.id}>
+                  {client.name} ({client.kea_identifier})
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </DialogContent>
