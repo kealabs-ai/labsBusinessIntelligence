@@ -51,10 +51,16 @@ async def create_unit(unit_data: UnitCreate, current_user: dict = Depends(get_cu
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/units", response_model=List[UnitResponse])
-async def get_units(current_user: dict = Depends(get_current_user)):
+async def get_units(id: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     try:
-        units = unit_service.get_user_units(current_user["user_id"])
-        return [unit.to_dict() for unit in units]
+        if id:
+            unit = unit_service.get_unit_by_id(id)
+            if not unit:
+                raise HTTPException(status_code=404, detail="Unidade não encontrada")
+            return [unit.to_dict()]
+        else:
+            units = unit_service.get_user_units(current_user["user_id"])
+            return [unit.to_dict() for unit in units]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -134,6 +134,41 @@ class UnitRepository:
             cursor.close()
             connection.close()
 
+    def get_unit_by_id(self, unit_id: int) -> Optional[Unit]:
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        
+        try:
+            if self.db_type == "mysql":
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE id = %s"
+            else:
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE id = ?"
+            
+            cursor.execute(query, (unit_id,))
+            row = cursor.fetchone()
+            
+            if row:
+                return Unit(
+                    id=row[0],
+                    user_id=row[1],
+                    unit_name=row[2],
+                    address=row[3],
+                    phone=row[4],
+                    email=row[5],
+                    opening_time=row[6] if row[6] else time(8, 0),
+                    closing_time=row[7] if row[7] else time(18, 0),
+                    appointment_interval=row[8] if row[8] else 30,
+                    notifications_enabled=bool(row[9]) if row[9] is not None else True,
+                    notification_advance_hours=row[10] if row[10] else 24,
+                    created_at=str(row[11]) if row[11] else None,
+                    updated_at=str(row[12]) if row[12] else None
+                )
+            return None
+            
+        finally:
+            cursor.close()
+            connection.close()
+
     def delete_unit(self, unit_id: int, user_id: int) -> bool:
         connection = self.get_connection()
         cursor = connection.cursor()
