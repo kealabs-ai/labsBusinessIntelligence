@@ -18,6 +18,7 @@ class Agendamento(BaseModel):
     notification_date: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    unit_name: Optional[str] = None
     
     class Config:
         from_attributes = True

@@ -156,10 +156,9 @@ class AgendamentoRepository(BaseRepository):
                     notification_unit=row.get('notification_unit', 'dias'),
                     notification_date=row.get('notification_date'),
                     created_at=row.get('created_at'),
-                    updated_at=row.get('updated_at')
+                    updated_at=row.get('updated_at'),
+                    unit_name=row.get('unit_name')
                 )
-                # Adicionar nome da unidade como atributo extra
-                agendamento.unit_name = row.get('unit_name', 'Sem unidade')
                 agendamentos.append(agendamento)
             
             return {
