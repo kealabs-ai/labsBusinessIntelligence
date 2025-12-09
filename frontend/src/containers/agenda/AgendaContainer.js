@@ -57,11 +57,14 @@ const AgendaContainer = () => {
   const [lastMessageId, setLastMessageId] = useState(null);
   const [pollingActive, setPollingActive] = useState(false);
   const [chatPollingInterval, setChatPollingInterval] = useState(null);
+  const [units, setUnits] = useState([]);
+  const [userUnit, setUserUnit] = useState(null);
 
   useEffect(() => {
     loadAgendamentos();
     loadAllEvents();
     loadContacts();
+    loadUserUnit();
   }, []);
   
   useEffect(() => {
@@ -95,7 +98,8 @@ const AgendaContainer = () => {
         servico: ag.servico,
         whatsapp_number: ag.whatsapp_number,
         custom_message: ag.custom_message,
-        enable_notification: ag.enable_notification
+        enable_notification: ag.enable_notification,
+        unit_name: userUnit || 'Carregando...'
       })) : [];
       setEvents(formattedEvents);
       
@@ -168,7 +172,8 @@ const AgendaContainer = () => {
           servico: ag.servico,
           whatsapp_number: ag.whatsapp_number,
           custom_message: ag.custom_message,
-          enable_notification: ag.enable_notification
+          enable_notification: ag.enable_notification,
+          unit_name: userUnit || 'Carregando...'
         })) : [];
         setEvents(formattedEvents);
         
@@ -203,6 +208,26 @@ const AgendaContainer = () => {
       console.error('Erro ao carregar contatos:', error);
       // Set empty array on error to prevent UI issues
       setContacts([]);
+    }
+  };
+
+  const loadUserUnit = async () => {
+    try {
+      const response = await fetch('http://72.60.140.128:6002/api/v1/user-unit', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUserUnit(data.unit_name || 'Sem unidade');
+      } else {
+        setUserUnit('Sem unidade');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar unidade do usuário:', error);
+      setUserUnit('Sem unidade');
     }
   };
 
@@ -408,7 +433,8 @@ const AgendaContainer = () => {
         servico: ag.servico,
         whatsapp_number: ag.whatsapp_number,
         custom_message: ag.custom_message,
-        enable_notification: ag.enable_notification
+        enable_notification: ag.enable_notification,
+        unit_name: userUnit || 'Carregando...'
       })) : [];
       setEvents(formattedEvents);
       

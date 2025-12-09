@@ -161,15 +161,28 @@ const AgendaPresentational = ({
                   >
                     <ListItemText
                       primary={event.title}
-                      secondary={`${event.date} às ${event.time} - ${event.description}`}
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" color="textSecondary">
+                            {event.date} às {event.time} - {event.description}
+                          </Typography>
+                          {event.unit_name && (
+                            <Typography variant="caption" sx={{ 
+                              color: 'primary.main', 
+                              fontWeight: 500,
+                              display: 'block',
+                              mt: 0.5
+                            }}>
+                              📍 Unidade: {event.unit_name}
+                            </Typography>
+                          )}
+                        </Box>
+                      }
                       sx={{ 
                         flex: 1,
                         '& .MuiListItemText-primary': {
                           fontSize: { xs: '0.9rem', sm: '1rem' },
                           fontWeight: 500
-                        },
-                        '& .MuiListItemText-secondary': {
-                          fontSize: { xs: '0.8rem', sm: '0.875rem' }
                         }
                       }}
                     />

@@ -50,7 +50,7 @@ class AdminService:
     def get_all_units(self):
         cursor = self.connection.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT id, unit_name FROM unit_settings WHERE is_active = 1")
+            cursor.execute("SELECT id, unit_name FROM unit_settings")
             return cursor.fetchall()
         finally:
             cursor.close()

@@ -151,6 +151,15 @@ class AgendaService {
       throw error;
     }
   }
+
+  async getUnits() {
+    try {
+      return await this.request('/admin/units');
+    } catch (error) {
+      console.warn('Units endpoint not available, returning empty data');
+      return { success: true, data: [] };
+    }
+  }
 }
 
 export const agendaService = new AgendaService();

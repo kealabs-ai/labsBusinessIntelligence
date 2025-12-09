@@ -74,22 +74,42 @@ class AgendamentoRepository(BaseRepository):
         finally:
             cursor.close()
     
-    def get_all(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None, date_filter: str = None) -> dict:
+    def get_all(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None, date_filter: str = None, kea_client_id: str = None) -> dict:
         cursor = self.connection.cursor(dictionary=True)
         try:
-            # Query base - filtrar apenas registros ativos e do usuário
-            base_query = "SELECT * FROM agendamentos WHERE (ativo IS NULL OR ativo = TRUE)"
-            count_query = "SELECT COUNT(*) as total FROM agendamentos WHERE (ativo IS NULL OR ativo = TRUE)"
+            # Query base com JOIN para buscar nome da unidade
+            base_query = """
+                SELECT a.*, u.unit_name 
+                FROM agendamentos a 
+                LEFT JOIN users us ON a.user_id = us.id 
+                LEFT JOIN unit_settings u ON us.unit_id = u.id 
+                WHERE (a.ativo IS NULL OR a.ativo = TRUE)
+            """
+            count_query = """
+                SELECT COUNT(*) as total 
+                FROM agendamentos a 
+                LEFT JOIN users us ON a.user_id = us.id 
+                WHERE (a.ativo IS NULL OR a.ativo = TRUE)
+            """
             params = []
             
-            if user_id:
-                base_query += " AND user_id = %s"
-                count_query += " AND user_id = %s"
+            # Filtrar por user_id OU kea_client_id
+            if user_id and kea_client_id:
+                base_query += " AND (a.user_id = %s OR us.kea_client_id = %s)"
+                count_query += " AND (a.user_id = %s OR us.kea_client_id = %s)"
+                params.extend([user_id, kea_client_id, user_id, kea_client_id])
+            elif user_id:
+                base_query += " AND a.user_id = %s"
+                count_query += " AND a.user_id = %s"
                 params.append(user_id)
+            elif kea_client_id:
+                base_query += " AND us.kea_client_id = %s"
+                count_query += " AND us.kea_client_id = %s"
+                params.append(kea_client_id)
             
             # Adicionar filtro de busca
             if search:
-                search_filter = " AND (cliente LIKE %s OR servico LIKE %s)"
+                search_filter = " AND (a.cliente LIKE %s OR a.servico LIKE %s)"
                 base_query += search_filter
                 count_query += search_filter
                 search_param = f"%{search}%"
@@ -97,7 +117,7 @@ class AgendamentoRepository(BaseRepository):
             
             # Adicionar filtro por data
             if date_filter:
-                date_filter_sql = " AND data = %s"
+                date_filter_sql = " AND a.data = %s"
                 base_query += date_filter_sql
                 count_query += date_filter_sql
                 params.append(date_filter)
@@ -108,14 +128,14 @@ class AgendamentoRepository(BaseRepository):
             
             # Adicionar paginação
             offset = (page - 1) * limit
-            base_query += " ORDER BY data DESC, hora DESC LIMIT %s OFFSET %s"
+            base_query += " ORDER BY a.data DESC, a.hora DESC LIMIT %s OFFSET %s"
             params.extend([limit, offset])
             
             cursor.execute(base_query, params)
             
             agendamentos = []
             for row in cursor.fetchall():
-                agendamentos.append(Agendamento(
+                agendamento = Agendamento(
                     id=row['id'],
                     cliente=row['cliente'],
                     servico=row['servico'],
@@ -131,7 +151,10 @@ class AgendamentoRepository(BaseRepository):
                     notification_date=row.get('notification_date'),
                     created_at=row.get('created_at'),
                     updated_at=row.get('updated_at')
-                ))
+                )
+                # Adicionar nome da unidade como atributo extra
+                agendamento.unit_name = row.get('unit_name', 'Sem unidade')
+                agendamentos.append(agendamento)
             
             return {
                 "items": agendamentos,

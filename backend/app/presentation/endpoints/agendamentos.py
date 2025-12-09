@@ -66,15 +66,23 @@ async def get_agendamentos(
     user=Depends(get_current_user)
 ):
     """
-    Buscar agendamentos com paginação, busca e filtro por data
+    Buscar agendamentos filtrados por user_id e kea_client_id
     """
     logger.info(f"GET /agendamentos/ called - page: {page}, limit: {limit}, search: {search}, date: {date}")
     try:
         service = AgendamentoService()
-        result = service.get_all_agendamentos(page, limit, search, user.id, date)
+        result = service.get_all_agendamentos(page, limit, search, user.id, date, user.kea_client_id)
+        
+        # Adicionar unit_name aos dados retornados
+        items_with_unit = []
+        for agendamento in result.get("items", []):
+            agendamento_dict = agendamento.dict()
+            agendamento_dict['unit_name'] = getattr(agendamento, 'unit_name', 'Sem unidade')
+            items_with_unit.append(agendamento_dict)
+        
         return {
             "success": True,
-            "items": [agendamento.dict() for agendamento in result["items"]] if result.get("items") else [],
+            "items": items_with_unit,
             "total": result.get("total", 0),
             "page": result.get("page", page),
             "limit": result.get("limit", limit),
