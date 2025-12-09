@@ -94,18 +94,22 @@ class AgendamentoRepository(BaseRepository):
             params = []
             
             # Filtrar por user_id OU kea_client_id
+            count_params = []
             if user_id and kea_client_id:
                 base_query += " AND (a.user_id = %s OR us.kea_client_id = %s)"
                 count_query += " AND (a.user_id = %s OR us.kea_client_id = %s)"
-                params.extend([user_id, kea_client_id, user_id, kea_client_id])
+                params.extend([user_id, kea_client_id])
+                count_params.extend([user_id, kea_client_id])
             elif user_id:
                 base_query += " AND a.user_id = %s"
                 count_query += " AND a.user_id = %s"
                 params.append(user_id)
+                count_params.append(user_id)
             elif kea_client_id:
                 base_query += " AND us.kea_client_id = %s"
                 count_query += " AND us.kea_client_id = %s"
                 params.append(kea_client_id)
+                count_params.append(kea_client_id)
             
             # Adicionar filtro de busca
             if search:
@@ -114,6 +118,7 @@ class AgendamentoRepository(BaseRepository):
                 count_query += search_filter
                 search_param = f"%{search}%"
                 params.extend([search_param, search_param])
+                count_params.extend([search_param, search_param])
             
             # Adicionar filtro por data
             if date_filter:
@@ -121,9 +126,10 @@ class AgendamentoRepository(BaseRepository):
                 base_query += date_filter_sql
                 count_query += date_filter_sql
                 params.append(date_filter)
+                count_params.append(date_filter)
             
             # Contar total de registros
-            cursor.execute(count_query, params)
+            cursor.execute(count_query, count_params)
             total = cursor.fetchone()['total']
             
             # Adicionar paginação
