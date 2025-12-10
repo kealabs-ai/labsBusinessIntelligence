@@ -22,17 +22,21 @@ export const getResourceById = async (id) => {
 
 export const createResource = async (resourceData) => {
     const token = getAuthToken();
+    console.log('Creating resource with data:', resourceData);
     const response = await axios.post(`${API_URL}/`, resourceData, {
         headers: { Authorization: `Bearer ${token}` }
     });
+    console.log('Create response:', response.data);
     return response.data;
 };
 
 export const updateResource = async (id, resourceData) => {
     const token = getAuthToken();
-    const response = await axios.put(`${API_URL}/${id}`, resourceData, {
+    console.log('Updating resource ID:', id, 'with data:', resourceData);
+    const response = await axios.post(`${API_URL}/${id}`, resourceData, {
         headers: { Authorization: `Bearer ${token}` }
     });
+    console.log('Update response:', response.data);
     return response.data;
 };
 

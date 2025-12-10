@@ -12,6 +12,9 @@ class Resource(BaseModel):
     phone: Optional[str] = None
     notes: Optional[str] = None
     status: Optional[bool] = True
+    unit_id: Optional[int] = None
+    role_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -22,6 +25,9 @@ class ResourceCreate(BaseModel):
     email: Optional[str] = ""
     phone: Optional[str] = ""
     notes: Optional[str] = ""
+    unit_id: Optional[int] = None
+    role_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
 
 class ResourceUpdate(BaseModel):
     name: Optional[str] = None
@@ -31,3 +37,6 @@ class ResourceUpdate(BaseModel):
     phone: Optional[str] = None
     notes: Optional[str] = None
     status: Optional[bool] = None
+    unit_id: Optional[int] = None
+    role_id: Optional[int] = None
+    kea_client_id: Optional[str] = None

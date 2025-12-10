@@ -55,8 +55,13 @@ const RecursosContainer = () => {
     try {
       setLoading(true);
       
-      // Get kea_client_id from session/user context
+      // Get user data from session/localStorage
       const userKeaClientId = localStorage.getItem('kea_client_id') || '';
+      const userRoleId = localStorage.getItem('role_id') || '1';
+      
+      console.log('Original recursoData:', recursoData);
+      console.log('User kea_client_id from session:', userKeaClientId);
+      console.log('User role_id from session:', userRoleId);
       
       // Map Portuguese field names to English
       const mappedData = {
@@ -67,8 +72,11 @@ const RecursosContainer = () => {
         phone: recursoData.telefone || '',
         notes: recursoData.observacoes || '',
         unit_id: recursoData.kea_client_id || '',
-        kea_client_id: userKeaClientId
+        kea_client_id: userKeaClientId,
+        role_id: parseInt(userRoleId)
       };
+      
+      console.log('Mapped data to send:', mappedData);
       
       if (editingRecurso) {
         await updateResource(editingRecurso.id, mappedData);
