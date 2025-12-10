@@ -35,8 +35,8 @@ class ResourceRepository:
     def create(self, resource: ResourceCreate, user_id: int) -> Resource:
         try:
             query = """
-                INSERT INTO resources (user_id, name, type, specialty, email, phone, notes, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO resources (user_id, name, type, specialty, email, phone, notes, status, unit_id, role_id, kea_client_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = (
                 user_id,
@@ -47,6 +47,9 @@ class ResourceRepository:
                 resource.phone,
                 resource.notes,
                 resource.status if hasattr(resource, 'status') else True,
+                resource.unit_id,
+                resource.role_id,
+                resource.kea_client_id,
             )
             resource_id = self.repository.execute(query, params)
             return self.get_by_id(resource_id, user_id)
@@ -79,6 +82,15 @@ class ResourceRepository:
         if resource_update.status is not None:
             query_parts.append("status = %s")
             params.append(resource_update.status)
+        if resource_update.unit_id is not None:
+            query_parts.append("unit_id = %s")
+            params.append(resource_update.unit_id)
+        if resource_update.role_id is not None:
+            query_parts.append("role_id = %s")
+            params.append(resource_update.role_id)
+        if resource_update.kea_client_id is not None:
+            query_parts.append("kea_client_id = %s")
+            params.append(resource_update.kea_client_id)
 
         if not query_parts:
             return self.get_by_id(resource_id, user_id)
