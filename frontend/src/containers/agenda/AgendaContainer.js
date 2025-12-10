@@ -88,18 +88,25 @@ const AgendaContainer = () => {
       setLoading(true);
       const response = await agendaService.getAgendamentos(page, 3);
       const agendamentos = response.items || response.data || response;
-      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
-        id: ag.id,
-        title: `${ag.cliente} - ${ag.servico}`,
-        date: ag.data,
-        time: ag.hora,
-        description: ag.servico,
-        cliente: ag.cliente,
-        servico: ag.servico,
-        whatsapp_number: ag.whatsapp_number,
-        custom_message: ag.custom_message,
-        enable_notification: ag.enable_notification,
-        unit_name: userUnit || 'Carregando...'
+      console.log('loadAgendamentos: Agendamentos recebidos:', agendamentos);
+      const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => {
+        console.log('Processando agendamento:', ag);
+        console.log('ag.unit_name:', ag.unit_name, 'ag.unit_id:', ag.unit_id);
+        const unitName = ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade';
+        console.log('Unit name final:', unitName);
+        return {
+          id: ag.id,
+          title: `${ag.cliente} - ${ag.servico}`,
+          date: ag.data,
+          time: ag.hora,
+          description: ag.servico,
+          cliente: ag.cliente,
+          servico: ag.servico,
+          whatsapp_number: ag.whatsapp_number,
+          custom_message: ag.custom_message,
+          enable_notification: ag.enable_notification,
+          unit_name: unitName
+        };
       })) : [];
       setEvents(formattedEvents);
       
@@ -162,7 +169,7 @@ const AgendaContainer = () => {
       try {
         const response = await agendaService.getAgendamentos(1, 3, term, dateFilter);
         const agendamentos = response.items || response.data || response;
-        const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+        const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => ({
           id: ag.id,
           title: `${ag.cliente} - ${ag.servico}`,
           date: ag.data,
@@ -173,8 +180,8 @@ const AgendaContainer = () => {
           whatsapp_number: ag.whatsapp_number,
           custom_message: ag.custom_message,
           enable_notification: ag.enable_notification,
-          unit_name: userUnit || 'Carregando...'
-        })) : [];
+          unit_name: ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade'
+        }))) : [];
         setEvents(formattedEvents);
         
         if (response.total !== undefined) {
@@ -208,6 +215,33 @@ const AgendaContainer = () => {
       console.error('Erro ao carregar contatos:', error);
       // Set empty array on error to prevent UI issues
       setContacts([]);
+    }
+  };
+
+  const loadUnitName = async (unitId) => {
+    if (!unitId) {
+      console.log('loadUnitName: unitId é null/undefined');
+      return 'Sem unidade';
+    }
+    
+    try {
+      console.log('loadUnitName: Buscando unidade com ID:', unitId);
+      const response = await fetch(`http://72.60.140.128:6002/api/v1/units?id=${unitId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('loadUnitName: Resposta da API:', data);
+        return data[0]?.unit_name || 'Sem unidade';
+      }
+      console.log('loadUnitName: Resposta não OK:', response.status);
+      return 'Sem unidade';
+    } catch (error) {
+      console.error('Erro ao carregar nome da unidade:', error);
+      return 'Sem unidade';
     }
   };
 
@@ -423,7 +457,7 @@ const AgendaContainer = () => {
       setLoading(true);
       const response = await agendaService.getAgendamentos(1, 3, searchTerm, dateFilter);
       const agendamentos = response.items || response.data || response;
-      const formattedEvents = Array.isArray(agendamentos) ? agendamentos.map(ag => ({
+      const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => ({
         id: ag.id,
         title: `${ag.cliente} - ${ag.servico}`,
         date: ag.data,
@@ -434,8 +468,8 @@ const AgendaContainer = () => {
         whatsapp_number: ag.whatsapp_number,
         custom_message: ag.custom_message,
         enable_notification: ag.enable_notification,
-        unit_name: userUnit || 'Carregando...'
-      })) : [];
+        unit_name: ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade'
+      }))) : [];
       setEvents(formattedEvents);
       
       if (response.total !== undefined) {

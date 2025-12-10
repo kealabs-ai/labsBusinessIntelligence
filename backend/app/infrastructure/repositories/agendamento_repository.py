@@ -79,10 +79,10 @@ class AgendamentoRepository(BaseRepository):
         try:
             # Query base com JOIN para buscar nome da unidade
             base_query = """
-                SELECT a.*, u.unit_name 
+                SELECT a.*, u.unit_name, us.unit_id 
                 FROM agendamentos a 
                 LEFT JOIN users us ON a.user_id = us.id 
-                LEFT JOIN unit_settings u ON us.unit_id = u.id 
+                LEFT JOIN unit_settings u ON us.unit_id =  us.unit_id 
                 WHERE (a.ativo IS NULL OR a.ativo = TRUE)
             """
             count_query = """
@@ -157,7 +157,8 @@ class AgendamentoRepository(BaseRepository):
                     notification_date=row.get('notification_date'),
                     created_at=row.get('created_at'),
                     updated_at=row.get('updated_at'),
-                    unit_name=row.get('unit_name')
+                    unit_name=row.get('unit_name'),
+                    unit_id=row.get('unit_id')
                 )
                 agendamentos.append(agendamento)
             

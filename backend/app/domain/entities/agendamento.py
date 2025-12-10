@@ -19,6 +19,7 @@ class Agendamento(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     unit_name: Optional[str] = None
+    unit_id: Optional[int] = None
     
     class Config:
         from_attributes = True
