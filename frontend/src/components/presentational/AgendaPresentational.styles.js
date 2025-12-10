@@ -52,8 +52,8 @@ export const agendaStyles = {
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     p: { xs: 2, sm: 3 },
-    height: { xs: 'auto', md: '700px' },
-    minHeight: { xs: '500px', md: '700px' }
+    height: { xs: 'auto', md: '900px' },
+    minHeight: { xs: '600px', md: '900px' }
   },
   
   whatsappCard: {
@@ -63,8 +63,8 @@ export const agendaStyles = {
     backdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     p: { xs: 2, sm: 3 },
-    height: { xs: 'auto', md: '800px' },
-    minHeight: { xs: '600px', md: '800px' }
+    height: { xs: 'auto', md: '900px' },
+    minHeight: { xs: '600px', md: '900px' }
   },
   
   sectionTitle: {

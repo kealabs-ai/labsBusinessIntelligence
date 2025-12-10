@@ -86,7 +86,8 @@ const AgendaContainer = () => {
   const loadAgendamentos = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await agendaService.getAgendamentos(page, 3);
+      setEvents([]); // Limpa eventos antes de carregar novos
+      const response = await agendaService.getAgendamentos(page, 5);
       const agendamentos = response.items || response.data || response;
       console.log('loadAgendamentos: Agendamentos recebidos:', agendamentos);
       const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => {
@@ -108,18 +109,21 @@ const AgendaContainer = () => {
           unit_name: unitName
         };
       })) : [];
-      setEvents(formattedEvents);
       
-      if (response.total !== undefined) {
-        setPagination({
-          currentPage: response.page || page,
-          totalPages: response.pages || Math.ceil(response.total / 3),
-          totalItems: response.total || formattedEvents.length
-        });
-      }
+      // Remove duplicatas baseado no ID
+      const uniqueEvents = formattedEvents.filter((event, index, self) => 
+        index === self.findIndex(e => e.id === event.id)
+      );
+      
+      setEvents(uniqueEvents);
+      
+      setPagination({
+        currentPage: page,
+        totalPages: response.pages || Math.ceil((response.total || 0) / 5),
+        totalItems: response.total || 0
+      });
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
-      // Set empty state on error
       setEvents([]);
       setPagination({ currentPage: 1, totalPages: 1, totalItems: 0 });
     } finally {
@@ -167,7 +171,8 @@ const AgendaContainer = () => {
     
     if (term.trim()) {
       try {
-        const response = await agendaService.getAgendamentos(1, 3, term, dateFilter);
+        setEvents([]); // Limpa eventos antes de buscar
+        const response = await agendaService.getAgendamentos(1, 5, term, dateFilter);
         const agendamentos = response.items || response.data || response;
         const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => ({
           id: ag.id,
@@ -182,15 +187,19 @@ const AgendaContainer = () => {
           enable_notification: ag.enable_notification,
           unit_name: ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade'
         }))) : [];
-        setEvents(formattedEvents);
         
-        if (response.total !== undefined) {
-          setPagination({
-            currentPage: 1,
-            totalPages: response.pages || Math.ceil(response.total / 3),
-            totalItems: response.total || formattedEvents.length
-          });
-        }
+        // Remove duplicatas baseado no ID
+        const uniqueEvents = formattedEvents.filter((event, index, self) => 
+          index === self.findIndex(e => e.id === event.id)
+        );
+        
+        setEvents(uniqueEvents);
+        
+        setPagination({
+          currentPage: 1,
+          totalPages: response.pages || Math.ceil((response.total || 0) / 5),
+          totalItems: response.total || 0
+        });
       } catch (error) {
         console.error('Erro ao buscar agendamentos:', error);
       }
@@ -292,7 +301,6 @@ const AgendaContainer = () => {
       if (result.success !== false) {
         await loadAgendamentos(pagination.currentPage);
         await loadAllEvents();
-        await loadContacts();
         console.log(editingEvent ? 'Agendamento atualizado' : 'Agendamento criado', 'com sucesso');
       }
     } catch (error) {
@@ -338,7 +346,8 @@ const AgendaContainer = () => {
     }
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (event, page) => {
+    console.log('Mudando para página:', page);
     loadAgendamentos(page);
   };
 
@@ -455,7 +464,8 @@ const AgendaContainer = () => {
     const dateFilter = date.toISOString().split('T')[0];
     try {
       setLoading(true);
-      const response = await agendaService.getAgendamentos(1, 3, searchTerm, dateFilter);
+      setEvents([]); // Limpa eventos antes de filtrar
+      const response = await agendaService.getAgendamentos(1, 5, searchTerm, dateFilter);
       const agendamentos = response.items || response.data || response;
       const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => ({
         id: ag.id,
@@ -470,15 +480,19 @@ const AgendaContainer = () => {
         enable_notification: ag.enable_notification,
         unit_name: ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade'
       }))) : [];
-      setEvents(formattedEvents);
       
-      if (response.total !== undefined) {
-        setPagination({
-          currentPage: 1,
-          totalPages: response.pages || Math.ceil(response.total / 3),
-          totalItems: response.total || formattedEvents.length
-        });
-      }
+      // Remove duplicatas baseado no ID
+      const uniqueEvents = formattedEvents.filter((event, index, self) => 
+        index === self.findIndex(e => e.id === event.id)
+      );
+      
+      setEvents(uniqueEvents);
+      
+      setPagination({
+        currentPage: 1,
+        totalPages: response.pages || Math.ceil((response.total || 0) / 5),
+        totalItems: response.total || 0
+      });
     } catch (error) {
       console.error('Erro ao filtrar por data:', error);
     } finally {
@@ -487,8 +501,8 @@ const AgendaContainer = () => {
   };
 
   const handleRefreshEvents = async () => {
-    await loadAllEvents();
     await loadAgendamentos(pagination.currentPage);
+    await loadAllEvents();
   };
 
   const handleMenuClick = (option) => {

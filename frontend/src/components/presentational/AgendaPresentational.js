@@ -214,7 +214,7 @@ const AgendaPresentational = ({
                 <Pagination
                   count={pagination?.totalPages || 1}
                   page={pagination?.currentPage || 1}
-                  onChange={(e, page) => onPageChange(page)}
+                  onChange={(e, page) => onPageChange(e, page)}
                   color="primary"
                   size="small"
                 />

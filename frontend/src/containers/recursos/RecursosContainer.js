@@ -55,6 +55,9 @@ const RecursosContainer = () => {
     try {
       setLoading(true);
       
+      // Get kea_client_id from session/user context
+      const userKeaClientId = localStorage.getItem('kea_client_id') || '';
+      
       // Map Portuguese field names to English
       const mappedData = {
         name: recursoData.nome,
@@ -62,7 +65,9 @@ const RecursosContainer = () => {
         specialty: recursoData.especialidade || '',
         email: recursoData.email || '',
         phone: recursoData.telefone || '',
-        notes: recursoData.observacoes || ''
+        notes: recursoData.observacoes || '',
+        unit_id: recursoData.kea_client_id || '',
+        kea_client_id: userKeaClientId
       };
       
       if (editingRecurso) {

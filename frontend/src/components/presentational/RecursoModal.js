@@ -25,8 +25,11 @@ const RecursoModal = ({ open, onClose, onSave, editingRecurso }) => {
     email: '',
     telefone: '',
     observacoes: '',
-    status: true
+    status: true,
+    kea_client_id: ''
   });
+
+  const [units, setUnits] = useState([]);
 
   const [errors, setErrors] = useState({});
 
@@ -45,7 +48,8 @@ const RecursoModal = ({ open, onClose, onSave, editingRecurso }) => {
         email: editingRecurso.email || '',
         telefone: editingRecurso.telefone || '',
         observacoes: editingRecurso.observacoes || '',
-        status: editingRecurso.status !== undefined ? editingRecurso.status : true
+        status: editingRecurso.status !== undefined ? editingRecurso.status : true,
+        kea_client_id: editingRecurso.kea_client_id || ''
       });
     } else {
       setFormData({
@@ -55,17 +59,44 @@ const RecursoModal = ({ open, onClose, onSave, editingRecurso }) => {
         email: '',
         telefone: '',
         observacoes: '',
-        status: true
+        status: true,
+        kea_client_id: ''
       });
     }
     setErrors({});
   }, [editingRecurso, open]);
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const response = await fetch('http://72.60.140.128:6002/api/v1/units', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUnits(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar unidades:', error);
+      }
+    };
+    
+    if (open) {
+      loadUnits();
+    }
+  }, [open]);
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.nome.trim()) {
       newErrors.nome = 'Nome é obrigatório';
+    }
+
+    if (!formData.kea_client_id) {
+      newErrors.kea_client_id = 'Unidade é obrigatória';
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -202,6 +233,35 @@ const RecursoModal = ({ open, onClose, onSave, editingRecurso }) => {
               onChange={handlePhoneChange}
               placeholder="(11) 99999-9999"
             />
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.kea_client_id}>
+              <InputLabel>Unidade *</InputLabel>
+              <Select
+                value={formData.kea_client_id}
+                onChange={(event) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    kea_client_id: event.target.value
+                  }));
+                  if (errors.kea_client_id) {
+                    setErrors(prev => ({ ...prev, kea_client_id: '' }));
+                  }
+                }}
+                label="Unidade *"
+                required
+              >
+                <MenuItem value="">
+                  <em>Selecione uma unidade</em>
+                </MenuItem>
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           
           <Grid item xs={12} sm={6}>
