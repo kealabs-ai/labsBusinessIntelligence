@@ -17,6 +17,9 @@ class ServiceCreateRequest(BaseModel):
     price: Decimal
     duration: int
     status: bool = True
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 class ServiceUpdateRequest(BaseModel):
     name: Optional[str] = None
@@ -46,7 +49,10 @@ async def create_service(
         description=request.description,
         price=request.price,
         duration=request.duration,
-        status=request.status
+        status=request.status,
+        unit_id=request.unit_id,
+        kea_client_id=request.kea_client_id,
+        role_id=request.role_id
     )
     return await service_service.create_service(service)
 

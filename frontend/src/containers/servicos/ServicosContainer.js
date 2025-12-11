@@ -55,6 +55,8 @@ const ServicosContainer = () => {
     try {
       setLoading(true);
       
+      console.log('Original servicoData:', servicoData);
+      
       if (editingServico) {
         await serviceService.updateService(editingServico.service_id, servicoData);
         showSnackbar('Serviço atualizado com sucesso!');

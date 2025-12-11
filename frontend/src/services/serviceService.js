@@ -40,6 +40,7 @@ class ServiceService {
   }
 
   async createService(serviceData) {
+    console.log('Sending service data to API:', serviceData);
     return this.request('/', {
       method: 'POST',
       body: JSON.stringify(serviceData)
