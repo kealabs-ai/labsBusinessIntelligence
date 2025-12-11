@@ -14,6 +14,7 @@ class Service(BaseModel):
     status: bool = Field(default=True)
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -26,6 +27,7 @@ class ServiceCreate(BaseModel):
     status: bool = True
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 class ServiceUpdate(BaseModel):
     name: Optional[str] = None
@@ -36,3 +38,4 @@ class ServiceUpdate(BaseModel):
     status: Optional[bool] = None
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None

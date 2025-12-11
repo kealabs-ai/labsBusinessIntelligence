@@ -446,12 +446,12 @@ class MySQLServiceRepository(IServiceRepository):
         cursor = conn.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO services (user_id, name, category, description, price, duration, status, unit_id, kea_client_id, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO services (user_id, name, category, description, price, duration, status, unit_id, kea_client_id, role_id, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 service.user_id, service.name, service.category, service.description,
-                service.price, service.duration, service.status, service.unit_id, service.kea_client_id, datetime.now(), datetime.now()
+                service.price, service.duration, service.status, service.unit_id, service.kea_client_id, service.role_id or 1, datetime.now(), datetime.now()
             )
             cursor.execute(query, values)
             conn.commit()

@@ -129,6 +129,7 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       const userKeaClientId = localStorage.getItem('kea_client_id') || '';
+      const userRoleId = localStorage.getItem('role_id') || '1';
       
       const submitData = {
         name: formData.nome,
@@ -138,7 +139,8 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
         duration: parseInt(formData.duracao),
         status: formData.status,
         unit_id: formData.unit_id,
-        kea_client_id: userKeaClientId
+        kea_client_id: userKeaClientId,
+        role_id: parseInt(userRoleId)
       };
       onSave(submitData);
       onClose();
