@@ -69,8 +69,18 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const response = await authService.login(username, password);
+      console.log('Login response:', response);
+      console.log('kea_client_id from response:', response.kea_client_id);
+      console.log('role_id from response:', response.role_id);
+      console.log('unit_id from response:', response.unit_id);
+      
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('loginTime', Date.now().toString());
+      localStorage.setItem('kea_client_id', response.kea_client_id || '');
+      localStorage.setItem('role_id', response.role_id || '1');
+      localStorage.setItem('unit_id', response.unit_id || '0');
+      
+      console.log('Saved to localStorage - kea_client_id:', localStorage.getItem('kea_client_id'));
       
       const userData = await authService.getCurrentUser();
       setUser(userData);
@@ -84,6 +94,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('loginTime');
+    localStorage.removeItem('kea_client_id');
+    localStorage.removeItem('role_id');
+    localStorage.removeItem('unit_id');
     setUser(null);
     setIsAuthenticated(false);
   };

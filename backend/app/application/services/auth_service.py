@@ -8,7 +8,7 @@ class AuthService:
     def __init__(self):
         self.user_repository = DatabaseFactory.get_user_repository()
     
-    async def authenticate_user(self, username: str, password: str) -> Optional[Token]:
+    async def authenticate_user(self, username: str, password: str) -> Optional[tuple]:
         user = await self.user_repository.get_user_by_credentials(username)
         
         if not user or not user.is_active:
@@ -17,7 +17,8 @@ class AuthService:
         if not TokenManager.verify_password(password, user.password_hash):
             return None
             
-        return TokenManager.create_access_token(user.id, user.is_active, user.role)
+        token = TokenManager.create_access_token(user.id, user.is_active, user.role)
+        return (token, user)
     
     async def get_current_user(self, token: str) -> Optional[User]:
         token_data = TokenManager.verify_token(token)

@@ -28,6 +28,7 @@ class MySQLUserRepository(IUserRepository):
         try:
             cursor.execute("SELECT id, username, email, password_hash, role_id, kea_client_id, unit_id, is_active, created_at, updated_at FROM users WHERE username = %s AND is_active = 1", (username,))
             result = cursor.fetchone()
+            print(f"User query result: {result}")
             return User(**result) if result else None
         finally:
             cursor.close()
