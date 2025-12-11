@@ -12,6 +12,8 @@ class Service(BaseModel):
     price: Decimal = Field(..., gt=0, description="Preço deve ser maior que zero")
     duration: int = Field(..., gt=0, description="Duração em minutos")
     status: bool = Field(default=True)
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -22,6 +24,8 @@ class ServiceCreate(BaseModel):
     price: Decimal
     duration: int
     status: bool = True
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
 
 class ServiceUpdate(BaseModel):
     name: Optional[str] = None
@@ -30,3 +34,5 @@ class ServiceUpdate(BaseModel):
     price: Optional[Decimal] = None
     duration: Optional[int] = None
     status: Optional[bool] = None
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None

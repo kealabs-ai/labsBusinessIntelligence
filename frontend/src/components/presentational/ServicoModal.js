@@ -24,8 +24,11 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
     descricao: '',
     preco: '',
     duracao: '',
-    status: true
+    status: true,
+    unit_id: ''
   });
+
+  const [units, setUnits] = useState([]);
 
   const [errors, setErrors] = useState({});
 
@@ -42,7 +45,8 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
         descricao: editingServico.description || editingServico.descricao || '',
         preco: editingServico.price || editingServico.preco || '',
         duracao: editingServico.duration || editingServico.duracao || '',
-        status: editingServico.status !== undefined ? editingServico.status : true
+        status: editingServico.status !== undefined ? editingServico.status : true,
+        unit_id: editingServico.unit_id || ''
       });
     } else {
       setFormData({
@@ -51,11 +55,34 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
         descricao: '',
         preco: '',
         duracao: '',
-        status: true
+        status: true,
+        unit_id: ''
       });
     }
     setErrors({});
   }, [editingServico, open]);
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const response = await fetch('http://72.60.140.128:6002/api/v1/units', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUnits(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar unidades:', error);
+      }
+    };
+    
+    if (open) {
+      loadUnits();
+    }
+  }, [open]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -74,6 +101,10 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
 
     if (!formData.duracao || parseInt(formData.duracao) <= 0) {
       newErrors.duracao = 'Duração deve ser maior que zero';
+    }
+
+    if (!formData.unit_id) {
+      newErrors.unit_id = 'Unidade é obrigatória';
     }
 
     setErrors(newErrors);
@@ -97,13 +128,17 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
 
   const handleSubmit = () => {
     if (validateForm()) {
+      const userKeaClientId = localStorage.getItem('kea_client_id') || '';
+      
       const submitData = {
         name: formData.nome,
         category: formData.categoria,
         description: formData.descricao,
         price: parseFloat(formData.preco),
         duration: parseInt(formData.duracao),
-        status: formData.status
+        status: formData.status,
+        unit_id: formData.unit_id,
+        kea_client_id: userKeaClientId
       };
       onSave(submitData);
       onClose();
@@ -202,7 +237,36 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
             />
           </Grid>
           
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.unit_id}>
+              <InputLabel>Unidade *</InputLabel>
+              <Select
+                value={formData.unit_id}
+                onChange={(event) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    unit_id: event.target.value
+                  }));
+                  if (errors.unit_id) {
+                    setErrors(prev => ({ ...prev, unit_id: '' }));
+                  }
+                }}
+                label="Unidade *"
+                required
+              >
+                <MenuItem value="">
+                  <em>Selecione uma unidade</em>
+                </MenuItem>
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
             <FormControlLabel
               control={
                 <Switch

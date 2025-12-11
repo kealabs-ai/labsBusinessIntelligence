@@ -446,12 +446,12 @@ class MySQLServiceRepository(IServiceRepository):
         cursor = conn.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO services (user_id, name, category, description, price, duration, status, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO services (user_id, name, category, description, price, duration, status, unit_id, kea_client_id, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 service.user_id, service.name, service.category, service.description,
-                service.price, service.duration, service.status, datetime.now(), datetime.now()
+                service.price, service.duration, service.status, service.unit_id, service.kea_client_id, datetime.now(), datetime.now()
             )
             cursor.execute(query, values)
             conn.commit()
@@ -469,12 +469,12 @@ class MySQLServiceRepository(IServiceRepository):
         try:
             query = """
                 UPDATE services SET name = %s, category = %s, description = %s, price = %s,
-                duration = %s, status = %s, updated_at = %s
+                duration = %s, status = %s, unit_id = %s, kea_client_id = %s, updated_at = %s
                 WHERE service_id = %s
             """
             values = (
                 service.name, service.category, service.description, service.price,
-                service.duration, service.status, datetime.now(), service_id
+                service.duration, service.status, service.unit_id, service.kea_client_id, datetime.now(), service_id
             )
             cursor.execute(query, values)
             conn.commit()
