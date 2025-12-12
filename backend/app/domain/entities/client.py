@@ -15,6 +15,7 @@ class Client(BaseModel):
     status: bool = Field(default=True, description="Active status: True for active, False for inactive")
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
     
     @validator('email')
     def validate_email(cls, v):

@@ -18,6 +18,7 @@ class ClientCreateRequest(BaseModel):
     note: Optional[str] = None
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 class ClientUpdateRequest(BaseModel):
     full_name: str
@@ -28,6 +29,7 @@ class ClientUpdateRequest(BaseModel):
     status: bool
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 class ClientStatusRequest(BaseModel):
     status: bool
@@ -57,8 +59,9 @@ async def create_client(
         email=request.email,
         birth_date=request.birth_date,
         note=request.note,
-        unit_id=request.unit_id,
-        kea_client_id=request.kea_client_id
+        unit_id=request.unit_id or 1,
+        kea_client_id=request.kea_client_id,
+        role_id=request.role_id or 1
     )
     return await client_service.create_client(client)
 
@@ -88,8 +91,9 @@ async def update_client(
         birth_date=request.birth_date,
         note=request.note,
         status=request.status,
-        unit_id=request.unit_id,
-        kea_client_id=request.kea_client_id
+        unit_id=request.unit_id or existing_client.unit_id or 1,
+        kea_client_id=request.kea_client_id,
+        role_id=request.role_id or existing_client.role_id or 1
     )
     
     updated_client = await client_service.update_client(client_id, client)
