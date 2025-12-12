@@ -205,13 +205,13 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         try:
             query = """
                 INSERT INTO transactions (cash_register_id, transaction_type, amount, description, 
-                                        transaction_date, category, payment_method)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                        transaction_date, category, payment_method, unit_id, kea_client_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 transacao.cash_register_id, transacao.transaction_type, transacao.amount, 
                 transacao.description, transacao.transaction_date, transacao.category, 
-                transacao.payment_method
+                transacao.payment_method, transacao.unit_id, transacao.kea_client_id
             )
             cursor.execute(query, values)
             conn.commit()
@@ -272,12 +272,13 @@ class MySQLTransacaoRepository(ITransacaoRepository):
         try:
             query = """
                 UPDATE transactions SET transaction_type = %s, category = %s, description = %s, 
-                amount = %s, transaction_date = %s, payment_method = %s
+                amount = %s, transaction_date = %s, payment_method = %s, unit_id = %s, kea_client_id = %s
                 WHERE id = %s
             """
             values = (
                 transacao.transaction_type, transacao.category, transacao.description, 
-                transacao.amount, transacao.transaction_date, transacao.payment_method, transacao_id
+                transacao.amount, transacao.transaction_date, transacao.payment_method, 
+                transacao.unit_id, transacao.kea_client_id, transacao_id
             )
             cursor.execute(query, values)
             conn.commit()

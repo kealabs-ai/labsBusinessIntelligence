@@ -25,9 +25,12 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
     data_transacao: '',
     metodo_pagamento: '',
     observacoes: '',
-    status: true
+    status: true,
+    unit_id: '',
+    kea_client_id: ''
   });
 
+  const [units, setUnits] = useState([]);
   const [errors, setErrors] = useState({});
 
   const categorias = [
@@ -52,9 +55,12 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
           new Date(editingTransacao.transaction_date || editingTransacao.data_transacao).toISOString().split('T')[0] : '',
         metodo_pagamento: editingTransacao.payment_method || editingTransacao.metodo_pagamento || '',
         observacoes: editingTransacao.observacoes || '',
-        status: editingTransacao.status !== undefined ? editingTransacao.status : true
+        status: editingTransacao.status !== undefined ? editingTransacao.status : true,
+        unit_id: editingTransacao.unit_id || '',
+        kea_client_id: editingTransacao.kea_client_id || ''
       });
     } else {
+      const sessionKeaClientId = localStorage.getItem('kea_client_id');
       setFormData({
         tipo: 'entrada',
         categoria: '',
@@ -63,11 +69,35 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
         data_transacao: new Date().toISOString().split('T')[0],
         metodo_pagamento: '',
         observacoes: '',
-        status: true
+        status: true,
+        unit_id: '',
+        kea_client_id: sessionKeaClientId || ''
       });
     }
     setErrors({});
   }, [editingTransacao, open]);
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const response = await fetch('http://72.60.140.128:6002/api/v1/units', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUnits(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar unidades:', error);
+      }
+    };
+    
+    if (open) {
+      loadUnits();
+    }
+  }, [open]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -90,6 +120,10 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
 
     if (!formData.metodo_pagamento.trim()) {
       newErrors.metodo_pagamento = 'Método de pagamento é obrigatório';
+    }
+
+    if (!formData.unit_id) {
+      newErrors.unit_id = 'Unidade é obrigatória';
     }
 
     setErrors(newErrors);
@@ -119,7 +153,9 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
         description: formData.descricao,
         transaction_date: new Date(formData.data_transacao).toISOString(),
         category: formData.categoria,
-        payment_method: formData.metodo_pagamento
+        payment_method: formData.metodo_pagamento,
+        unit_id: parseInt(formData.unit_id),
+        kea_client_id: formData.kea_client_id
       };
       onSave(submitData);
       onClose();
@@ -227,7 +263,7 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
             />
           </Grid>
           
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.metodo_pagamento}>
               <InputLabel>Método de Pagamento</InputLabel>
               <Select
@@ -244,6 +280,40 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
               {errors.metodo_pagamento && (
                 <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                   {errors.metodo_pagamento}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth error={!!errors.unit_id}>
+              <InputLabel>Unidade *</InputLabel>
+              <Select
+                value={formData.unit_id}
+                onChange={(event) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    unit_id: event.target.value
+                  }));
+                  if (errors.unit_id) {
+                    setErrors(prev => ({ ...prev, unit_id: '' }));
+                  }
+                }}
+                label="Unidade *"
+                required
+              >
+                <MenuItem value="">
+                  <em>Selecione uma unidade</em>
+                </MenuItem>
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.unit_id && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {errors.unit_id}
                 </Typography>
               )}
             </FormControl>

@@ -12,6 +12,8 @@ class Transacao(BaseModel):
     transaction_date: datetime
     category: Optional[str] = Field(None, max_length=100)
     payment_method: Optional[str] = Field(None, max_length=100)
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
     
     # Aliases for backward compatibility
     @property
@@ -50,3 +52,5 @@ class TransacaoCreate(BaseModel):
     transaction_date: datetime
     category: Optional[str] = None
     payment_method: Optional[str] = None
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
