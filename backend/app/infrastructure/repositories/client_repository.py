@@ -11,8 +11,8 @@ class ClientRepository:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO clients (user_id, full_name, phone_whatsapp, email, birth_date, note, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO clients (user_id, full_name, phone_whatsapp, email, birth_date, note, status, unit_id, kea_client_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(query, (
                 client.user_id,
@@ -21,7 +21,9 @@ class ClientRepository:
                 client.email,
                 client.birth_date,
                 client.note,
-                client.status if hasattr(client, 'status') else True
+                client.status if hasattr(client, 'status') else True,
+                client.unit_id if hasattr(client, 'unit_id') and client.unit_id else 1,
+                client.kea_client_id if hasattr(client, 'kea_client_id') else None
             ))
             self.connection.commit()
             
@@ -39,7 +41,7 @@ class ClientRepository:
         try:
             query = """
                 UPDATE clients 
-                SET full_name = %s, phone_whatsapp = %s, email = %s, birth_date = %s, note = %s, status = %s
+                SET full_name = %s, phone_whatsapp = %s, email = %s, birth_date = %s, note = %s, status = %s, unit_id = %s, kea_client_id = %s
                 WHERE client_id = %s
             """
             cursor.execute(query, (
@@ -49,6 +51,8 @@ class ClientRepository:
                 client.birth_date,
                 client.note,
                 client.status if hasattr(client, 'status') else True,
+                client.unit_id if hasattr(client, 'unit_id') and client.unit_id else 1,
+                client.kea_client_id if hasattr(client, 'kea_client_id') else None,
                 client_id
             ))
             self.connection.commit()
