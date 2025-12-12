@@ -21,6 +21,7 @@ class TransacaoCreateRequest(BaseModel):
     payment_method: Optional[str] = None
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 class TransacaoUpdateRequest(BaseModel):
     transaction_type: Literal['entrada', 'saida']
@@ -31,6 +32,7 @@ class TransacaoUpdateRequest(BaseModel):
     payment_method: Optional[str] = None
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
 
 async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
     auth_service = AuthService()
@@ -59,7 +61,8 @@ async def create_transacao(
         category=request.category,
         payment_method=request.payment_method,
         unit_id=request.unit_id,
-        kea_client_id=request.kea_client_id
+        kea_client_id=request.kea_client_id,
+        role_id=request.role_id or 1
     )
     return await transacao_service.create_transacao(transacao)
 
@@ -112,7 +115,8 @@ async def update_transacao(
         category=request.category,
         payment_method=request.payment_method,
         unit_id=request.unit_id,
-        kea_client_id=request.kea_client_id
+        kea_client_id=request.kea_client_id,
+        role_id=request.role_id or existing_transacao.role_id or 1
     )
     
     updated_transacao = await transacao_service.update_transacao(transacao_id, transacao)

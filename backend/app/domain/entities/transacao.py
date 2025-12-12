@@ -14,6 +14,7 @@ class Transacao(BaseModel):
     payment_method: Optional[str] = Field(None, max_length=100)
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None
     
     # Aliases for backward compatibility
     @property
@@ -54,3 +55,4 @@ class TransacaoCreate(BaseModel):
     payment_method: Optional[str] = None
     unit_id: Optional[int] = None
     kea_client_id: Optional[str] = None
+    role_id: Optional[int] = None

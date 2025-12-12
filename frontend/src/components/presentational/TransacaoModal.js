@@ -61,6 +61,7 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
       });
     } else {
       const sessionKeaClientId = localStorage.getItem('kea_client_id');
+      const sessionRoleId = localStorage.getItem('role_id');
       setFormData({
         tipo: 'entrada',
         categoria: '',
@@ -71,7 +72,8 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
         observacoes: '',
         status: true,
         unit_id: '',
-        kea_client_id: sessionKeaClientId || ''
+        kea_client_id: sessionKeaClientId || '',
+        role_id: sessionRoleId || ''
       });
     }
     setErrors({});
@@ -155,7 +157,8 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
         category: formData.categoria,
         payment_method: formData.metodo_pagamento,
         unit_id: parseInt(formData.unit_id),
-        kea_client_id: formData.kea_client_id
+        kea_client_id: formData.kea_client_id,
+        role_id: parseInt(formData.role_id) || 1
       };
       onSave(submitData);
       onClose();
