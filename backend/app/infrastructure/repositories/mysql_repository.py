@@ -105,12 +105,12 @@ class MySQLClientRepository(IClientRepository):
         cursor = conn.cursor(dictionary=True)
         try:
             query = """
-                INSERT INTO clients (user_id, full_name, phone_whatsapp, email, birth_date, note, created_at, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO clients (user_id, full_name, phone_whatsapp, email, birth_date, note, created_at, status, unit_id, kea_client_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 client.user_id, client.full_name, client.phone_whatsapp, client.email,
-                client.birth_date, client.note, datetime.now(), client.status
+                client.birth_date, client.note, datetime.now(), client.status, client.unit_id, client.kea_client_id
             )
             cursor.execute(query, values)
             conn.commit()
@@ -127,12 +127,12 @@ class MySQLClientRepository(IClientRepository):
         try:
             query = """
                 UPDATE clients SET full_name = %s, phone_whatsapp = %s, email = %s, 
-                birth_date = %s, note = %s, status = %s
+                birth_date = %s, note = %s, status = %s, unit_id = %s, kea_client_id = %s
                 WHERE client_id = %s
             """
             values = (
                 client.full_name, client.phone_whatsapp, client.email,
-                client.birth_date, client.note, client.status, client_id
+                client.birth_date, client.note, client.status, client.unit_id, client.kea_client_id, client_id
             )
             cursor.execute(query, values)
             conn.commit()

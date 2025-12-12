@@ -16,6 +16,8 @@ class ClientCreateRequest(BaseModel):
     email: str
     birth_date: Optional[date] = None
     note: Optional[str] = None
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
 
 class ClientUpdateRequest(BaseModel):
     full_name: str
@@ -24,6 +26,8 @@ class ClientUpdateRequest(BaseModel):
     birth_date: Optional[date] = None
     note: Optional[str] = None
     status: bool
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
 
 class ClientStatusRequest(BaseModel):
     status: bool
@@ -52,7 +56,9 @@ async def create_client(
         phone_whatsapp=request.phone_whatsapp,
         email=request.email,
         birth_date=request.birth_date,
-        note=request.note
+        note=request.note,
+        unit_id=request.unit_id,
+        kea_client_id=request.kea_client_id
     )
     return await client_service.create_client(client)
 
@@ -81,7 +87,9 @@ async def update_client(
         email=request.email,
         birth_date=request.birth_date,
         note=request.note,
-        status=request.status
+        status=request.status,
+        unit_id=request.unit_id,
+        kea_client_id=request.kea_client_id
     )
     
     updated_client = await client_service.update_client(client_id, client)

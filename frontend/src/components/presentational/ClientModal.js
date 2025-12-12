@@ -10,7 +10,11 @@ import {
   FormControlLabel,
   Switch,
   Grid,
-  Typography
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { Save, Cancel } from '@mui/icons-material';
 
@@ -21,9 +25,12 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
     email: '',
     birth_date: '',
     note: '',
-    status: true
+    status: true,
+    unit_id: '',
+    kea_client_id: ''
   });
 
+  const [units, setUnits] = useState([]);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -34,20 +41,47 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
         email: editingClient.email || '',
         birth_date: editingClient.birth_date || '',
         note: editingClient.note || '',
-        status: editingClient.status !== undefined ? editingClient.status : true
+        status: editingClient.status !== undefined ? editingClient.status : true,
+        unit_id: editingClient.unit_id || '',
+        kea_client_id: editingClient.kea_client_id || ''
       });
     } else {
+      const sessionKeaClientId = localStorage.getItem('kea_client_id');
       setFormData({
         full_name: '',
         phone_whatsapp: '',
         email: '',
         birth_date: '',
         note: '',
-        status: true
+        status: true,
+        unit_id: '',
+        kea_client_id: sessionKeaClientId || ''
       });
     }
     setErrors({});
   }, [editingClient, open]);
+
+  useEffect(() => {
+    const loadUnits = async () => {
+      try {
+        const response = await fetch('http://72.60.140.128:6002/api/v1/units', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUnits(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar unidades:', error);
+      }
+    };
+    
+    if (open) {
+      loadUnits();
+    }
+  }, [open]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -66,6 +100,10 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
       newErrors.email = 'Email é obrigatório';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Formato de email inválido';
+    }
+
+    if (!formData.unit_id) {
+      newErrors.unit_id = 'Unidade é obrigatória';
     }
 
     setErrors(newErrors);
@@ -201,7 +239,41 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <FormControl fullWidth error={!!errors.unit_id}>
+              <InputLabel>Unidade *</InputLabel>
+              <Select
+                value={formData.unit_id}
+                onChange={(event) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    unit_id: event.target.value
+                  }));
+                  if (errors.unit_id) {
+                    setErrors(prev => ({ ...prev, unit_id: '' }));
+                  }
+                }}
+                label="Unidade *"
+                required
+              >
+                <MenuItem value="">
+                  <em>Selecione uma unidade</em>
+                </MenuItem>
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.unit_id && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {errors.unit_id}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <FormControlLabel
                 control={
                   <Switch

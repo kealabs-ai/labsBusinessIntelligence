@@ -13,6 +13,8 @@ class Client(BaseModel):
     note: Optional[str] = Field(None, max_length=1000)
     created_at: Optional[datetime] = None
     status: bool = Field(default=True, description="Active status: True for active, False for inactive")
+    unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
     
     @validator('email')
     def validate_email(cls, v):
