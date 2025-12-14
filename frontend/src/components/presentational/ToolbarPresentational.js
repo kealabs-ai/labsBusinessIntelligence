@@ -6,7 +6,8 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Divider
+  Divider,
+  Typography
 } from '@mui/material';
 import { 
   AccountCircle, 
@@ -53,7 +54,18 @@ const ToolbarPresentational = ({ user, onLogout }) => {
         </Box>
         
         <Box sx={toolbarStyles.userSection}>
-          
+          {user && (
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'white', 
+                marginRight: 1,
+                fontWeight: 500
+              }}
+            >
+              {user.username || user.email || 'Usuário'}
+            </Typography>
+          )}
           <IconButton
             size="large"
             onClick={handleMenu}

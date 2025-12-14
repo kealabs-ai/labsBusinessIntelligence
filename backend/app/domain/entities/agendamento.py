@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 class Agendamento(BaseModel):
     id: Optional[int] = None
+    client_id: Optional[int] = None
     cliente: str
     servico: str
     data: str  # YYYY-MM-DD

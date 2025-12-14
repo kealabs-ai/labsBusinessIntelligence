@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,11 @@ import {
   Switch,
   FormControlLabel,
   Grid,
-  Divider
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { Save, Close } from '@mui/icons-material';
 
@@ -20,6 +24,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     title: '',
     date: '',
     time: '',
+    client_id: '',
     cliente: '',
     servico: '',
     valor: '',
@@ -28,12 +33,37 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     enableNotification: true
   });
 
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const response = await fetch('http://72.60.140.128:6002/api/v1/clients', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setClients(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+      }
+    };
+    
+    if (open) {
+      loadClients();
+    }
+  }, [open]);
+
   React.useEffect(() => {
     if (editingEvent) {
       setFormData({
         title: editingEvent.title || '',
         date: editingEvent.date || '',
         time: editingEvent.time || '',
+        client_id: editingEvent.client_id || '',
         cliente: editingEvent.cliente || '',
         servico: editingEvent.servico || '',
         valor: editingEvent.valor ? editingEvent.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
@@ -46,6 +76,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         title: '',
         date: '',
         time: '',
+        client_id: '',
         cliente: '',
         servico: '',
         valor: '',
@@ -74,6 +105,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
   const handleSave = () => {
     // Mapear campos do modal para formato esperado pelo backend
     const mappedData = {
+      client_id: parseInt(formData.client_id),
       cliente: formData.cliente,
       servico: formData.servico,
       date: formData.date,
@@ -90,6 +122,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       title: '',
       date: '',
       time: '',
+      client_id: '',
       cliente: '',
       servico: '',
       valor: '',
@@ -124,13 +157,28 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Cliente"
-                value={formData.cliente}
-                onChange={(e) => handleChange('cliente', e.target.value)}
-                required
-              />
+              <FormControl fullWidth required>
+                <InputLabel>Cliente</InputLabel>
+                <Select
+                  value={formData.client_id}
+                  onChange={(e) => {
+                    const selectedClient = clients.find(c => c.client_id === e.target.value);
+                    handleChange('client_id', e.target.value);
+                    handleChange('cliente', selectedClient ? selectedClient.full_name : '');
+                    handleChange('whatsappNumber', selectedClient ? selectedClient.phone_whatsapp : '');
+                  }}
+                  label="Cliente"
+                >
+                  <MenuItem value="">
+                    <em>Selecione um cliente</em>
+                  </MenuItem>
+                  {clients.map((client) => (
+                    <MenuItem key={client.client_id} value={client.client_id}>
+                      {client.full_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -175,6 +223,17 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 helperText="Valor do serviço em reais"
               />
             </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Número WhatsApp"
+                placeholder="+55 (11) 99999-9999"
+                value={formData.whatsappNumber}
+                onChange={(e) => handleChange('whatsappNumber', formatPhoneNumber(e.target.value))}
+                helperText="Preenchido automaticamente ao selecionar cliente"
+              />
+            </Grid>
           </Grid>
 
           <Divider sx={{ my: 3 }} />
@@ -198,30 +257,17 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
             </Grid>
             
             {formData.enableNotification && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Número WhatsApp"
-                    placeholder="+55 (11) 99999-9999"
-                    value={formData.whatsappNumber}
-                    onChange={(e) => handleChange('whatsappNumber', formatPhoneNumber(e.target.value))}
-                    helperText="Formato: +55 (DDD) XXXXX-XXXX"
-                  />
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Mensagem Personalizada"
-                    value={formData.customMessage}
-                    onChange={(e) => handleChange('customMessage', e.target.value)}
-                    helperText="Use {{nome_cliente}}, {{data_agenda}}, {{hora_agenda}}, {{servico}} para personalizar"
-                  />
-                </Grid>
-              </>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Mensagem Personalizada"
+                  value={formData.customMessage}
+                  onChange={(e) => handleChange('customMessage', e.target.value)}
+                  helperText="Use {{nome_cliente}}, {{data_agenda}}, {{hora_agenda}}, {{servico}} para personalizar"
+                />
+              </Grid>
             )}
           </Grid>
         </Box>

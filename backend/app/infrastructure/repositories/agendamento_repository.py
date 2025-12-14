@@ -143,6 +143,7 @@ class AgendamentoRepository(BaseRepository):
             for row in cursor.fetchall():
                 agendamento = Agendamento(
                     id=row['id'],
+                    client_id=row.get('client_id'),
                     cliente=row['cliente'],
                     servico=row['servico'],
                     data=str(row['data']),
@@ -258,6 +259,7 @@ class AgendamentoRepository(BaseRepository):
         if row:
             return Agendamento(
                 id=row['id'],
+                client_id=row.get('client_id'),
                 cliente=row['cliente'],
                 servico=row['servico'],
                 data=str(row['data']),
