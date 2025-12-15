@@ -6,6 +6,7 @@ class Agendamento(BaseModel):
     id: Optional[int] = None
     client_id: Optional[int] = None
     cliente: str
+    service_id: Optional[int] = None
     servico: str
     data: str  # YYYY-MM-DD
     hora: str  # HH:MM

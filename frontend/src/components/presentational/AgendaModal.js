@@ -26,6 +26,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     time: '',
     client_id: '',
     cliente: '',
+    service_id: '',
     servico: '',
     valor: '',
     whatsappNumber: '',
@@ -34,26 +35,42 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
   });
 
   const [clients, setClients] = useState([]);
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
-    const loadClients = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('http://72.60.140.128:6002/api/v1/clients', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setClients(data);
+        const unitId = localStorage.getItem('unit_id');
+        const keaClientId = localStorage.getItem('kea_client_id');
+        
+        const [clientsResponse, servicesResponse] = await Promise.all([
+          fetch('http://72.60.140.128:6002/api/v1/clients', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          }),
+          fetch('http://72.60.140.128:6002/api/v1/services', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          })
+        ]);
+        
+        if (clientsResponse.ok) {
+          const clientsData = await clientsResponse.json();
+          setClients(clientsData);
+        }
+        
+        if (servicesResponse.ok) {
+          const servicesData = await servicesResponse.json();
+          const filteredServices = servicesData.filter(service => 
+            service.unit_id == unitId && service.kea_client_id === keaClientId
+          );
+          setServices(filteredServices);
         }
       } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
+        console.error('Erro ao carregar dados:', error);
       }
     };
     
     if (open) {
-      loadClients();
+      loadData();
     }
   }, [open]);
 
@@ -65,6 +82,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         time: editingEvent.time || '',
         client_id: editingEvent.client_id || '',
         cliente: editingEvent.cliente || '',
+        service_id: editingEvent.service_id || '',
         servico: editingEvent.servico || '',
         valor: editingEvent.valor ? editingEvent.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
         whatsappNumber: editingEvent.whatsapp_number || '',
@@ -78,6 +96,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         time: '',
         client_id: '',
         cliente: '',
+        service_id: localStorage.getItem('selected_service_id') || '',
         servico: '',
         valor: '',
         whatsappNumber: '',
@@ -107,6 +126,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     const mappedData = {
       client_id: parseInt(formData.client_id),
       cliente: formData.cliente,
+      service_id: parseInt(formData.service_id),
       servico: formData.servico,
       date: formData.date,
       time: formData.time,
@@ -124,6 +144,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       time: '',
       client_id: '',
       cliente: '',
+      service_id: '',
       servico: '',
       valor: '',
       whatsappNumber: '',
@@ -181,13 +202,30 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Serviço"
-                value={formData.servico}
-                onChange={(e) => handleChange('servico', e.target.value)}
-                required
-              />
+              <FormControl fullWidth required>
+                <InputLabel>Serviço</InputLabel>
+                <Select
+                  value={formData.service_id}
+                  onChange={(e) => {
+                    const selectedService = services.find(s => s.id === e.target.value);
+                    handleChange('service_id', e.target.value);
+                    handleChange('servico', selectedService ? selectedService.name : '');
+                    handleChange('valor', selectedService ? selectedService.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '');
+                    localStorage.setItem('selected_service_id', e.target.value);
+                  }}
+                  label="Serviço"
+                  multiple={false}
+                >
+                  <MenuItem value="">
+                    <em>Selecione um serviço</em>
+                  </MenuItem>
+                  {services.map((service) => (
+                    <MenuItem key={service.id} value={service.id}>
+                      {service.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             
             <Grid item xs={12} sm={6}>

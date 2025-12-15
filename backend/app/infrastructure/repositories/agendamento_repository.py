@@ -39,15 +39,15 @@ class AgendamentoRepository(BaseRepository):
         """)
         self.connection.commit()
     
-    def create(self, agendamento: Agendamento, user_id: int, client_id: int = None) -> Agendamento:
+    def create(self, agendamento: Agendamento, user_id: int, client_id: int = None, service_id: int = None) -> Agendamento:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
                 INSERT INTO agendamentos (cliente, servico, data, hora, valor, whatsapp_number, 
                                         custom_message, enable_notification, notification_quantity, 
                                         notification_unit, notification_date, user_id, client_id, 
-                                        notification_sent, ativo)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                        service_id, notification_sent, ativo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -64,6 +64,7 @@ class AgendamentoRepository(BaseRepository):
                 agendamento.notification_date,
                 user_id,
                 client_id or 0,
+                service_id or 0,
                 int(agendamento.notification_sent),
                 1
             ))
@@ -145,6 +146,7 @@ class AgendamentoRepository(BaseRepository):
                     id=row['id'],
                     client_id=row.get('client_id'),
                     cliente=row['cliente'],
+                    service_id=row.get('service_id'),
                     servico=row['servico'],
                     data=str(row['data']),
                     hora=str(row['hora']),
@@ -261,6 +263,7 @@ class AgendamentoRepository(BaseRepository):
                 id=row['id'],
                 client_id=row.get('client_id'),
                 cliente=row['cliente'],
+                service_id=row.get('service_id'),
                 servico=row['servico'],
                 data=str(row['data']),
                 hora=str(row['hora']),

@@ -20,7 +20,7 @@ class AgendamentoService:
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = AgendamentoRepository(self.connection)
     
-    async def create_agendamento(self, agendamento_data: dict, user_id: int) -> Agendamento:
+    async def create_agendamento(self, agendamento_data: dict, user_id: int, client_id: int = None, service_id: int = None) -> Agendamento:
         """Criar novo agendamento"""
         # Validar e formatar número WhatsApp
         if agendamento_data.get('whatsapp_number'):
@@ -29,7 +29,7 @@ class AgendamentoService:
             )
         
         agendamento = Agendamento(**agendamento_data)
-        created_agendamento = self.repository.create(agendamento, user_id)
+        created_agendamento = self.repository.create(agendamento, user_id, client_id, service_id)
         
         # Criar ou atualizar contato se número WhatsApp fornecido
         if created_agendamento.whatsapp_number:

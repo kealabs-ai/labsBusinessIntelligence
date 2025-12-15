@@ -17,6 +17,10 @@ class Service(BaseModel):
     role_id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    
+    @property
+    def id(self) -> Optional[int]:
+        return self.service_id
 
 class ServiceCreate(BaseModel):
     name: str

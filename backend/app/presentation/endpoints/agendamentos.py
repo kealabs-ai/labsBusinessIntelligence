@@ -24,6 +24,7 @@ class AgendamentoRequest(BaseModel):
     notification_unit: str = 'dias'
     notification_date: Optional[datetime] = None
     client_id: Optional[int] = None
+    service_id: Optional[int] = None
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     auth_service = AuthService()
@@ -48,7 +49,7 @@ async def create_agendamento(request: AgendamentoRequest, user=Depends(get_curre
     logger.info(f"Request data: {request.dict()}")
     try:
         service = AgendamentoService()
-        agendamento = await service.create_agendamento(request.dict(), user.id, request.client_id)
+        agendamento = await service.create_agendamento(request.dict(), user.id, request.client_id, request.service_id)
         logger.info(f"Agendamento created successfully: {agendamento.dict()}")
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:
