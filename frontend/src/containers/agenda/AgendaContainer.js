@@ -47,6 +47,9 @@ const AgendaContainer = () => {
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorDialogMsg, setErrorDialogMsg] = useState('');
   const navigate = useNavigate();
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [confirmDialogMsg, setConfirmDialogMsg] = useState('');
+    const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const { hasPermission } = useAuth();
   const [currentView, setCurrentView] = useState('agendamentos');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,6 +63,23 @@ const AgendaContainer = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+    const handleConfirmDelete = async () => {
+      if (!pendingDeleteId) return;
+      try {
+        setLoading(true);
+        await agendaService.deleteAgendamento(pendingDeleteId);
+        await loadAgendamentos(pagination.currentPage);
+        console.log('Agendamento inativado com sucesso');
+      } catch (error) {
+        console.error('Erro ao inativar agendamento:', error);
+        setErrorDialogMsg('Erro ao inativar agendamento. Tente novamente.');
+        setErrorDialogOpen(true);
+      } finally {
+        setLoading(false);
+        setConfirmDialogOpen(false);
+        setPendingDeleteId(null);
+      }
+    };
   const [searchTerm, setSearchTerm] = useState('');
   const [allEvents, setAllEvents] = useState([]);
   const [lastMessageId, setLastMessageId] = useState(null);
