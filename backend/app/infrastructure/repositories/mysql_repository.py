@@ -471,7 +471,7 @@ class MySQLServiceRepository(IServiceRepository):
             query = """
                 UPDATE services SET name = %s, category = %s, description = %s, price = %s,
                 duration = %s, status = %s, unit_id = %s, kea_client_id = %s, updated_at = %s
-                WHERE service_id = %s
+                WHERE id = %s
             """
             values = (
                 service.name, service.category, service.description, service.price,
@@ -488,9 +488,12 @@ class MySQLServiceRepository(IServiceRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT * FROM services WHERE service_id = %s", (service_id,))
+            cursor.execute("SELECT * FROM services WHERE id = %s", (service_id,))
             result = cursor.fetchone()
-            return Service(**result) if result else None
+            if result:
+                result['service_id'] = result['id']
+                return Service(**result)
+            return None
         finally:
             cursor.close()
             conn.close()
@@ -501,6 +504,8 @@ class MySQLServiceRepository(IServiceRepository):
         try:
             cursor.execute("SELECT * FROM services WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
             results = cursor.fetchall()
+            for row in results:
+                row['service_id'] = row['id']
             return [Service(**row) for row in results]
         finally:
             cursor.close()
@@ -510,7 +515,7 @@ class MySQLServiceRepository(IServiceRepository):
         conn = mysql.connector.connect(**self.connection_config)
         cursor = conn.cursor()
         try:
-            cursor.execute("UPDATE services SET status = %s, updated_at = %s WHERE service_id = %s", (status, datetime.now(), service_id))
+            cursor.execute("UPDATE services SET status = %s, updated_at = %s WHERE id = %s", (status, datetime.now(), service_id))
             conn.commit()
             return cursor.rowcount > 0
         finally:
