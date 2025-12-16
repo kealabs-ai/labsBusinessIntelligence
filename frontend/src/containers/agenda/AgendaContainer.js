@@ -13,7 +13,13 @@ import {
   IconButton,
   Typography,
   CssBaseline,
-  Collapse
+  Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
@@ -38,6 +44,8 @@ import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+    const [errorDialogMsg, setErrorDialogMsg] = useState('');
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
   const [currentView, setCurrentView] = useState('agendamentos');
@@ -305,7 +313,8 @@ const AgendaContainer = () => {
       }
     } catch (error) {
       console.error('Erro ao salvar agendamento:', error);
-      alert('Erro ao salvar agendamento. Tente novamente.');
+      setErrorDialogMsg('Erro ao salvar agendamento. Tente novamente.');
+      setErrorDialogOpen(true);
     } finally {
       setLoading(false);
     }
@@ -339,7 +348,26 @@ const AgendaContainer = () => {
         console.log('Agendamento inativado com sucesso');
       } catch (error) {
         console.error('Erro ao inativar agendamento:', error);
-        alert('Erro ao inativar agendamento. Tente novamente.');
+        setErrorDialogMsg('Erro ao inativar agendamento. Tente novamente.');
+        setErrorDialogOpen(true);
+        // ...existing code...
+        return (
+          <>
+            {/* ...existing JSX... */}
+            <Dialog open={errorDialogOpen} onClose={() => setErrorDialogOpen(false)}>
+              <DialogTitle>Erro</DialogTitle>
+              <DialogContent>
+                <DialogContentText>{errorDialogMsg}</DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setErrorDialogOpen(false)} color="primary" autoFocus>
+                  OK
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </>
+        );
+        // ...existing code...
       } finally {
         setLoading(false);
       }
