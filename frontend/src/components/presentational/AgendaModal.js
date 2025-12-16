@@ -205,13 +205,14 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
               <FormControl fullWidth required>
                 <InputLabel>Serviço</InputLabel>
                 <Select
-                  value={formData.service_id}
+                  value={formData.service_id?.toString() || ''}
                   onChange={(e) => {
-                    const selectedService = services.find(s => s.id === e.target.value);
-                    handleChange('service_id', e.target.value);
+                    const value = e.target.value;
+                    const selectedService = services.find(s => String(s.service_id) === String(value));
+                    handleChange('service_id', value);
                     handleChange('servico', selectedService ? selectedService.name : '');
                     handleChange('valor', selectedService ? selectedService.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '');
-                    localStorage.setItem('selected_service_id', e.target.value);
+                    localStorage.setItem('selected_service_id', value);
                   }}
                   label="Serviço"
                   multiple={false}
@@ -220,7 +221,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                     <em>Selecione um serviço</em>
                   </MenuItem>
                   {services.map((service) => (
-                    <MenuItem key={service.id} value={service.id}>
+                    <MenuItem key={service.service_id} value={service.service_id?.toString()}>
                       {service.name}
                     </MenuItem>
                   ))}
