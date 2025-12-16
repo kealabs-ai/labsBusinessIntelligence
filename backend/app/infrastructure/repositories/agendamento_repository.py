@@ -33,6 +33,7 @@ class AgendamentoRepository(BaseRepository):
                 notification_unit ENUM('dias', 'semanas', 'meses') DEFAULT 'dias',
                 notification_date DATETIME,
                 unit_id INT NOT NULL,
+                role_id INT DEFAULT 1,
                 INDEX idx_agendamentos_data (data),
                 INDEX idx_agendamentos_enable_notification (enable_notification),
                 INDEX idx_agendamentos_user_id (user_id)
@@ -47,10 +48,11 @@ class AgendamentoRepository(BaseRepository):
                 INSERT INTO agendamentos (cliente, servico, data, hora, valor, whatsapp_number, 
                                         custom_message, enable_notification, notification_quantity, 
                                         notification_unit, notification_date, user_id, client_id, 
-                                        service_id, notification_sent, ativo, unit_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                        service_id, notification_sent, ativo, unit_id, role_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             unit_id = getattr(agendamento, 'unit_id', None)
+            role_id = getattr(agendamento, 'role_id', 1) or 1
             if not unit_id:
                 raise ValueError('unit_id é obrigatório para criar agendamento')
             cursor.execute(query, (
@@ -70,7 +72,8 @@ class AgendamentoRepository(BaseRepository):
                 service_id or 0,
                 int(agendamento.notification_sent),
                 1,
-                unit_id
+                unit_id,
+                role_id
             ))
             
             agendamento.id = cursor.lastrowid

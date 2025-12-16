@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS services (
     price DECIMAL(10,2) NOT NULL,
     duration INT NOT NULL COMMENT 'Duration in minutes',
     status BOOLEAN DEFAULT TRUE,
+    role_id INT DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
