@@ -49,7 +49,9 @@ async def create_agendamento(request: AgendamentoRequest, user=Depends(get_curre
     logger.info(f"Request data: {request.dict()}")
     try:
         service = AgendamentoService()
-        agendamento = await service.create_agendamento(request.dict(), user.id, request.client_id, request.service_id)
+        # unit_id do usuário autenticado
+        unit_id = getattr(user, 'unit_id', None)
+        agendamento = await service.create_agendamento(request.dict(), user.id, request.client_id, request.service_id, unit_id=unit_id)
         logger.info(f"Agendamento created successfully: {agendamento.dict()}")
         return {"success": True, "data": agendamento.dict()}
     except Exception as e:

@@ -20,17 +20,21 @@ class AgendamentoService:
         self.connection = mysql.connector.connect(**connection_config)
         self.repository = AgendamentoRepository(self.connection)
     
-    async def create_agendamento(self, agendamento_data: dict, user_id: int, client_id: int = None, service_id: int = None) -> Agendamento:
+    async def create_agendamento(self, agendamento_data: dict, user_id: int, client_id: int = None, service_id: int = None, unit_id: int = None) -> Agendamento:
         """Criar novo agendamento"""
         # Validar e formatar número WhatsApp
         if agendamento_data.get('whatsapp_number'):
             agendamento_data['whatsapp_number'] = self._format_whatsapp_number(
                 agendamento_data['whatsapp_number']
             )
-        
+        # unit_id obrigatório: tenta pegar do argumento, senão do agendamento_data, senão lança erro
+        if not unit_id:
+            unit_id = agendamento_data.get('unit_id')
+        if not unit_id:
+            raise ValueError('unit_id é obrigatório para criar agendamento')
+        agendamento_data['unit_id'] = unit_id
         agendamento = Agendamento(**agendamento_data)
         created_agendamento = self.repository.create(agendamento, user_id, client_id, service_id)
-        
         # Criar ou atualizar contato se número WhatsApp fornecido
         if created_agendamento.whatsapp_number:
             try:
@@ -42,9 +46,7 @@ class AgendamentoService:
                 )
             except Exception as e:
                 print(f"Erro ao criar contato: {e}")
-            
             await self.send_whatsapp_confirmation(created_agendamento)
-        
         return created_agendamento
     
     def get_all_agendamentos(self, page: int = 1, limit: int = 10, search: str = None, user_id: int = None, date_filter: str = None, kea_client_id: str = None) -> dict:
