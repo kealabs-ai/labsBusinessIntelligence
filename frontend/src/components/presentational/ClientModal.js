@@ -92,8 +92,8 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
 
     if (!formData.phone_whatsapp.trim()) {
       newErrors.phone_whatsapp = 'Telefone WhatsApp é obrigatório';
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone_whatsapp.replace(/\s/g, ''))) {
-      newErrors.phone_whatsapp = 'Formato de telefone inválido';
+    } else if (!/^\+55 \(\d{2}\) \d{5}-\d{4}$/.test(formData.phone_whatsapp)) {
+      newErrors.phone_whatsapp = 'Formato esperado: +55 (XX) XXXXX-XXXX';
     }
 
     if (!formData.email.trim()) {
@@ -133,19 +133,22 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
     }
   };
 
+  // Formata o telefone para '+55 (XX) XXXXX-XXXX' e força o código do país
   const formatPhoneInput = (value) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
-    
-    // Format as (XX) XXXXX-XXXX
+    let digits = value.replace(/\D/g, '');
+    // Garante que começa com 55 (Brasil)
+    if (!digits.startsWith('55')) {
+      digits = '55' + digits;
+    }
+    digits = digits.slice(0, 13); // +55 XX XXXXX XXXX
     if (digits.length <= 2) {
-      return digits;
-    } else if (digits.length <= 7) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else if (digits.length <= 11) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      return `+${digits}`;
+    } else if (digits.length <= 4) {
+      return `+${digits.slice(0,2)} (${digits.slice(2)}`;
+    } else if (digits.length <= 9) {
+      return `+${digits.slice(0,2)} (${digits.slice(2,4)}) ${digits.slice(4)}`;
     } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      return `+${digits.slice(0,2)} (${digits.slice(2,4)}) ${digits.slice(4,9)}-${digits.slice(9)}`;
     }
   };
 
@@ -207,8 +210,9 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
               onChange={handlePhoneChange}
               error={!!errors.phone_whatsapp}
               helperText={errors.phone_whatsapp}
-              placeholder="(11) 99999-9999"
+              placeholder="+55 (19) 99999-9999"
               required
+              inputProps={{ maxLength: 20 }}
             />
           </Grid>
           

@@ -22,6 +22,7 @@ class Agendamento(BaseModel):
     updated_at: Optional[datetime] = None
     unit_name: Optional[str] = None
     unit_id: Optional[int] = None
+    kea_client_id: Optional[str] = None
     
     class Config:
         from_attributes = True

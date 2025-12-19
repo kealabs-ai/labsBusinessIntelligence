@@ -19,8 +19,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Button
+  Button,
+  Alert
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { 
   Menu as MenuIcon, 
   CalendarToday, 
@@ -44,16 +46,16 @@ import ToolbarContainer from '../toolbar/ToolbarContainer';
 import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
-    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-    const [errorDialogMsg, setErrorDialogMsg] = useState('');
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorDialogMsg, setErrorDialogMsg] = useState('');
+  const [successAlertOpen, setSuccessAlertOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmDialogMsg, setConfirmDialogMsg] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const navigate = useNavigate();
-    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-    const [confirmDialogMsg, setConfirmDialogMsg] = useState('');
-    const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const { hasPermission } = useAuth();
   const [currentView, setCurrentView] = useState('agendamentos');
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -63,23 +65,6 @@ const AgendaContainer = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const handleConfirmDelete = async () => {
-      if (!pendingDeleteId) return;
-      try {
-        setLoading(true);
-        await agendaService.deleteAgendamento(pendingDeleteId);
-        await loadAgendamentos(pagination.currentPage);
-        console.log('Agendamento inativado com sucesso');
-      } catch (error) {
-        console.error('Erro ao inativar agendamento:', error);
-        setErrorDialogMsg('Erro ao inativar agendamento. Tente novamente.');
-        setErrorDialogOpen(true);
-      } finally {
-        setLoading(false);
-        setConfirmDialogOpen(false);
-        setPendingDeleteId(null);
-      }
-    };
   const [searchTerm, setSearchTerm] = useState('');
   const [allEvents, setAllEvents] = useState([]);
   const [lastMessageId, setLastMessageId] = useState(null);
@@ -305,7 +290,6 @@ const AgendaContainer = () => {
   const handleSaveEvent = async (eventData) => {
     try {
       setLoading(true);
-      
       const agendamentoData = {
         cliente: eventData.cliente,
         servico: eventData.servico,
@@ -318,17 +302,33 @@ const AgendaContainer = () => {
         notification_quantity: eventData.notificationQuantity || 1,
         notification_unit: eventData.notificationUnit || 'dias'
       };
-      
       let result;
       if (editingEvent && editingEvent.id) {
         result = await agendaService.updateAgendamento(editingEvent.id, agendamentoData);
       } else {
         result = await agendaService.createAgendamento(agendamentoData);
       }
-      
       if (result.success !== false) {
         await loadAgendamentos(pagination.currentPage);
         await loadAllEvents();
+        // Substituir variáveis {{variavel}} na mensagem personalizada
+        if (eventData.whatsappNumber && eventData.customMessage) {
+          let msg = eventData.customMessage;
+          const variaveis = {
+            nome_cliente: eventData.cliente,
+            data_agenda: eventData.date,
+            hora_agenda: eventData.time,
+            servico: eventData.servico
+          };
+          msg = msg.replace(/{{(.*?)}}/g, (_, v) => variaveis[v.trim()] || '');
+          try {
+            await agendaService.sendWhatsAppMessage(eventData.whatsappNumber, msg);
+          } catch (err) {
+            console.warn('Falha ao enviar mensagem WhatsApp:', err);
+          }
+        }
+        setSuccessAlertOpen(true);
+        setTimeout(() => setSuccessAlertOpen(false), 4000);
         console.log(editingEvent ? 'Agendamento atualizado' : 'Agendamento criado', 'com sucesso');
       }
     } catch (error) {
@@ -359,40 +359,30 @@ const AgendaContainer = () => {
     setModalOpen(true);
   };
 
-  const handleDeleteEvent = async (eventId) => {
-    if (window.confirm('Tem certeza que deseja inativar este agendamento?')) {
-      try {
-        setLoading(true);
-        await agendaService.deleteAgendamento(eventId);
-        await loadAgendamentos(pagination.currentPage);
-        console.log('Agendamento inativado com sucesso');
-      } catch (error) {
-        console.error('Erro ao inativar agendamento:', error);
-        setErrorDialogMsg('Erro ao inativar agendamento. Tente novamente.');
-        setErrorDialogOpen(true);
-        // ...existing code...
-        return (
-          <>
-            {/* ...existing JSX... */}
-            <Dialog open={errorDialogOpen} onClose={() => setErrorDialogOpen(false)}>
-              <DialogTitle>Erro</DialogTitle>
-              <DialogContent>
-                <DialogContentText>{errorDialogMsg}</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setErrorDialogOpen(false)} color="primary" autoFocus>
-                  OK
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </>
-        );
-        // ...existing code...
-      } finally {
-        setLoading(false);
-      }
+  const handleDeleteEvent = (eventId) => {
+    setConfirmDialogMsg('Tem certeza que deseja inativar este agendamento?');
+    setPendingDeleteId(eventId);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      setLoading(true);
+      await agendaService.deleteAgendamento(pendingDeleteId);
+      await loadAgendamentos(pagination.currentPage);
+      console.log('Agendamento inativado com sucesso');
+    } catch (error) {
+      console.error('Erro ao inativar agendamento:', error);
+      setErrorDialogMsg('Erro ao inativar agendamento. Tente novamente.');
+      setErrorDialogOpen(true);
+    } finally {
+      setLoading(false);
+      setConfirmDialogOpen(false);
+      setPendingDeleteId(null);
     }
   };
+// ...existing code...
 
   const handlePageChange = (event, page) => {
     console.log('Mudando para página:', page);
@@ -622,6 +612,7 @@ const AgendaContainer = () => {
           </Typography>
         </Box>
         
+        {/* Fim do menu lateral Drawer */}
         <List>
           {menuItems.map((item) => (
             <ListItem key={item.id} disablePadding>
@@ -642,7 +633,33 @@ const AgendaContainer = () => {
           ))}
         </List>
       </Drawer>
-      
+
+      {/* Dialog de confirmação e Alert de sucesso devem ficar fora do Drawer */}
+      <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
+        <DialogTitle>Confirmação</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{confirmDialogMsg}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {successAlertOpen && (
+        <Alert
+          iconMapping={{ success: <CheckCircleIcon fontSize="inherit" /> }}
+          severity="success"
+          sx={{ position: 'fixed', top: 80, right: 32, zIndex: 2000, minWidth: 320 }}
+          onClose={() => setSuccessAlertOpen(false)}
+        >
+          Agendamento realizado com sucesso.
+        </Alert>
+      )}
+
       <Box component="main" sx={{ 
         flexGrow: 1, 
         p: 3, 
@@ -701,6 +718,16 @@ const AgendaContainer = () => {
         onSave={handleSaveEvent}
         editingEvent={editingEvent}
       />
+    {successAlertOpen && (
+      <Alert
+        iconMapping={{ success: <CheckCircleIcon fontSize="inherit" /> }}
+        severity="success"
+        sx={{ position: 'fixed', top: 80, right: 32, zIndex: 2000, minWidth: 320 }}
+        onClose={() => setSuccessAlertOpen(false)}
+      >
+        Agendamento realizado com sucesso.
+      </Alert>
+    )}
     </Box>
   );
 };

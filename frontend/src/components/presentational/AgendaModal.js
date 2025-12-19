@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import DialogMui from '@mui/material/Dialog';
+import DialogTitleMui from '@mui/material/DialogTitle';
+import DialogContentMui from '@mui/material/DialogContent';
+import DialogActionsMui from '@mui/material/DialogActions';
 import {
   Dialog,
   DialogTitle,
@@ -20,6 +24,7 @@ import {
 import { Save, Close } from '@mui/icons-material';
 
 const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
+    const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     date: '',
@@ -122,7 +127,18 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
   };
 
   const handleSave = () => {
-    // Mapear campos do modal para formato esperado pelo backend
+    // Validação do número WhatsApp: deve começar com + e ter código do país
+    if (!/^\+\d{2}/.test(formData.whatsappNumber)) {
+      setOpenDialog(true);
+      return;
+    }
+    // Formatar data_agenda para dd/MM/YYYY na mensagem personalizada
+    let customMessage = formData.customMessage;
+    if (formData.date) {
+      const [yyyy, mm, dd] = formData.date.split('-');
+      const dataFormatada = `${dd}/${mm}/${yyyy}`;
+      customMessage = customMessage.replace(/\{\{data_agenda\}\}/g, dataFormatada);
+    }
     const mappedData = {
       client_id: parseInt(formData.client_id),
       cliente: formData.cliente,
@@ -132,12 +148,11 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       time: formData.time,
       valor: formData.valor ? parseCurrency(formData.valor) : null,
       whatsappNumber: formData.whatsappNumber,
-      customMessage: formData.customMessage,
-      enableNotification: formData.enableNotification
+      customMessage: customMessage,
+      enableNotification: formData.enableNotification,
+      kea_client_id: localStorage.getItem('kea_client_id') || null
     };
     onSave(mappedData);
-    
-    // Limpar campos após salvar
     setFormData({
       title: '',
       date: '',
@@ -151,7 +166,6 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       customMessage: 'Olá {{nome_cliente}}, lembramos que você tem um agendamento em {{data_agenda}} às {{hora_agenda}} para {{servico}}.',
       enableNotification: true
     });
-    
     onClose();
   };
 
@@ -168,6 +182,16 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+            {/* Dialogo de instrução para número WhatsApp */}
+            <DialogMui open={openDialog} onClose={() => setOpenDialog(false)}>
+              <DialogTitleMui>Formato do número WhatsApp</DialogTitleMui>
+              <DialogContentMui>
+                <Typography>O número do WhatsApp deve conter o código do país. Exemplo para Brasil: <b>+55 (19) 99999-9999</b></Typography>
+              </DialogContentMui>
+              <DialogActionsMui>
+                <Button onClick={() => setOpenDialog(false)} autoFocus>OK</Button>
+              </DialogActionsMui>
+            </DialogMui>
       <DialogTitle>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {editingEvent ? 'Editar Agendamento' : 'Novo Agendamento'}
