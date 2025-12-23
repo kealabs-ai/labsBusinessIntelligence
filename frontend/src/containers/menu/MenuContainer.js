@@ -9,6 +9,13 @@ const MenuContainer = () => {
   const { user } = useAuth();
 
   const menuItems = [
+        {
+          title: 'Instância Evolution',
+          description: 'Gerar QR Code para nova instância no Evolution API',
+          path: '/configuracoes/instance-qrcode',
+          icon: 'Business',
+          adminOnly: true
+        },
     {
       title: 'Dashboards',
       description: 'Visualize dados em Dashboards interativos',

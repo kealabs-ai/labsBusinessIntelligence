@@ -8,6 +8,7 @@ except Exception as e:
     print(f"Error importing clients module: {e}")
     clients = None
 from api import communication
+from api import instance
 from infrastructure.database.factory import DatabaseFactory
 import os
 from dotenv import load_dotenv
@@ -58,6 +59,7 @@ app.include_router(kea_clients.router, prefix="/api/v1", tags=["kea-clients"])
 app.include_router(roles.router, prefix="/api/v1", tags=["roles"])
 app.include_router(user_unit.router, prefix="/api/v1", tags=["user-unit"])
 app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
+app.include_router(instance.router, prefix="/api/instance", tags=["instance"])
 
 @app.get("/")
 async def root():

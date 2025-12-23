@@ -11,6 +11,7 @@ import AdminContainer from './containers/admin/AdminContainer';
 import CaixaContainer from './containers/caixa/CaixaContainer';
 import UnitsContainer from './containers/units/UnitsContainer';
 import { AuthProvider, useAuth } from './services/AuthContext';
+import InstanceQRCodeContainer from './containers/configuracoes/InstanceQRCodeContainer';
 
 const theme = createTheme({
   palette: {
@@ -36,6 +37,11 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<LoginContainer />} />
+            <Route path="/configuracoes/instance-qrcode" element={
+              <ProtectedRoute>
+                <InstanceQRCodeContainer />
+              </ProtectedRoute>
+            } />
             <Route path="/menu" element={
               <ProtectedRoute>
                 <MenuContainer />
