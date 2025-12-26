@@ -17,29 +17,45 @@ class EnvManager:
     
     def __init__(self):
         if not self._loaded:
-            # Try to load the project's backend `.env` first (robust when running
-            # from a different working directory). Fall back to default behavior
-            # so `load_dotenv()` can pick up environment files elsewhere.
+            # Try to load the project's backend `.env` file from different possible locations
             try:
-                # First try explicit backend/.env relative to this file
-                base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-                dotenv_path = os.path.join(base_dir, '.env')
-                if os.path.exists(dotenv_path):
-                    load_dotenv(dotenv_path)
-                    logger.info(f"Loaded dotenv from: {dotenv_path}")
+                # Path to the directory of the current file (env_manager.py)
+                current_dir = os.path.dirname(__file__)
+                
+                # Path to the backend directory: .../backend
+                backend_dir = os.path.abspath(os.path.join(current_dir, '..', '..', '..'))
+                
+                # Path to the root project directory: .../ (e.g., LabsBusinessIntelligence)
+                project_root_dir = os.path.abspath(os.path.join(backend_dir, '..'))
+
+                # List of paths to check for the .env file
+                dotenv_paths_to_check = [
+                    os.path.join(backend_dir, '.env'),
+                    os.path.join(project_root_dir, '.env')
+                ]
+
+                loaded_path = None
+                for path in dotenv_paths_to_check:
+                    if os.path.exists(path):
+                        load_dotenv(dotenv_path=path)
+                        loaded_path = path
+                        break
+                
+                if loaded_path:
+                    logger.info(f"Loaded .env file from: {loaded_path}")
                 else:
-                    # Fallback to find_dotenv which searches parent dirs
-                    found = find_dotenv()
-                    if found:
-                        load_dotenv(found)
-                        logger.info(f"Loaded dotenv from: {found}")
+                    # Fallback to find_dotenv if no specific path is found
+                    found_path = find_dotenv()
+                    if found_path:
+                        load_dotenv(found_path)
+                        logger.info(f"Loaded .env file using find_dotenv(): {found_path}")
                     else:
-                        # Generic attempt
-                        load_dotenv()
-                        logger.info("Loaded dotenv using generic load_dotenv()")
-            except Exception:
-                logger.exception("Failed to load .env via env_manager; falling back to generic load_dotenv")
+                        logger.warning("No .env file found in standard locations or through find_dotenv().")
+
+            except Exception as e:
+                logger.exception("Failed to load .env file via EnvManager; falling back to generic load_dotenv().")
                 load_dotenv()
+            
             self._loaded = True
     
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:

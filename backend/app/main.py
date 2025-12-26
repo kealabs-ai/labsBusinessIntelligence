@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from presentation.endpoints import auth, charts, agendamentos, contacts, admin, database_config, config, transacoes, cash_register, services, resources, units, kea_clients, roles, user_unit
+from presentation.endpoints import auth, charts, agendamentos, contacts, admin, database_config, config, transacoes, cash_register, services, resources, units, kea_clients, roles, user_unit, whatsapp_instances
 try:
     from presentation.endpoints import clients
     print("Clients module imported successfully")
@@ -58,6 +58,7 @@ app.include_router(units.router, prefix="/api/v1", tags=["units"])
 app.include_router(kea_clients.router, prefix="/api/v1", tags=["kea-clients"])
 app.include_router(roles.router, prefix="/api/v1", tags=["roles"])
 app.include_router(user_unit.router, prefix="/api/v1", tags=["user-unit"])
+app.include_router(whatsapp_instances.router, prefix="/api/v1", tags=["whatsapp-instances"])
 app.include_router(communication.router, prefix="/api/v1/communication", tags=["communication"])
 app.include_router(instance.router, prefix="/api/instance", tags=["instance"])
 

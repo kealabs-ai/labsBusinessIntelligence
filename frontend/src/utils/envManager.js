@@ -1,6 +1,13 @@
 class EnvManager {
   static instance = null;
 
+  // Evolution API Key
+  get evolutionApiKey() {
+    // Permite acessar tanto REACT_APP_EVOLUTION_API_KEY (frontend) quanto EVOLUTION_API_KEY (caso futuro)
+    const value = this.get('REACT_APP_EVOLUTION_API_KEY', this.get('EVOLUTION_API_KEY', '429683C4C977415CAAFCCE10F7D57E11'));
+    return value == null ? '' : value;
+  }
+
   constructor() {
     if (EnvManager.instance) {
       return EnvManager.instance;

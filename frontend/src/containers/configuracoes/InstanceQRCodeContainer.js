@@ -13,8 +13,14 @@ const InstanceQRCodeContainer = () => {
     setError(null);
     setQrCodeUrl(null);
     try {
-      const result = await instanceService.createInstance({});
-      setQrCodeUrl(result.qrCodeUrl || result.qr_code_url || result.qrcode_url || result.qr_code || result.qr);
+      const result = await instanceService.createInstance();
+      // Processa o QR code base64 da resposta
+      if (result.qrcode && result.qrcode.base64) {
+        // O base64 já vem com o prefixo data:image/png;base64,
+        setQrCodeUrl(result.qrcode.base64);
+      } else {
+        setError('QR Code não encontrado na resposta');
+      }
     } catch (err) {
       setError(err.message || 'Erro ao criar instância');
     } finally {

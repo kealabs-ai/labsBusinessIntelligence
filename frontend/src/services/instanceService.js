@@ -10,12 +10,17 @@ class InstanceService {
     // Gera nome aleatório para a instância
     const random = Math.random().toString(36).substring(2, 8);
     const instanceName = `kea_${random}`;
-    // Recupera API_KEY Evolution do .env
-    const token = env.get('API_KEY', '');
-    const apikey = env.get('API_KEY', '');
+    // Recupera API_KEY Evolution do envManager
+    const apikey = env.evolutionApiKey;
+    
+    // Validação da API key
+    if (!apikey) {
+      throw new Error('Evolution API Key não encontrada. Verifique se REACT_APP_EVOLUTION_API_KEY está definida no .env');
+    }
+    
     const body = {
       instanceName,
-      token,
+      token: apikey,
       token_type: 'apiKey',
       qrcode: true,
       integration: 'WHATSAPP-BAILEYS'
@@ -29,7 +34,7 @@ class InstanceService {
       body: JSON.stringify(body)
     });
     if (!response.ok) {
-      throw new Error('Erro ao criar instância');
+      throw new Error(`Erro ao criar instância: ${response.status} - ${response.statusText}`);
     }
     return response.json();
   }
