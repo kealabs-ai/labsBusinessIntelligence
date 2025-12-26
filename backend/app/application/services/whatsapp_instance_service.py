@@ -1,6 +1,6 @@
 from typing import List
-from app.domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
-from app.infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
+from domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
+from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
 
 
 class WhatsAppInstanceService:

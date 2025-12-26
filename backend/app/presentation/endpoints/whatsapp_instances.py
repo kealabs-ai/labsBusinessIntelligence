@@ -1,16 +1,15 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from app.domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
-from app.application.services.whatsapp_instance_service import WhatsAppInstanceService
-from app.infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
-from app.infrastructure.database.database_factory import get_db
+from domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
+from application.services.whatsapp_instance_service import WhatsAppInstanceService
+from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
+from infrastructure.repositories.mysql_repository import MySQLResourceRepository
 
 router = APIRouter(prefix="/whatsapp-instances", tags=["WhatsApp Instances"])
 
 
-def get_whatsapp_instance_service(db: Session = Depends(get_db)) -> WhatsAppInstanceService:
-    repository = WhatsAppInstanceRepository(db)
+def get_whatsapp_instance_service() -> WhatsAppInstanceService:
+    repository = WhatsAppInstanceRepository()
     return WhatsAppInstanceService(repository)
 
 
