@@ -36,7 +36,10 @@ class InstanceService {
     if (!response.ok) {
       throw new Error(`Erro ao criar instância: ${response.status} - ${response.statusText}`);
     }
-    return response.json();
+    const result = await response.json();
+    // Adiciona o instanceName na resposta para uso posterior
+    result.instanceName = instanceName;
+    return result;
   }
 }
 
