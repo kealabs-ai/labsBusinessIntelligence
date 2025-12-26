@@ -7,6 +7,7 @@ const InstanceQRCodeContainer = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   const handleCreateInstance = async () => {
     setLoading(true);
@@ -27,6 +28,9 @@ const InstanceQRCodeContainer = () => {
     }
   };
 
+  const handleShowQRModal = () => setShowQRModal(true);
+  const handleCloseQRModal = () => setShowQRModal(false);
+
   return (
     <>
       <ToolbarContainer />
@@ -35,6 +39,9 @@ const InstanceQRCodeContainer = () => {
         qrCodeUrl={qrCodeUrl}
         loading={loading}
         error={error}
+        onShowQRModal={handleShowQRModal}
+        showQRModal={showQRModal}
+        onCloseQRModal={handleCloseQRModal}
       />
     </>
   );
