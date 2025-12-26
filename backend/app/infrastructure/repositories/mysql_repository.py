@@ -560,6 +560,9 @@ class MySQLResourceRepository:
             cursor.execute(query, params)
             conn.commit()
             return cursor.lastrowid
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
             cursor.close()
             conn.close()

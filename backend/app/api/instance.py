@@ -45,6 +45,7 @@ async def create_instance(user=Depends(get_current_user)):
             payload = {
                 "instanceName": instance_name,
                 "qrcode": True,
+                "integration": "WHATSAPP-BAILEYS"
             }
             response = await client.post(f"{api_url}/instance/create", json=payload, headers=headers)
             response.raise_for_status()
@@ -59,23 +60,19 @@ async def create_instance(user=Depends(get_current_user)):
                 raise HTTPException(status_code=502, detail="QR Code (base64) não retornado pela Evolution API")
 
             # Gravar instância na tabela whatsapp_instances
-            try:
-                repository = WhatsAppInstanceRepository()
-                service = WhatsAppInstanceService(repository)
-                
-                instance_data = WhatsAppInstanceCreate(
-                    user_id=user.id,
-                    kea_client_id=getattr(user, 'kea_client_id', None),
-                    instance_name=instance_name,
-                    qr_code=base64_qr,
-                    status=True
-                )
-                
-                service.create_instance(instance_data)
-                logger.info(f"Instância {instance_name} salva na tabela whatsapp_instances")
-            except Exception as db_error:
-                logger.error(f"Erro ao salvar instância no banco: {str(db_error)}")
-                # Não interrompe o fluxo, apenas loga o erro
+            repository = WhatsAppInstanceRepository()
+            service = WhatsAppInstanceService(repository)
+            
+            instance_data = WhatsAppInstanceCreate(
+                user_id=user.id,
+                kea_client_id=getattr(user, 'kea_client_id', None),
+                instance_name=instance_name,
+                qr_code=base64_qr,
+                status=True
+            )
+            
+            created_instance = service.create_instance(instance_data)
+            logger.info(f"Instância {instance_name} salva na tabela whatsapp_instances com ID: {created_instance.id}")
 
             return {"qrcode": base64_qr}
 
@@ -84,4 +81,4 @@ async def create_instance(user=Depends(get_current_user)):
         raise HTTPException(status_code=502, detail="Erro ao criar instância na Evolution API")
     except Exception as e:
         logger.error(f"Erro ao criar instância: {str(e)}")
-        raise HTTPException(status_code=500, detail="Erro interno ao processar a criação da instância")
+        raise HTTPException(status_code=500, detail=f"Erro interno ao processar a criação da instância: {str(e)}")

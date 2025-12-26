@@ -22,7 +22,11 @@ class WhatsAppInstanceRepository:
         ))
         
         # Busca a instância criada
-        return self.get_by_instance_name(instance_data.instance_name)
+        created_instance = self.get_by_instance_name(instance_data.instance_name)
+        if not created_instance:
+            raise Exception(f"Falha ao recuperar instância criada: {instance_data.instance_name}")
+        
+        return created_instance
 
     def get_by_instance_name(self, instance_name: str) -> Optional[WhatsAppInstance]:
         query = """
