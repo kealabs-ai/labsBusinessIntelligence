@@ -8,35 +8,23 @@ class WhatsAppInstanceRepository:
         self.db = MySQLResourceRepository()
 
     def create(self, instance_data: WhatsAppInstanceCreate) -> WhatsAppInstance:
-        import logging
-        logger = logging.getLogger(__name__)
-        
         query = """
             INSERT INTO whatsapp_instances (user_id, kea_client_id, instance_name, qr_code, status)
             VALUES (%s, %s, %s, %s, %s)
         """
         
-        logger.info(f"Executando inserção no banco: {instance_data.instance_name}")
+        self.db.execute(query, (
+            instance_data.user_id,
+            instance_data.kea_client_id,
+            instance_data.instance_name,
+            instance_data.qr_code,
+            instance_data.status
+        ))
         
-        try:
-            self.db.execute(query, (
-                instance_data.user_id,
-                instance_data.kea_client_id,
-                instance_data.instance_name,
-                instance_data.qr_code,
-                instance_data.status
-            ))
-            logger.info(f"Inserção executada com sucesso")
-        except Exception as e:
-            logger.error(f"Erro na inserção: {str(e)}")
-            raise
-        
-        # Busca a instância criada
         created_instance = self.get_by_instance_name(instance_data.instance_name)
         if not created_instance:
             raise Exception(f"Falha ao recuperar instância criada: {instance_data.instance_name}")
         
-        logger.info(f"Instância recuperada com ID: {created_instance.id}")
         return created_instance
 
     def get_by_instance_name(self, instance_name: str) -> Optional[WhatsAppInstance]:

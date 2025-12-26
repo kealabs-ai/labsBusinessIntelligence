@@ -28,68 +28,52 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @router.post("/create", response_model=QRCodeBase64Response)
 async def create_instance(user=Depends(get_current_user)):
-    # Chama Evolution API para criar nova instância e obter QR code
     api_url = env.get("URL_EVOLUTION_API", "https://comunication-with-client-evolution-api.t37hka.easypanel.host")
     evolution_api_key = env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
     
-    # Gera nome aleatório para a instância
     random_str = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
     instance_name = f"kea_{random_str}"
+    
+    logger.info(f"Criando instância: {instance_name}")
 
     try:
+        # 1. Chamar Evolution API
         async with httpx.AsyncClient(timeout=30.0) as client:
-            headers = {
-                "apikey": evolution_api_key,
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "instanceName": instance_name,
-                "qrcode": True,
-                "integration": "WHATSAPP-BAILEYS"
-            }
+            headers = {"apikey": evolution_api_key, "Content-Type": "application/json"}
+            payload = {"instanceName": instance_name, "qrcode": True, "integration": "WHATSAPP-BAILEYS"}
+            
             response = await client.post(f"{api_url}/instance/create", json=payload, headers=headers)
             response.raise_for_status()
-            
             data = response.json()
             
-            # O endpoint da Evolution API retorna o QR code no campo 'qrcode.base64'
             qrcode_data = data.get("qrcode", {})
             base64_qr = qrcode_data.get("base64") if isinstance(qrcode_data, dict) else None
             
             if not base64_qr:
-                logger.error(f"Evolution API did not return QR code base64 in response: {data}")
-                raise HTTPException(status_code=502, detail="QR Code não retornado pela Evolution API")
-
-            # Gravar instância na tabela whatsapp_instances IMEDIATAMENTE
-            logger.info(f"Iniciando gravação da instância {instance_name}")
-            
-            try:
-                repository = WhatsAppInstanceRepository()
-                service = WhatsAppInstanceService(repository)
-                
-                instance_data = WhatsAppInstanceCreate(
-                    user_id=user.id,
-                    kea_client_id=getattr(user, 'kea_client_id', None),
-                    instance_name=instance_name,
-                    qr_code=base64_qr,
-                    status=True
-                )
-                
-                logger.info(f"Dados da instância: user_id={user.id}, instance_name={instance_name}")
-                
-                created_instance = service.create_instance(instance_data)
-                logger.info(f"✅ Instância {instance_name} salva com ID: {created_instance.id}")
-                
-            except Exception as db_error:
-                logger.error(f"❌ ERRO ao salvar no banco: {str(db_error)}")
-                # Não falha o endpoint, mas loga o erro
-                pass
-
-            return {"qrcode": base64_qr}
-
+                raise HTTPException(status_code=502, detail="QR Code não retornado")
+        
+        # 2. Salvar no banco IMEDIATAMENTE
+        logger.info(f"Salvando {instance_name} no banco...")
+        
+        repository = WhatsAppInstanceRepository()
+        service = WhatsAppInstanceService(repository)
+        
+        instance_data = WhatsAppInstanceCreate(
+            user_id=user.id,
+            kea_client_id=getattr(user, 'kea_client_id', None),
+            instance_name=instance_name,
+            qr_code=base64_qr,
+            status=True
+        )
+        
+        created_instance = service.create_instance(instance_data)
+        logger.info(f"✅ SUCESSO: Instância salva com ID {created_instance.id}")
+        
+        return {"qrcode": base64_qr}
+        
     except httpx.HTTPStatusError as e:
-        logger.error(f"Evolution API error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=502, detail="Erro ao criar instância na Evolution API")
+        logger.error(f"Evolution API error: {e.response.status_code}")
+        raise HTTPException(status_code=502, detail="Erro na Evolution API")
     except Exception as e:
-        logger.error(f"Erro ao criar instância: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro interno ao processar a criação da instância: {str(e)}")
+        logger.error(f"Erro geral: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
