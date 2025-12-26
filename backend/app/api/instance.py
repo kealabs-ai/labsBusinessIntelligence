@@ -60,24 +60,30 @@ async def create_instance(user=Depends(get_current_user)):
                 logger.error(f"Evolution API did not return QR code base64 in response: {data}")
                 raise HTTPException(status_code=502, detail="QR Code não retornado pela Evolution API")
 
-            # Gravar instância na tabela whatsapp_instances
+            # Gravar instância na tabela whatsapp_instances IMEDIATAMENTE
             logger.info(f"Iniciando gravação da instância {instance_name}")
             
-            repository = WhatsAppInstanceRepository()
-            service = WhatsAppInstanceService(repository)
-            
-            instance_data = WhatsAppInstanceCreate(
-                user_id=user.id,
-                kea_client_id=getattr(user, 'kea_client_id', None),
-                instance_name=instance_name,
-                qr_code=base64_qr,
-                status=True
-            )
-            
-            logger.info(f"Dados da instância: user_id={user.id}, instance_name={instance_name}")
-            
-            created_instance = service.create_instance(instance_data)
-            logger.info(f"Instância {instance_name} salva com ID: {created_instance.id}")
+            try:
+                repository = WhatsAppInstanceRepository()
+                service = WhatsAppInstanceService(repository)
+                
+                instance_data = WhatsAppInstanceCreate(
+                    user_id=user.id,
+                    kea_client_id=getattr(user, 'kea_client_id', None),
+                    instance_name=instance_name,
+                    qr_code=base64_qr,
+                    status=True
+                )
+                
+                logger.info(f"Dados da instância: user_id={user.id}, instance_name={instance_name}")
+                
+                created_instance = service.create_instance(instance_data)
+                logger.info(f"✅ Instância {instance_name} salva com ID: {created_instance.id}")
+                
+            except Exception as db_error:
+                logger.error(f"❌ ERRO ao salvar no banco: {str(db_error)}")
+                # Não falha o endpoint, mas loga o erro
+                pass
 
             return {"qrcode": base64_qr}
 
