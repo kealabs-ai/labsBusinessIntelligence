@@ -15,8 +15,8 @@ const InstanceQRCodeContainer = () => {
     try {
       const result = await instanceService.createInstance();
       
-      if (result.qrcode && result.qrcode.base64) {
-        setQrCodeUrl(result.qrcode.base64);
+      if (result.qrcode) {
+        setQrCodeUrl(result.qrcode);
       } else {
         setError('QR Code não encontrado na resposta');
       }

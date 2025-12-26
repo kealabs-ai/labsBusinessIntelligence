@@ -1,6 +1,10 @@
 const API_BASE_URL = 'http://72.60.140.128:6002/api/v1';
 
 class AuthService {
+  getToken() {
+    return localStorage.getItem('token');
+  }
+
   getHeaders() {
     const token = localStorage.getItem('token');
     return {
