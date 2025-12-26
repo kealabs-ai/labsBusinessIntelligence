@@ -49,17 +49,20 @@ async def create_instance(user=Depends(get_current_user)):
             }
             response = await client.post(f"{api_url}/instance/create", json=payload, headers=headers)
             response.raise_for_status()
-
+            
             data = response.json()
             
-            # O endpoint da Evolution API com 'qrcode: true' retorna o QR code em um campo 'base64'
-            base64_qr = data.get("base64")
+            # O endpoint da Evolution API retorna o QR code no campo 'qrcode.base64'
+            qrcode_data = data.get("qrcode", {})
+            base64_qr = qrcode_data.get("base64") if isinstance(qrcode_data, dict) else None
             
             if not base64_qr:
-                logger.error(f"Evolution API did not return 'base64' in response: {data}")
-                raise HTTPException(status_code=502, detail="QR Code (base64) não retornado pela Evolution API")
+                logger.error(f"Evolution API did not return QR code base64 in response: {data}")
+                raise HTTPException(status_code=502, detail="QR Code não retornado pela Evolution API")
 
             # Gravar instância na tabela whatsapp_instances
+            logger.info(f"Iniciando gravação da instância {instance_name}")
+            
             repository = WhatsAppInstanceRepository()
             service = WhatsAppInstanceService(repository)
             
@@ -71,8 +74,10 @@ async def create_instance(user=Depends(get_current_user)):
                 status=True
             )
             
+            logger.info(f"Dados da instância: user_id={user.id}, instance_name={instance_name}")
+            
             created_instance = service.create_instance(instance_data)
-            logger.info(f"Instância {instance_name} salva na tabela whatsapp_instances com ID: {created_instance.id}")
+            logger.info(f"Instância {instance_name} salva com ID: {created_instance.id}")
 
             return {"qrcode": base64_qr}
 
