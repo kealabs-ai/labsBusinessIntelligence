@@ -6,7 +6,10 @@ class WhatsAppInstanceService {
   }
 
   async createInstance(instanceData) {
-    const response = await fetch(`${this.baseURL}/whatsapp-instances/`, {
+    console.log('Enviando dados para API:', instanceData);
+    console.log('URL:', `${this.baseURL}/api/v1/whatsapp-instances/`);
+    
+    const response = await fetch(`${this.baseURL}/api/v1/whatsapp-instances/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -14,11 +17,17 @@ class WhatsAppInstanceService {
       body: JSON.stringify(instanceData)
     });
 
+    console.log('Response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`Erro ao salvar instância: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Erro na resposta:', errorText);
+      throw new Error(`Erro ao salvar instância: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log('Instância salva com sucesso:', result);
+    return result;
   }
 
   async getInstances(userId, keaClientId = null) {
@@ -27,7 +36,7 @@ class WhatsAppInstanceService {
       params.append('kea_client_id', keaClientId);
     }
 
-    const response = await fetch(`${this.baseURL}/whatsapp-instances/?${params}`);
+    const response = await fetch(`${this.baseURL}/api/v1/whatsapp-instances/?${params}`);
     
     if (!response.ok) {
       throw new Error(`Erro ao buscar instâncias: ${response.status}`);

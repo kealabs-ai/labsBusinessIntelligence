@@ -5,6 +5,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from infrastructure.config.env_manager import env
+from application.services.whatsapp_instance_service import WhatsAppInstanceService
+from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
+from domain.entities.whatsapp_instance import WhatsAppInstanceCreate
 import httpx
 import logging
 
@@ -54,6 +57,25 @@ async def create_instance(user=Depends(get_current_user)):
             if not base64_qr:
                 logger.error(f"Evolution API did not return 'base64' in response: {data}")
                 raise HTTPException(status_code=502, detail="QR Code (base64) não retornado pela Evolution API")
+
+            # Gravar instância na tabela whatsapp_instances
+            try:
+                repository = WhatsAppInstanceRepository()
+                service = WhatsAppInstanceService(repository)
+                
+                instance_data = WhatsAppInstanceCreate(
+                    user_id=user.id,
+                    kea_client_id=getattr(user, 'kea_client_id', None),
+                    instance_name=instance_name,
+                    qr_code=base64_qr,
+                    status=True
+                )
+                
+                service.create_instance(instance_data)
+                logger.info(f"Instância {instance_name} salva na tabela whatsapp_instances")
+            except Exception as db_error:
+                logger.error(f"Erro ao salvar instância no banco: {str(db_error)}")
+                # Não interrompe o fluxo, apenas loga o erro
 
             return {"qrcode": base64_qr}
 
