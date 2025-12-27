@@ -289,6 +289,45 @@ class AgendamentoRepository(BaseRepository):
             )
         return None
     
+    def update_notification_settings(self, user_id: int, quantity: int, unit: str) -> int:
+        """Atualizar configurações de notificação dos agendamentos"""
+        cursor = self.connection.cursor()
+        
+        # Calcular notification_date para cada agendamento
+        from datetime import datetime, timedelta
+        
+        # Buscar agendamentos do usuário
+        cursor.execute("SELECT id, data, hora FROM agendamentos WHERE user_id = %s AND ativo = 1", (user_id,))
+        agendamentos = cursor.fetchall()
+        
+        updated_count = 0
+        for agendamento in agendamentos:
+            agendamento_id, data, hora = agendamento
+            
+            # Calcular notification_date
+            agendamento_datetime = datetime.combine(data, hora)
+            
+            if unit == 'dias':
+                notification_date = agendamento_datetime - timedelta(days=quantity)
+            elif unit == 'semanas':
+                notification_date = agendamento_datetime - timedelta(weeks=quantity)
+            elif unit == 'meses':
+                notification_date = agendamento_datetime - timedelta(days=quantity * 30)
+            else:
+                notification_date = agendamento_datetime - timedelta(days=1)
+            
+            # Atualizar agendamento
+            update_query = """
+                UPDATE agendamentos 
+                SET notification_quantity = %s, notification_unit = %s, notification_date = %s
+                WHERE id = %s
+            """
+            cursor.execute(update_query, (quantity, unit, notification_date, agendamento_id))
+            updated_count += cursor.rowcount
+        
+        self.connection.commit()
+        return updated_count
+    
     def update_status_to_attended(self, user_id: int) -> int:
         """Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)"""
         cursor = self.connection.cursor()

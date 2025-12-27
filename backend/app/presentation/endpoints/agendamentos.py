@@ -132,6 +132,31 @@ async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, u
         logger.error(f"Error updating agendamento: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+class NotificationSettingsRequest(BaseModel):
+    notification_quantity: int
+    notification_unit: str
+
+@router.post("/update-notification-settings")
+async def update_notification_settings(request: NotificationSettingsRequest, user=Depends(get_current_user)):
+    """
+    Atualizar configurações de notificação dos agendamentos
+    """
+    logger.info("POST /agendamentos/update-notification-settings called")
+    try:
+        service = AgendamentoService()
+        updated_count = service.update_notification_settings(
+            user.id, 
+            request.notification_quantity, 
+            request.notification_unit
+        )
+        return {
+            "success": True, 
+            "message": f"{updated_count} agendamentos atualizados com novas configurações de notificação",
+            "updated_count": updated_count
+        }
+    except Exception as e:
+        logger.error(f"Error updating notification settings: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 @router.post("/update-status")
 async def update_agendamentos_status(user=Depends(get_current_user)):
     """

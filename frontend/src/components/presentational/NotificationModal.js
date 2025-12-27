@@ -23,9 +23,23 @@ const NotificationModal = ({ open, onClose, onSave }) => {
 
   const handleSave = async () => {
     try {
-      // Chamar endpoint para atualizar status dos agendamentos
       const token = localStorage.getItem('token');
-      const response = await fetch('http://72.60.140.128:6002/api/v1/agendamentos/update-status', {
+      
+      // Atualizar campos de notificação dos agendamentos
+      const updateResponse = await fetch('http://72.60.140.128:6002/api/v1/agendamentos/update-notification-settings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          notification_quantity: formData.quantidade,
+          notification_unit: formData.unidade
+        })
+      });
+      
+      // Atualizar status dos agendamentos
+      const statusResponse = await fetch('http://72.60.140.128:6002/api/v1/agendamentos/update-status', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -33,9 +47,11 @@ const NotificationModal = ({ open, onClose, onSave }) => {
         }
       });
       
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Agendamentos atualizados:', result.message);
+      if (updateResponse.ok && statusResponse.ok) {
+        const updateResult = await updateResponse.json();
+        const statusResult = await statusResponse.json();
+        console.log('Configurações atualizadas:', updateResult.message);
+        console.log('Status atualizados:', statusResult.message);
       }
       
       onSave(formData);
