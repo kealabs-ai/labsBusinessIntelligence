@@ -289,6 +289,25 @@ class AgendamentoRepository(BaseRepository):
             )
         return None
     
+    def update_status_to_attended(self, user_id: int) -> int:
+        """Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)"""
+        cursor = self.connection.cursor()
+        
+        # Adicionar coluna service_is se não existir
+        try:
+            cursor.execute("ALTER TABLE agendamentos ADD COLUMN service_is TINYINT(1) DEFAULT 0")
+            self.connection.commit()
+        except mysql.connector.Error:
+            pass  # Coluna já existe
+        
+        # Atualizar registros onde service_is = 0 para service_is = 1
+        query = "UPDATE agendamentos SET service_is = 1 WHERE user_id = %s AND service_is = 0"
+        cursor.execute(query, (user_id,))
+        updated_count = cursor.rowcount
+        self.connection.commit()
+        
+        return updated_count
+    
     def mark_notification_sent(self, agendamento_id: int):
         """Marcar notificação como enviada"""
         cursor = self.connection.cursor()

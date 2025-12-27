@@ -21,9 +21,30 @@ const NotificationModal = ({ open, onClose, onSave }) => {
     unidade: 'dias'
   });
 
-  const handleSave = () => {
-    onSave(formData);
-    onClose();
+  const handleSave = async () => {
+    try {
+      // Chamar endpoint para atualizar status dos agendamentos
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://72.60.140.128:6002/api/v1/agendamentos/update-status', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Agendamentos atualizados:', result.message);
+      }
+      
+      onSave(formData);
+      onClose();
+    } catch (error) {
+      console.error('Erro ao atualizar agendamentos:', error);
+      onSave(formData);
+      onClose();
+    }
   };
 
   return (

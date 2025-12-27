@@ -132,16 +132,20 @@ async def update_agendamento(agendamento_id: int, request: AgendamentoRequest, u
         logger.error(f"Error updating agendamento: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{agendamento_id}/delete")
-async def delete_agendamento(agendamento_id: int, user=Depends(get_current_user)):
+@router.post("/update-status")
+async def update_agendamentos_status(user=Depends(get_current_user)):
     """
-    Inativar agendamento
+    Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)
     """
-    logger.info(f"POST /agendamentos/{agendamento_id}/delete called")
+    logger.info("POST /agendamentos/update-status called")
     try:
         service = AgendamentoService()
-        service.delete_agendamento(agendamento_id)
-        return {"success": True, "message": "Agendamento inativado com sucesso"}
+        updated_count = service.update_agendamentos_status(user.id)
+        return {
+            "success": True, 
+            "message": f"{updated_count} agendamentos atualizados para status 'atendido'",
+            "updated_count": updated_count
+        }
     except Exception as e:
-        logger.error(f"Error deleting agendamento: {str(e)}")
+        logger.error(f"Error updating agendamentos status: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

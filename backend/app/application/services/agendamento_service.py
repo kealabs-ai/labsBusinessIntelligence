@@ -145,6 +145,10 @@ class AgendamentoService:
         
         return notification_datetime
     
+    def update_agendamentos_status(self, user_id: int) -> int:
+        """Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)"""
+        return self.repository.update_status_to_attended(user_id)
+    
     async def send_whatsapp_confirmation(self, agendamento: Agendamento) -> bool:
         """Enviar confirmação via WhatsApp"""
         if not agendamento.whatsapp_number:
