@@ -289,15 +289,23 @@ class AgendamentoRepository(BaseRepository):
             )
         return None
     
-    def update_notification_settings(self, user_id: int, quantity: int, unit: str) -> int:
+    def update_notification_settings(self, user_id: int, quantity: int, unit: str, unit_id: int = None, kea_client_id: str = None) -> int:
         """Atualizar configurações de notificação dos agendamentos"""
         cursor = self.connection.cursor()
         
-        # Calcular notification_date para cada agendamento
-        from datetime import datetime, timedelta
+        # Construir query com condições
+        base_query = "SELECT id, data, hora FROM agendamentos WHERE user_id = %s AND ativo = 1"
+        params = [user_id]
         
-        # Buscar agendamentos do usuário
-        cursor.execute("SELECT id, data, hora FROM agendamentos WHERE user_id = %s AND ativo = 1", (user_id,))
+        if unit_id:
+            base_query += " AND unit_id = %s"
+            params.append(unit_id)
+        
+        if kea_client_id:
+            base_query += " AND kea_client_id = %s"
+            params.append(kea_client_id)
+        
+        cursor.execute(base_query, params)
         agendamentos = cursor.fetchall()
         
         updated_count = 0
@@ -305,6 +313,7 @@ class AgendamentoRepository(BaseRepository):
             agendamento_id, data, hora = agendamento
             
             # Calcular notification_date
+            from datetime import datetime, timedelta
             agendamento_datetime = datetime.combine(data, hora)
             
             if unit == 'dias':
@@ -328,7 +337,7 @@ class AgendamentoRepository(BaseRepository):
         self.connection.commit()
         return updated_count
     
-    def update_status_to_attended(self, user_id: int) -> int:
+    def update_status_to_attended(self, user_id: int, unit_id: int = None, kea_client_id: str = None) -> int:
         """Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)"""
         cursor = self.connection.cursor()
         
@@ -339,9 +348,19 @@ class AgendamentoRepository(BaseRepository):
         except mysql.connector.Error:
             pass  # Coluna já existe
         
-        # Atualizar registros onde service_is = 0 para service_is = 1
+        # Construir query com condições
         query = "UPDATE agendamentos SET service_is = 1 WHERE user_id = %s AND service_is = 0"
-        cursor.execute(query, (user_id,))
+        params = [user_id]
+        
+        if unit_id:
+            query += " AND unit_id = %s"
+            params.append(unit_id)
+        
+        if kea_client_id:
+            query += " AND kea_client_id = %s"
+            params.append(kea_client_id)
+        
+        cursor.execute(query, params)
         updated_count = cursor.rowcount
         self.connection.commit()
         

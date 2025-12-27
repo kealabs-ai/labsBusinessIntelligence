@@ -147,7 +147,9 @@ async def update_notification_settings(request: NotificationSettingsRequest, use
         updated_count = service.update_notification_settings(
             user.id, 
             request.notification_quantity, 
-            request.notification_unit
+            request.notification_unit,
+            getattr(user, 'unit_id', None),
+            getattr(user, 'kea_client_id', None)
         )
         return {
             "success": True, 
@@ -165,7 +167,11 @@ async def update_agendamentos_status(user=Depends(get_current_user)):
     logger.info("POST /agendamentos/update-status called")
     try:
         service = AgendamentoService()
-        updated_count = service.update_agendamentos_status(user.id)
+        updated_count = service.update_agendamentos_status(
+            user.id,
+            getattr(user, 'unit_id', None),
+            getattr(user, 'kea_client_id', None)
+        )
         return {
             "success": True, 
             "message": f"{updated_count} agendamentos atualizados para status 'atendido'",

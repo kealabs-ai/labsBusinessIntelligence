@@ -145,13 +145,13 @@ class AgendamentoService:
         
         return notification_datetime
     
-    def update_notification_settings(self, user_id: int, quantity: int, unit: str) -> int:
+    def update_notification_settings(self, user_id: int, quantity: int, unit: str, unit_id: int = None, kea_client_id: str = None) -> int:
         """Atualizar configurações de notificação dos agendamentos"""
-        return self.repository.update_notification_settings(user_id, quantity, unit)
+        return self.repository.update_notification_settings(user_id, quantity, unit, unit_id, kea_client_id)
     
-    def update_agendamentos_status(self, user_id: int) -> int:
+    def update_agendamentos_status(self, user_id: int, unit_id: int = None, kea_client_id: str = None) -> int:
         """Atualizar status dos agendamentos de 0 (agendado) para 1 (atendido)"""
-        return self.repository.update_status_to_attended(user_id)
+        return self.repository.update_status_to_attended(user_id, unit_id, kea_client_id)
     
     async def send_whatsapp_confirmation(self, agendamento: Agendamento) -> bool:
         """Enviar confirmação via WhatsApp"""
