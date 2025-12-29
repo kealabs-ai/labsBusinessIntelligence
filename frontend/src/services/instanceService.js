@@ -13,7 +13,10 @@ class InstanceService {
       throw new Error('Token de autenticação não encontrado');
     }
     
-    const response = await fetch(`${this.baseURL}/api/instance/create`, {
+    const url = `${this.baseURL}/api/instance/create`;
+    console.log('Chamando URL:', url);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
