@@ -3,7 +3,7 @@ import { authService } from './authService';
 
 class InstanceService {
   constructor() {
-    this.baseURL = env.get('REACT_APP_API_URL', 'http://72.60.140.128:6002');
+    this.baseURL = 'http://72.60.140.128:6002';
   }
 
   async createInstance() {
