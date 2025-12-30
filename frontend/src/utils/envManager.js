@@ -42,7 +42,10 @@ class EnvManager {
 
   // API configurations
   get apiBaseUrl() {
-    return this.get('REACT_APP_API_URL', 'http://72.60.140.128:6002');
+    if (process.env.NODE_ENV === 'production') {
+      return 'http://72.60.140.128:6002';
+    }
+    return this.get('REACT_APP_API_URL', 'http://localhost:6002');
   }
 
   get apiTimeout() {
