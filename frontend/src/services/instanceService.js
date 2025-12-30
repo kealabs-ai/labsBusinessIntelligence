@@ -17,20 +17,27 @@ class InstanceService {
     const url = `${this.baseURL}/api/instance/create`;
     console.log('Chamando URL:', url);
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Erro ao criar instância: ${response.status}`);
       }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `Erro ao criar instância: ${response.status}`);
+      
+      return await response.json();
+    } catch (error) {
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Erro de conexão. Verifique se o servidor está acessível.');
+      }
+      throw error;
     }
-    
-    return await response.json();
   }
 }
 
