@@ -3,7 +3,8 @@ import { authService } from './authService';
 
 class InstanceService {
   constructor() {
-    this.baseURL = 'http://72.60.140.128:6002';
+    this.baseURL = env.apiBaseUrl;
+    console.log('InstanceService baseURL:', this.baseURL);
   }
 
   async createInstance() {
