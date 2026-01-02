@@ -36,7 +36,7 @@ class KeaClientRepository:
             query = """
             INSERT INTO kea_clients (name, cpf_cnpj, kea_identifier, email, site, 
                                    phone_number, cell_phone, whatsapp_number, address, 
-                                   status, payment_plan, user_quantity, last_payment_date, segmento)
+                                   status, payment_plan, user_quantity, last_payment_date, segment)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
@@ -67,7 +67,7 @@ class KeaClientRepository:
             query = """
             SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
                    cell_phone, whatsapp_number, address, status, payment_plan, 
-                   user_quantity, last_payment_date, segmento, created_at, updated_at 
+                   user_quantity, last_payment_date, segment, created_at, updated_at 
             FROM kea_clients ORDER BY created_at DESC
             """
             
@@ -77,7 +77,7 @@ class KeaClientRepository:
             clients = []
             for row in rows:
                 segmento_data = None
-                if row[14]:  # segmento field
+                if row[14]:  # segment field
                     try:
                         segmento_data = json.loads(row[14])
                     except:
@@ -109,6 +109,55 @@ class KeaClientRepository:
         finally:
             cursor.close()
             connection.close()
+    
+    def get_kea_client_by_id(self, client_id: int) -> Optional[KeaClient]:
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        
+        try:
+            query = """
+            SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
+                   cell_phone, whatsapp_number, address, status, payment_plan, 
+                   user_quantity, last_payment_date, segment, created_at, updated_at 
+            FROM kea_clients WHERE id = %s
+            """
+            
+            cursor.execute(query, (client_id,))
+            row = cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            segmento_data = None
+            if row[14]:  # segment field
+                try:
+                    segmento_data = json.loads(row[14])
+                except:
+                    segmento_data = []
+            
+            return KeaClient(
+                id=row[0],
+                name=row[1],
+                cpf_cnpj=row[2],
+                kea_identifier=row[3],
+                email=row[4],
+                site=row[5],
+                phone_number=row[6],
+                cell_phone=row[7],
+                whatsapp_number=row[8],
+                address=row[9],
+                status=bool(row[10]),
+                payment_plan=row[11],
+                user_quantity=row[12],
+                last_payment_date=row[13],
+                segmento=segmento_data,
+                created_at=str(row[15]) if row[15] else None,
+                updated_at=str(row[16]) if row[16] else None
+            )
+            
+        finally:
+            cursor.close()
+            connection.close()
 
     def update_kea_client(self, kea_client: KeaClient) -> KeaClient:
         connection = self.get_connection()
@@ -119,7 +168,7 @@ class KeaClientRepository:
             UPDATE kea_clients 
             SET name = %s, cpf_cnpj = %s, email = %s, site = %s, phone_number = %s,
                 cell_phone = %s, whatsapp_number = %s, address = %s, status = %s,
-                payment_plan = %s, user_quantity = %s, last_payment_date = %s, segmento = %s
+                payment_plan = %s, user_quantity = %s, last_payment_date = %s, segment = %s
             WHERE id = %s
             """
             

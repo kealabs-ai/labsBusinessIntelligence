@@ -72,7 +72,20 @@ async def get_kea_clients(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.put("/kea-clients/{client_id}", response_model=KeaClientResponse)
+@router.get("/kea-clients/{client_id}", response_model=KeaClientResponse)
+async def get_kea_client(client_id: int, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role_id") != 1:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    try:
+        client = kea_client_service.get_kea_client_by_id(client_id)
+        if not client:
+            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+        return client.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/kea-clients/{client_id}/update", response_model=KeaClientResponse)
 async def update_kea_client(client_id: int, client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")

@@ -25,13 +25,17 @@ class KeaClientService:
             status=client_data.get('status', True),
             payment_plan=client_data.get('payment_plan'),
             user_quantity=client_data.get('user_quantity', 1),
-            last_payment_date=last_payment_date
+            last_payment_date=last_payment_date,
+            segmento=client_data.get('segmento')
         )
         
         return self.kea_client_repository.create_kea_client(kea_client)
 
     def get_all_kea_clients(self) -> List[KeaClient]:
         return self.kea_client_repository.get_all_kea_clients()
+    
+    def get_kea_client_by_id(self, client_id: int) -> KeaClient:
+        return self.kea_client_repository.get_kea_client_by_id(client_id)
 
     def update_kea_client(self, client_id: int, client_data: dict) -> KeaClient:
         # Parse date if provided
@@ -52,7 +56,8 @@ class KeaClientService:
             status=client_data.get('status', True),
             payment_plan=client_data.get('payment_plan'),
             user_quantity=client_data.get('user_quantity', 1),
-            last_payment_date=last_payment_date
+            last_payment_date=last_payment_date,
+            segmento=client_data.get('segmento')
         )
         
         return self.kea_client_repository.update_kea_client(kea_client)
