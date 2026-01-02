@@ -60,6 +60,10 @@ class ServiceService {
       body: JSON.stringify({ status })
     });
   }
+
+  async getServiceCategories() {
+    return this.request('/categories');
+  }
 }
 
 export const serviceService = new ServiceService();

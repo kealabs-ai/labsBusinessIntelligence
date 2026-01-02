@@ -118,3 +118,7 @@ class IServiceRepository(ABC):
     @abstractmethod
     async def update_service_status(self, service_id: int, status: bool) -> bool:
         pass
+    
+    @abstractmethod
+    async def get_service_categories(self) -> List[str]:
+        pass

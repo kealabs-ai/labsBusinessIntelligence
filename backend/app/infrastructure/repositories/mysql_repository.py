@@ -521,6 +521,17 @@ class MySQLServiceRepository(IServiceRepository):
         finally:
             cursor.close()
             conn.close()
+    
+    async def get_service_categories(self) -> List[str]:
+        conn = mysql.connector.connect(**self.connection_config)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT DISTINCT category FROM services WHERE category IS NOT NULL AND category != '' ORDER BY category")
+            results = cursor.fetchall()
+            return [row[0] for row in results]
+        finally:
+            cursor.close()
+            conn.close()
 
 class MySQLResourceRepository:
     def __init__(self):

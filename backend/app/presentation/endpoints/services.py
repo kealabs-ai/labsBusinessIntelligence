@@ -56,6 +56,11 @@ async def create_service(
     )
     return await service_service.create_service(service)
 
+@router.get("/categories", response_model=List[str])
+async def get_service_categories(user_id: int = Depends(get_current_user_id)):
+    service_service = ServiceService()
+    return await service_service.get_service_categories()
+
 @router.get("/", response_model=List[Service])
 async def get_services(user_id: int = Depends(get_current_user_id)):
     service_service = ServiceService()

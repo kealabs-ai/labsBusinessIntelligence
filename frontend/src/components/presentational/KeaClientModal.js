@@ -11,8 +11,14 @@ import {
   Switch,
   Box,
   Typography,
-  MenuItem
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  OutlinedInput
 } from '@mui/material';
+import { serviceService } from '../../services/serviceService';
 
 const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
   const [formData, setFormData] = useState({
@@ -27,14 +33,33 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
     status: true,
     payment_plan: '',
     user_quantity: 1,
-    last_payment_date: ''
+    last_payment_date: '',
+    segmento: []
   });
+
+  const [segmentos, setSegmentos] = useState([]);
 
   const paymentPlans = [
     { value: 'basico', label: 'Básico' },
     { value: 'premium', label: 'Premium' },
     { value: 'enterprise', label: 'Enterprise' }
   ];
+
+  useEffect(() => {
+    const loadSegmentos = async () => {
+      try {
+        const categories = await serviceService.getServiceCategories();
+        console.log('Categorias carregadas:', categories);
+        setSegmentos(categories || []);
+      } catch (error) {
+        console.error('Erro ao carregar segmentos:', error);
+        setSegmentos([]);
+      }
+    };
+    if (open) {
+      loadSegmentos();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (client) {
@@ -50,7 +75,8 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
         status: client.status !== undefined ? client.status : true,
         payment_plan: client.payment_plan || '',
         user_quantity: client.user_quantity || 1,
-        last_payment_date: client.last_payment_date || ''
+        last_payment_date: client.last_payment_date || '',
+        segmento: client.segmento || []
       });
     } else {
       setFormData({
@@ -65,7 +91,8 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
         status: true,
         payment_plan: '',
         user_quantity: 1,
-        last_payment_date: ''
+        last_payment_date: '',
+        segmento: []
       });
     }
   }, [client, open]);
@@ -209,6 +236,31 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
                 onChange={handleChange('user_quantity')}
                 inputProps={{ min: 1 }}
               />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Segmento</InputLabel>
+                <Select
+                  multiple
+                  value={formData.segmento}
+                  onChange={handleChange('segmento')}
+                  input={<OutlinedInput label="Segmento" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} size="small" />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {segmentos.map((segmento) => (
+                    <MenuItem key={segmento} value={segmento}>
+                      {segmento}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             
             <Grid item xs={12} sm={6}>

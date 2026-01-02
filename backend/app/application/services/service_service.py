@@ -20,3 +20,6 @@ class ServiceService:
     
     async def update_service_status(self, service_id: int, status: bool) -> bool:
         return await self.service_repository.update_service_status(service_id, status)
+    
+    async def get_service_categories(self) -> List[str]:
+        return await self.service_repository.get_service_categories()
