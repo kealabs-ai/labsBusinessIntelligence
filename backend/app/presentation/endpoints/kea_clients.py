@@ -23,6 +23,7 @@ class KeaClientCreate(BaseModel):
     payment_plan: Optional[str] = None
     user_quantity: int = 1
     last_payment_date: Optional[str] = None
+    segmento: Optional[List[str]] = None
 
 class KeaClientResponse(BaseModel):
     id: int
@@ -39,6 +40,7 @@ class KeaClientResponse(BaseModel):
     payment_plan: Optional[str] = None
     user_quantity: int
     last_payment_date: Optional[str] = None
+    segmento: Optional[List[str]] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 

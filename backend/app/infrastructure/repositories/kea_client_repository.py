@@ -4,6 +4,7 @@ from infrastructure.config.env_manager import env
 import mysql.connector
 import random
 import string
+import json
 
 class KeaClientRepository:
     def __init__(self):
@@ -35,8 +36,8 @@ class KeaClientRepository:
             query = """
             INSERT INTO kea_clients (name, cpf_cnpj, kea_identifier, email, site, 
                                    phone_number, cell_phone, whatsapp_number, address, 
-                                   status, payment_plan, user_quantity, last_payment_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                   status, payment_plan, user_quantity, last_payment_date, segmento)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -44,7 +45,7 @@ class KeaClientRepository:
                 kea_client.email, kea_client.site, kea_client.phone_number,
                 kea_client.cell_phone, kea_client.whatsapp_number, kea_client.address,
                 kea_client.status, kea_client.payment_plan, kea_client.user_quantity,
-                kea_client.last_payment_date
+                kea_client.last_payment_date, json.dumps(kea_client.segmento) if kea_client.segmento else None
             ))
             
             kea_client.id = cursor.lastrowid
@@ -66,7 +67,7 @@ class KeaClientRepository:
             query = """
             SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
                    cell_phone, whatsapp_number, address, status, payment_plan, 
-                   user_quantity, last_payment_date, created_at, updated_at 
+                   user_quantity, last_payment_date, segmento, created_at, updated_at 
             FROM kea_clients ORDER BY created_at DESC
             """
             
@@ -75,6 +76,13 @@ class KeaClientRepository:
             
             clients = []
             for row in rows:
+                segmento_data = None
+                if row[14]:  # segmento field
+                    try:
+                        segmento_data = json.loads(row[14])
+                    except:
+                        segmento_data = []
+                
                 client = KeaClient(
                     id=row[0],
                     name=row[1],
@@ -90,8 +98,9 @@ class KeaClientRepository:
                     payment_plan=row[11],
                     user_quantity=row[12],
                     last_payment_date=row[13],
-                    created_at=str(row[14]) if row[14] else None,
-                    updated_at=str(row[15]) if row[15] else None
+                    segmento=segmento_data,
+                    created_at=str(row[15]) if row[15] else None,
+                    updated_at=str(row[16]) if row[16] else None
                 )
                 clients.append(client)
             
@@ -110,7 +119,7 @@ class KeaClientRepository:
             UPDATE kea_clients 
             SET name = %s, cpf_cnpj = %s, email = %s, site = %s, phone_number = %s,
                 cell_phone = %s, whatsapp_number = %s, address = %s, status = %s,
-                payment_plan = %s, user_quantity = %s, last_payment_date = %s
+                payment_plan = %s, user_quantity = %s, last_payment_date = %s, segmento = %s
             WHERE id = %s
             """
             
@@ -118,7 +127,8 @@ class KeaClientRepository:
                 kea_client.name, kea_client.cpf_cnpj, kea_client.email, kea_client.site,
                 kea_client.phone_number, kea_client.cell_phone, kea_client.whatsapp_number,
                 kea_client.address, kea_client.status, kea_client.payment_plan,
-                kea_client.user_quantity, kea_client.last_payment_date, kea_client.id
+                kea_client.user_quantity, kea_client.last_payment_date, 
+                json.dumps(kea_client.segmento) if kea_client.segmento else None, kea_client.id
             ))
             
             connection.commit()

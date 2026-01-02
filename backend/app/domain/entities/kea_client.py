@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 from datetime import date
+import json
 
 @dataclass
 class KeaClient:
@@ -18,6 +19,7 @@ class KeaClient:
     payment_plan: Optional[str] = None
     user_quantity: int = 1
     last_payment_date: Optional[date] = None
+    segmento: Optional[List[str]] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -37,6 +39,7 @@ class KeaClient:
             'payment_plan': self.payment_plan,
             'user_quantity': self.user_quantity,
             'last_payment_date': str(self.last_payment_date) if self.last_payment_date else None,
+            'segmento': self.segmento,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
