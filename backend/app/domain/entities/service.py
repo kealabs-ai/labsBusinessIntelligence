@@ -9,7 +9,7 @@ class Service(BaseModel):
     name: str = Field(..., max_length=255)
     category: str = Field(..., max_length=100)
     description: Optional[str] = None
-    price: Decimal = Field(..., gt=0, description="Preço deve ser maior que zero")
+    price: Decimal = Field(..., ge=0, description="Preço deve ser maior ou igual a zero")
     duration: int = Field(..., gt=0, description="Duração em minutos")
     status: bool = Field(default=True)
     unit_id: Optional[int] = None
