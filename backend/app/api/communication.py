@@ -73,10 +73,16 @@ class SendMessageRequest(BaseModel):
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     auth_service = AuthService()
-    user = await auth_service.get_current_user(credentials.credentials)
-    if not user:
+    try:
+        user = await auth_service.get_current_user(credentials.credentials)
+        if not user:
+            logger.error("Token validation failed - user not found")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        logger.info(f"User authenticated: {user.id}")
+        return user
+    except Exception as e:
+        logger.error(f"Authentication error: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid token")
-    return user
 
 async def get_user_instance_name(user):
     """Obtém o instance_name do usuário logado"""
@@ -86,9 +92,24 @@ async def get_user_instance_name(user):
             user_id=user.id,
             kea_client_id=user.kea_client_id
         )
-        return instance_name or env.get("INSTANCE", "kealabs_comunication")
-    except Exception:
-        return env.get("INSTANCE", "kealabs_comunication")
+        result = instance_name or env.get("INSTANCE", "kealabs_comunication")
+        logger.info(f"Using instance: {result} for user {user.id}")
+        return result
+    except Exception as e:
+        logger.error(f"Error getting instance name: {str(e)}")
+        fallback = env.get("INSTANCE", "kealabs_comunication")
+        logger.info(f"Using fallback instance: {fallback}")
+        return fallback
+
+@router.get("/test-auth")
+async def test_auth(user=Depends(get_current_user)):
+    """Endpoint para testar autenticação"""
+    return {
+        "authenticated": True,
+        "user_id": user.id,
+        "username": user.username,
+        "kea_client_id": getattr(user, 'kea_client_id', None)
+    }
 
 @router.get("/env-check")
 async def check_environment():
