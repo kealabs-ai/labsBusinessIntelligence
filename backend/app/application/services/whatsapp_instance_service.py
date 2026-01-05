@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
 from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
 
@@ -25,3 +25,7 @@ class WhatsAppInstanceService:
     def update_status(self, instance_name: str, status: bool) -> bool:
         """Atualiza status da instância"""
         return self.repository.update_status(instance_name, status)
+    
+    def get_latest_instance_name(self, user_id: int, kea_client_id: Optional[str] = None) -> Optional[str]:
+        """Retorna o último instance_name do usuário e kea_client_id"""
+        return self.repository.get_latest_instance_name(user_id, kea_client_id)

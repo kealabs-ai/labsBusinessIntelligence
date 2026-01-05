@@ -65,3 +65,22 @@ class WhatsAppInstanceRepository:
         
         self.db.execute(query, (status, instance_name))
         return True
+    
+    def get_latest_instance_name(self, user_id: int, kea_client_id: Optional[str] = None) -> Optional[str]:
+        """Retorna o último instance_name do usuário e kea_client_id"""
+        query = """
+            SELECT instance_name
+            FROM whatsapp_instances
+            WHERE user_id = %s
+        """
+        
+        params = [user_id]
+        
+        if kea_client_id is not None:
+            query += " AND kea_client_id = %s"
+            params.append(kea_client_id)
+        
+        query += " ORDER BY created_at DESC LIMIT 1"
+        
+        result = self.db.fetchone(query, tuple(params))
+        return result['instance_name'] if result else None

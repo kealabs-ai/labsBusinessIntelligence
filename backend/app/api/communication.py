@@ -3,6 +3,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional
 from application.services.auth_service import AuthService
+from application.services.whatsapp_instance_service import WhatsAppInstanceService
+from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
 from infrastructure.config.env_manager import env
 import httpx
 import asyncio
@@ -76,6 +78,18 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="Invalid token")
     return user
 
+async def get_user_instance_name(user):
+    """Obtém o instance_name do usuário logado"""
+    try:
+        whatsapp_service = WhatsAppInstanceService(WhatsAppInstanceRepository())
+        instance_name = whatsapp_service.get_latest_instance_name(
+            user_id=user.id,
+            kea_client_id=user.kea_client_id
+        )
+        return instance_name or env.get("INSTANCE", "kealabs_comunication")
+    except Exception:
+        return env.get("INSTANCE", "kealabs_comunication")
+
 @router.get("/env-check")
 async def check_environment():
     return {
@@ -92,7 +106,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
     try:
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY","4EE9A4660493-4696-99FD-A4C9D2F59E6C")
-        current_instance = env.get("INSTANCE","kealabs_comunication")
+        current_instance = await get_user_instance_name(user)
 
         # Validate environment variables
         if not current_api_key or not current_instance:
@@ -170,7 +184,7 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
     try:
         # Obter variáveis de ambiente
         current_api_key = env.get("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
-        current_instance = env.get("INSTANCE", "kealabs_comunication")
+        current_instance = await get_user_instance_name(user)
         # Normalize and minimal validation
         api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
         instance_str = current_instance.strip() if isinstance(current_instance, str) else ""

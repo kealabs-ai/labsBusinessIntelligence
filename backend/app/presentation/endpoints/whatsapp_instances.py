@@ -1,16 +1,45 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from domain.entities.whatsapp_instance import WhatsAppInstance, WhatsAppInstanceCreate, WhatsAppInstanceQuery
 from application.services.whatsapp_instance_service import WhatsAppInstanceService
+from application.services.auth_service import AuthService
 from infrastructure.repositories.whatsapp_instance_repository import WhatsAppInstanceRepository
 from infrastructure.repositories.mysql_repository import MySQLResourceRepository
 
 router = APIRouter(prefix="/whatsapp-instances", tags=["WhatsApp Instances"])
+security = HTTPBearer()
+auth_service = AuthService()
+
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    user = await auth_service.get_current_user(credentials.credentials)
+    if not user:
+        raise HTTPException(status_code=401, detail="Token inválido")
+    return {"user_id": user.id, "role_id": user.role_id, "kea_client_id": user.kea_client_id}
 
 
 def get_whatsapp_instance_service() -> WhatsAppInstanceService:
     repository = WhatsAppInstanceRepository()
     return WhatsAppInstanceService(repository)
+
+
+@router.get("/latest-instance")
+async def get_latest_instance(
+    current_user: dict = Depends(get_current_user),
+    service: WhatsAppInstanceService = Depends(get_whatsapp_instance_service)
+):
+    """Retorna o último instance_name do usuário logado e kea_client_id"""
+    try:
+        instance_name = service.get_latest_instance_name(
+            user_id=current_user["user_id"],
+            kea_client_id=current_user["kea_client_id"]
+        )
+        if not instance_name:
+            raise HTTPException(status_code=404, detail="Nenhuma instância encontrada")
+        return {"instance_name": instance_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/", response_model=WhatsAppInstance)
