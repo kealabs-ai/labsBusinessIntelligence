@@ -13,6 +13,10 @@ class WhatsAppInstanceRepository:
             VALUES (%s, %s, %s, %s, %s, %s)
         """
         
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Executando INSERT com evolution_api_key: {instance_data.evolution_api_key}")
+        
         self.db.execute(query, (
             instance_data.user_id,
             instance_data.kea_client_id,

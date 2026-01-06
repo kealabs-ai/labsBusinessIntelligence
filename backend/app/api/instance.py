@@ -51,7 +51,8 @@ async def create_instance(user=Depends(get_current_user)):
             token = data.get("token")  # Extrair token da resposta
             
             logger.info(f"Token recebido da API: {token}")
-            logger.info(f"Dados completos da resposta: {data}")
+            logger.info(f"QR Code recebido: {'Sim' if base64_qr else 'Não'}")
+            logger.info(f"Chaves da resposta: {list(data.keys())}")
             
             if not base64_qr:
                 raise HTTPException(status_code=502, detail="QR Code não retornado")
@@ -71,8 +72,11 @@ async def create_instance(user=Depends(get_current_user)):
             status=True
         )
         
+        logger.info(f"Dados da instância a serem salvos: {instance_data.dict()}")
+        
         created_instance = service.create_instance(instance_data)
         logger.info(f"✅ SUCESSO: Instância salva com ID {created_instance.id}")
+        logger.info(f"Token salvo: {created_instance.evolution_api_key}")
         
         return {"qrcode": base64_qr}
         
