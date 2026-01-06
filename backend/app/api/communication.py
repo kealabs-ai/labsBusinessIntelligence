@@ -137,11 +137,12 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
         # Normalize and minimal validation
         api_key_str = current_api_key.strip()
         instance_str = current_instance.strip()
+        
+        logger.info(f"Using API Key: {api_key_str[:10]}... Instance: {instance_str}")
 
         headers = {
             "Content-Type": "application/json",
-            "apikey": api_key_str,
-            "instance": instance_str
+            "apikey": api_key_str
         }
 
         url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/chat/findMessages/{instance_str}"
@@ -209,6 +210,9 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         # Normalize and minimal validation
         api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""
         instance_str = current_instance.strip() if isinstance(current_instance, str) else ""
+        
+        logger.info(f"Using API Key: {api_key_str[:10]}... Instance: {instance_str}")
+        
         # Log minimal info about credentials (do NOT log secret values)
         logger.info(f"Evolution API creds loaded: API_KEY_exists={bool(api_key_str)}, API_KEY_len={len(api_key_str)}, INSTANCE={instance_str}")
 
@@ -218,8 +222,7 @@ async def send_message_client(request: SendMessageRequest, user=Depends(get_curr
         
         headers = {
             "Content-Type": "application/json",
-            "apikey": current_api_key,
-            "instance": current_instance
+            "apikey": current_api_key
         }
         
         url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/message/sendText/{current_instance}"
