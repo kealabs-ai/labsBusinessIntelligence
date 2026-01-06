@@ -126,7 +126,7 @@ async def check_environment():
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get("API_KEY","4EE9A4660493-4696-99FD-A4C9D2F59E6C")
+        current_api_key = env.get("API_KEY","6D8E21EE-2962-4770-8607-E27D63798746")
         current_instance = await get_user_instance_name(user)
 
         # Validate environment variables
