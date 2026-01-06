@@ -77,6 +77,19 @@ async def get_instance_by_name(
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.post("/update-token/{instance_name}")
+async def update_instance_token(
+    instance_name: str,
+    token: str,
+    service: WhatsAppInstanceService = Depends(get_whatsapp_instance_service)
+):
+    """Atualiza o token da instância com o valor retornado da API"""
+    success = service.update_evolution_api_key(instance_name, token)
+    if not success:
+        raise HTTPException(status_code=404, detail="Instância não encontrada")
+    return {"message": "Token atualizado com sucesso"}
+
+
 @router.post("/{instance_name}/status")
 async def update_instance_status(
     instance_name: str,

@@ -29,3 +29,11 @@ class WhatsAppInstanceService:
     def get_latest_instance_name(self, user_id: int, kea_client_id: Optional[str] = None) -> Optional[str]:
         """Retorna o último instance_name do usuário e kea_client_id"""
         return self.repository.get_latest_instance_name(user_id, kea_client_id)
+    
+    def get_evolution_api_key(self, user_id: int, kea_client_id: Optional[str] = None) -> Optional[str]:
+        """Retorna a evolution_api_key do usuário"""
+        return self.repository.get_evolution_api_key(user_id, kea_client_id)
+    
+    def update_evolution_api_key(self, instance_name: str, token: str) -> bool:
+        """Atualiza a evolution_api_key com o token retornado da API"""
+        return self.repository.update_evolution_api_key(instance_name, token)

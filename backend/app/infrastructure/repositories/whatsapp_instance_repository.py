@@ -9,8 +9,8 @@ class WhatsAppInstanceRepository:
 
     def create(self, instance_data: WhatsAppInstanceCreate) -> WhatsAppInstance:
         query = """
-            INSERT INTO whatsapp_instances (user_id, kea_client_id, instance_name, qr_code, status)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO whatsapp_instances (user_id, kea_client_id, instance_name, qr_code, evolution_api_key, status)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
         
         self.db.execute(query, (
@@ -18,6 +18,7 @@ class WhatsAppInstanceRepository:
             instance_data.kea_client_id,
             instance_data.instance_name,
             instance_data.qr_code,
+            instance_data.evolution_api_key,
             instance_data.status
         ))
         
@@ -29,7 +30,7 @@ class WhatsAppInstanceRepository:
 
     def get_by_instance_name(self, instance_name: str) -> Optional[WhatsAppInstance]:
         query = """
-            SELECT id, user_id, kea_client_id, instance_name, qr_code, created_at, status
+            SELECT id, user_id, kea_client_id, instance_name, qr_code, evolution_api_key, created_at, status
             FROM whatsapp_instances
             WHERE instance_name = %s
         """
@@ -41,7 +42,7 @@ class WhatsAppInstanceRepository:
 
     def get_instances(self, query_params: WhatsAppInstanceQuery) -> List[WhatsAppInstance]:
         base_query = """
-            SELECT id, user_id, kea_client_id, instance_name, qr_code, created_at, status
+            SELECT id, user_id, kea_client_id, instance_name, qr_code, evolution_api_key, created_at, status
             FROM whatsapp_instances
             WHERE user_id = %s
         """
@@ -84,3 +85,33 @@ class WhatsAppInstanceRepository:
         
         result = self.db.fetchone(query, tuple(params))
         return result['instance_name'] if result else None
+    
+    def get_evolution_api_key(self, user_id: int, kea_client_id: Optional[str] = None) -> Optional[str]:
+        """Retorna a evolution_api_key do usuário"""
+        query = """
+            SELECT evolution_api_key
+            FROM whatsapp_instances
+            WHERE user_id = %s
+        """
+        
+        params = [user_id]
+        
+        if kea_client_id is not None:
+            query += " AND kea_client_id = %s"
+            params.append(kea_client_id)
+        
+        query += " ORDER BY created_at DESC LIMIT 1"
+        
+        result = self.db.fetchone(query, tuple(params))
+        return result['evolution_api_key'] if result else None
+    
+    def update_evolution_api_key(self, instance_name: str, token: str) -> bool:
+        """Atualiza a evolution_api_key com o token retornado da API"""
+        query = """
+            UPDATE whatsapp_instances 
+            SET evolution_api_key = %s 
+            WHERE instance_name = %s
+        """
+        
+        self.db.execute(query, (token, instance_name))
+        return True

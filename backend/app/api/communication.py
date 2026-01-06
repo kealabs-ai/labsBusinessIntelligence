@@ -101,6 +101,23 @@ async def get_user_instance_name(user):
         logger.info(f"Using fallback instance: {fallback}")
         return fallback
 
+async def get_user_api_key(user):
+    """Obtém a evolution_api_key do usuário logado"""
+    try:
+        whatsapp_service = WhatsAppInstanceService(WhatsAppInstanceRepository())
+        api_key = whatsapp_service.get_evolution_api_key(
+            user_id=user.id,
+            kea_client_id=user.kea_client_id
+        )
+        result = api_key or env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
+        logger.info(f"Using API key from {'database' if api_key else 'env'} for user {user.id}")
+        return result
+    except Exception as e:
+        logger.error(f"Error getting API key: {str(e)}")
+        fallback = env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
+        logger.info(f"Using fallback API key from env")
+        return fallback
+
 @router.get("/test-auth")
 async def test_auth(user=Depends(get_current_user)):
     """Endpoint para testar autenticação"""
@@ -126,7 +143,7 @@ async def check_environment():
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get("API_KEY","6D8E21EE-2962-4770-8607-E27D63798746")
+        current_api_key = await get_user_api_key(user)
         current_instance = await get_user_instance_name(user)
 
         # Validate environment variables
@@ -205,7 +222,7 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
 async def send_message_client(request: SendMessageRequest, user=Depends(get_current_user)):
     try:
         # Obter variáveis de ambiente
-        current_api_key = env.get("API_KEY", "4EE9A4660493-4696-99FD-A4C9D2F59E6C")
+        current_api_key = await get_user_api_key(user)
         current_instance = await get_user_instance_name(user)
         # Normalize and minimal validation
         api_key_str = current_api_key.strip() if isinstance(current_api_key, str) else ""

@@ -9,6 +9,7 @@ class WhatsAppInstance(BaseModel):
     kea_client_id: Optional[str] = Field(None, description="ID do cliente KEA")
     instance_name: str = Field(..., max_length=100, description="Nome único da instância")
     qr_code: Optional[str] = Field(None, description="QR Code em base64")
+    evolution_api_key: Optional[str] = Field(None, description="Chave da Evolution API")
     created_at: Optional[datetime] = None
     status: bool = Field(False, description="Status da instância")
 
@@ -21,6 +22,7 @@ class WhatsAppInstanceCreate(BaseModel):
     kea_client_id: Optional[str] = None
     instance_name: str = Field(..., max_length=100)
     qr_code: Optional[str] = None
+    evolution_api_key: Optional[str] = None
     status: bool = False
 
 
