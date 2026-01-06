@@ -48,6 +48,10 @@ async def create_instance(user=Depends(get_current_user)):
             
             qrcode_data = data.get("qrcode", {})
             base64_qr = qrcode_data.get("base64") if isinstance(qrcode_data, dict) else None
+            token = data.get("token")  # Extrair token da resposta
+            
+            logger.info(f"Token recebido da API: {token}")
+            logger.info(f"Dados completos da resposta: {data}")
             
             if not base64_qr:
                 raise HTTPException(status_code=502, detail="QR Code não retornado")
@@ -63,6 +67,7 @@ async def create_instance(user=Depends(get_current_user)):
             kea_client_id=getattr(user, 'kea_client_id', None),
             instance_name=instance_name,
             qr_code=base64_qr,
+            evolution_api_key=token,  # Salvar token da resposta
             status=True
         )
         
