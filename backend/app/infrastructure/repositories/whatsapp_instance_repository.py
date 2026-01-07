@@ -106,8 +106,16 @@ class WhatsAppInstanceRepository:
         
         query += " ORDER BY created_at DESC LIMIT 1"
         
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Buscando evolution_api_key para user_id: {user_id}, kea_client_id: {kea_client_id}")
+        
         result = self.db.fetchone(query, tuple(params))
-        return result['evolution_api_key'] if result else None
+        api_key = result['evolution_api_key'] if result else None
+        
+        logger.info(f"Evolution API Key encontrada no banco: {'Sim' if api_key else 'Não'} - Valor: {api_key[:10] + '...' if api_key else 'None'}")
+        
+        return api_key
     
     def update_evolution_api_key(self, instance_name: str, token: str) -> bool:
         """Atualiza a evolution_api_key com o token retornado da API"""

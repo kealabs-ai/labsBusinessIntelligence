@@ -77,6 +77,29 @@ async def get_instance_by_name(
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.get("/debug/{instance_name}")
+async def debug_instance(
+    instance_name: str,
+    service: WhatsAppInstanceService = Depends(get_whatsapp_instance_service)
+):
+    """Debug: mostra dados completos da instância"""
+    try:
+        instance = service.get_by_instance_name(instance_name)
+        return {
+            "id": instance.id,
+            "user_id": instance.user_id,
+            "kea_client_id": instance.kea_client_id,
+            "instance_name": instance.instance_name,
+            "has_qr_code": bool(instance.qr_code),
+            "has_evolution_api_key": bool(instance.evolution_api_key),
+            "evolution_api_key_preview": instance.evolution_api_key[:10] + "..." if instance.evolution_api_key else None,
+            "status": instance.status,
+            "created_at": str(instance.created_at)
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.post("/update-token/{instance_name}")
 async def update_instance_token(
     instance_name: str,
