@@ -1,6 +1,8 @@
 import secrets
 import string
 import base64
+from PIL import Image
+from io import BytesIO
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -14,6 +16,48 @@ import logging
 router = APIRouter()
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
+
+def convert_qr_to_black(base64_qr: str) -> str:
+    """Converte QR code para cor preta"""
+    try:
+        # Decodificar base64
+        image_data = base64.b64decode(base64_qr.split(',')[-1])
+        
+        # Abrir imagem
+        image = Image.open(BytesIO(image_data))
+        
+        # Converter para RGBA se necessário
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        
+        # Criar nova imagem com fundo branco e QR preto
+        width, height = image.size
+        new_image = Image.new('RGBA', (width, height), (255, 255, 255, 255))
+        
+        # Processar cada pixel
+        pixels = image.load()
+        new_pixels = new_image.load()
+        
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = pixels[x, y]
+                # Se o pixel não é branco/transparente, torná-lo preto
+                if r < 200 or g < 200 or b < 200:
+                    new_pixels[x, y] = (0, 0, 0, 255)  # Preto
+                else:
+                    new_pixels[x, y] = (255, 255, 255, 255)  # Branco
+        
+        # Converter de volta para base64
+        buffer = BytesIO()
+        new_image.save(buffer, format='PNG')
+        buffer.seek(0)
+        
+        new_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{new_base64}"
+        
+    except Exception as e:
+        logger.error(f"Erro ao processar QR code: {str(e)}")
+        return base64_qr  # Retorna original se houver erro
 
 class QRCodeBase64Response(BaseModel):
     qrcode: str
@@ -66,6 +110,9 @@ async def create_instance(user=Depends(get_current_user)):
             
             if not base64_qr:
                 raise HTTPException(status_code=502, detail="QR Code não retornado")
+            
+            # Converter QR code para preto
+            base64_qr = convert_qr_to_black(base64_qr)
         
         # 2. Salvar no banco IMEDIATAMENTE
         logger.info(f"Salvando {instance_name} no banco...")
