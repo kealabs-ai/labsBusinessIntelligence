@@ -109,14 +109,35 @@ async def get_user_api_key(user):
             user_id=user.id,
             kea_client_id=user.kea_client_id
         )
-        result = api_key or env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
-        logger.info(f"Using API key from {'database' if api_key else 'env'} for user {user.id}")
-        return result
+        if api_key:
+            logger.info(f"Using API key from database for user {user.id}")
+            return api_key
+        else:
+            logger.info(f"No API key found in database for user {user.id}, using env fallback")
+            return env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
     except Exception as e:
         logger.error(f"Error getting API key: {str(e)}")
         fallback = env.get("EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
         logger.info(f"Using fallback API key from env")
         return fallback
+
+@router.get("/test-credentials")
+async def test_user_credentials(user=Depends(get_current_user)):
+    """Testa as credenciais do usuário (instance e API key) do banco"""
+    try:
+        instance_name = await get_user_instance_name(user)
+        api_key = await get_user_api_key(user)
+        
+        return {
+            "user_id": user.id,
+            "instance_name": instance_name,
+            "api_key_source": "database" if api_key != env.get("EVOLUTION_API_KEY") else "env",
+            "api_key_preview": api_key[:10] + "..." if api_key else None,
+            "has_instance": bool(instance_name),
+            "has_api_key": bool(api_key)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/test-auth")
 async def test_auth(user=Depends(get_current_user)):
