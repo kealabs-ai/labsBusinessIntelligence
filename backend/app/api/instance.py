@@ -46,11 +46,21 @@ async def create_instance(user=Depends(get_current_user)):
             response.raise_for_status()
             data = response.json()
             
+            # Log completo da resposta para debug
+            logger.info(f"Resposta completa da Evolution API: {data}")
+            
             qrcode_data = data.get("qrcode", {})
             base64_qr = qrcode_data.get("base64") if isinstance(qrcode_data, dict) else None
-            token = data.get("token")  # Extrair token da resposta
             
-            logger.info(f"Token recebido da API: {token}")
+            # Tentar diferentes caminhos para o token
+            token = data.get("token") or data.get("hash") or data.get("apikey") or data.get("key")
+            
+            # Se não encontrou token no nível raiz, verificar dentro de outros objetos
+            if not token and "instance" in data:
+                instance_data = data["instance"]
+                token = instance_data.get("token") or instance_data.get("hash") or instance_data.get("apikey")
+            
+            logger.info(f"Token extraído: {token}")
             logger.info(f"QR Code recebido: {'Sim' if base64_qr else 'Não'}")
             logger.info(f"Chaves da resposta: {list(data.keys())}")
             
