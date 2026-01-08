@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, Snackbar, Box } from '@mui/material';
 import UnitsPresentational from '../../components/presentational/UnitsPresentational';
 import UnitModal from '../../components/presentational/UnitModal';
+import Footer from '../../components/presentational/Footer';
 import { unitService } from '../../services/unitService';
 
 const UnitsContainer = () => {
@@ -94,14 +95,18 @@ const UnitsContainer = () => {
   };
 
   return (
-    <>
-      <UnitsPresentational
-        units={units}
-        loading={loading}
-        onOpenModal={handleOpenModal}
-        onEditUnit={handleEditUnit}
-        onDeleteUnit={handleDeleteUnit}
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <UnitsPresentational
+          units={units}
+          loading={loading}
+          onOpenModal={handleOpenModal}
+          onEditUnit={handleEditUnit}
+          onDeleteUnit={handleDeleteUnit}
+        />
+      </Box>
+      
+      <Footer />
       
       <UnitModal
         open={modalOpen}
@@ -125,7 +130,7 @@ const UnitsContainer = () => {
           {notification.message}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 };
 

@@ -14,7 +14,9 @@ import {
   CardContent,
   Badge,
   IconButton,
-  Pagination
+  Pagination,
+  CircularProgress,
+  Chip
 } from '@mui/material';
 import {
   CalendarToday,
@@ -119,8 +121,19 @@ const AgendaPresentational = ({
                 </Button>
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
-                <Typography variant="subtitle1">Próximos Eventos</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="subtitle1">Próximos Eventos</Typography>
+                  {loading && <CircularProgress size={16} />}
+                  {pagination.totalItems > 0 && (
+                    <Chip 
+                      label={`${pagination.totalItems} agendamentos`} 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton
                     onClick={() => setNotificationModalOpen(true)}
@@ -148,77 +161,97 @@ const AgendaPresentational = ({
                   </IconButton>
                 </Box>
               </Box>
-              <List sx={{ maxHeight: { xs: '250px', sm: '600px' }, overflow: 'auto' }}>
-                {events.map((event) => (
-                  <ListItem 
-                    key={event.id} 
-                    sx={{
-                      ...agendaStyles.eventItem,
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      gap: { xs: 1, sm: 0 }
-                    }}
-                  >
-                    <ListItemText
-                      primary={event.title}
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="textSecondary">
-                            {event.date} às {event.time} - {event.description}
-                          </Typography>
-                          {event.unit_name && (
-                            <Typography variant="caption" sx={{ 
-                              color: 'primary.main', 
-                              fontWeight: 500,
-                              display: 'block',
-                              mt: 0.5
-                            }}>
-                              📍 Unidade: {event.unit_name}
-                            </Typography>
-                          )}
-                        </Box>
-                      }
-                      sx={{ 
-                        flex: 1,
-                        '& .MuiListItemText-primary': {
-                          fontSize: { xs: '0.9rem', sm: '1rem' },
-                          fontWeight: 500
-                        }
+              <List sx={{ 
+                maxHeight: { xs: '250px', sm: '600px' }, 
+                overflow: 'auto',
+                minHeight: '200px'
+              }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : events.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                    <Typography variant="body2">
+                      {searchTerm ? 'Nenhum agendamento encontrado para a busca' : 'Nenhum agendamento encontrado'}
+                    </Typography>
+                  </Box>
+                ) : (
+                  events.map((event) => (
+                    <ListItem 
+                      key={event.id} 
+                      sx={{
+                        ...agendaStyles.eventItem,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        gap: { xs: 1, sm: 0 }
                       }}
-                    />
-                    <Box sx={{ 
-                      display: 'flex', 
-                      gap: 1,
-                      alignSelf: { xs: 'flex-end', sm: 'center' }
-                    }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => onEditEvent(event)}
-                        sx={{ color: 'primary.main' }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => onDeleteEvent(event.id)}
-                        sx={{ color: 'error.main' }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </ListItem>
-                ))}
+                    >
+                      <ListItemText
+                        primary={event.title}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="textSecondary">
+                              {event.date} às {event.time} - {event.description}
+                            </Typography>
+                            {event.unit_name && (
+                              <Typography variant="caption" sx={{ 
+                                color: 'primary.main', 
+                                fontWeight: 500,
+                                display: 'block',
+                                mt: 0.5
+                              }}>
+                                📍 Unidade: {event.unit_name}
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                        sx={{ 
+                          flex: 1,
+                          '& .MuiListItemText-primary': {
+                            fontSize: { xs: '0.9rem', sm: '1rem' },
+                            fontWeight: 500
+                          }
+                        }}
+                      />
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 1,
+                        alignSelf: { xs: 'flex-end', sm: 'center' }
+                      }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => onEditEvent(event)}
+                          sx={{ color: 'primary.main' }}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => onDeleteEvent(event.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </ListItem>
+                  ))
+                )}
               </List>
               
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                <Pagination
-                  count={pagination?.totalPages || 1}
-                  page={pagination?.currentPage || 1}
-                  onChange={(e, page) => onPageChange(e, page)}
-                  color="primary"
-                  size="small"
-                />
-              </Box>
+              {!loading && events.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Pagination
+                    count={pagination?.totalPages || 1}
+                    page={pagination?.currentPage || 1}
+                    onChange={(e, page) => onPageChange(e, page)}
+                    color="primary"
+                    size="small"
+                    showFirstButton
+                    showLastButton
+                  />
+                </Box>
+              )}
             </Card>
           </Grid>
 
@@ -240,6 +273,7 @@ const AgendaPresentational = ({
                     overflowY: 'scroll',
                     border: { xs: '1px solid #e0e0e0', sm: 'none' },
                     borderRadius: { xs: 1, sm: 0 },
+                    minHeight: '200px',
                     '&::-webkit-scrollbar': {
                       width: '8px'
                     },
@@ -255,62 +289,70 @@ const AgendaPresentational = ({
                       }
                     }
                   }}>
-                    {contacts.map((contact) => (
-                      <ListItem
-                        key={contact.id}
-                        button
-                        selected={selectedContact?.id === contact.id}
-                        onClick={() => onSelectContact(contact)}
-                        sx={{
-                          ...agendaStyles.contactItem,
-                          py: { xs: 1, sm: 1.5 },
-                          '&.Mui-selected': {
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                          }
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Badge
-                            badgeContent={getContactMessages(contact.id).length}
-                            color="primary"
-                            sx={{
-                              '& .MuiBadge-badge': {
-                                backgroundColor: '#667eea',
-                                color: 'white',
-                                fontSize: '0.75rem',
-                                minWidth: '18px',
-                                height: '18px'
-                              }
-                            }}
-                          >
-                            <Badge
-                              color={contact.online ? 'success' : 'default'}
-                              variant="dot"
-                            >
-                              <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
-                                <Person />
-                              </Avatar>
-                            </Badge>
-                          </Badge>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={contact.name}
-                          secondary={contact.lastMessage}
+                    {contacts.length === 0 ? (
+                      <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                        <Typography variant="body2">
+                          Nenhum contato disponível
+                        </Typography>
+                      </Box>
+                    ) : (
+                      contacts.map((contact) => (
+                        <ListItem
+                          key={contact.id}
+                          button
+                          selected={selectedContact?.id === contact.id}
+                          onClick={() => onSelectContact(contact)}
                           sx={{
-                            '& .MuiListItemText-primary': {
-                              fontSize: { xs: '0.9rem', sm: '1rem' },
-                              fontWeight: 500
-                            },
-                            '& .MuiListItemText-secondary': {
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
+                            ...agendaStyles.contactItem,
+                            py: { xs: 1, sm: 1.5 },
+                            '&.Mui-selected': {
+                              backgroundColor: 'rgba(102, 126, 234, 0.1)'
                             }
                           }}
-                        />
-                      </ListItem>
-                    ))}
+                        >
+                          <ListItemAvatar>
+                            <Badge
+                              badgeContent={getContactMessages(contact.id).length}
+                              color="primary"
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  backgroundColor: '#667eea',
+                                  color: 'white',
+                                  fontSize: '0.75rem',
+                                  minWidth: '18px',
+                                  height: '18px'
+                                }
+                              }}
+                            >
+                              <Badge
+                                color={contact.online ? 'success' : 'default'}
+                                variant="dot"
+                              >
+                                <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
+                                  <Person />
+                                </Avatar>
+                              </Badge>
+                            </Badge>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={contact.name}
+                            secondary={contact.lastMessage}
+                            sx={{
+                              '& .MuiListItemText-primary': {
+                                fontSize: { xs: '0.9rem', sm: '1rem' },
+                                fontWeight: 500
+                              },
+                              '& .MuiListItemText-secondary': {
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }
+                            }}
+                          />
+                        </ListItem>
+                      ))
+                    )}
                   </List>
                 </Grid>
 
@@ -325,24 +367,35 @@ const AgendaPresentational = ({
                       <Box sx={{ 
                         ...agendaStyles.messagesArea, 
                         maxHeight: { xs: '300px', sm: '500px' },
-                        minHeight: { xs: '200px', sm: '300px' }
+                        minHeight: { xs: '200px', sm: '300px' },
+                        display: 'flex',
+                        flexDirection: 'column-reverse',
+                        gap: 1
                       }}>
-                        {getContactMessages(selectedContact.id).map((msg) => (
-                          <Card
-                            key={msg.id}
-                            sx={{
-                              ...agendaStyles.messageCard,
-                              ...(msg.sent ? agendaStyles.sentMessage : agendaStyles.receivedMessage)
-                            }}
-                          >
-                            <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-                              <Typography variant="body2">{msg.message}</Typography>
-                              <Typography variant="caption" color="textSecondary">
-                                {msg.timestamp}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        ))}
+                        {getContactMessages(selectedContact.id).length === 0 ? (
+                          <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                            <Typography variant="body2">
+                              Nenhuma mensagem encontrada
+                            </Typography>
+                          </Box>
+                        ) : (
+                          getContactMessages(selectedContact.id).map((msg) => (
+                            <Card
+                              key={msg.id}
+                              sx={{
+                                ...agendaStyles.messageCard,
+                                ...(msg.sent ? agendaStyles.sentMessage : agendaStyles.receivedMessage)
+                              }}
+                            >
+                              <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                                <Typography variant="body2">{msg.message}</Typography>
+                                <Typography variant="caption" color="textSecondary">
+                                  {msg.timestamp}
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
                       </Box>
 
                       <Box sx={{ 
@@ -373,7 +426,11 @@ const AgendaPresentational = ({
                           sx={{
                             ...agendaStyles.sendButton,
                             minWidth: { xs: '100%', sm: 'auto' },
-                            height: { xs: '40px', sm: 'auto' }
+                            height: { xs: '40px', sm: 'auto' },
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                            }
                           }}
                         >
                           <Send sx={{ mr: { xs: 1, sm: 0 } }} />
@@ -382,10 +439,24 @@ const AgendaPresentational = ({
                       </Box>
                     </Box>
                   ) : (
-                    <Box sx={agendaStyles.emptyChat}>
-                      <Typography>
-                        Selecione um contato para iniciar o chat
-                      </Typography>
+                    <Box sx={{
+                      ...agendaStyles.emptyChat,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '400px',
+                      textAlign: 'center',
+                      color: 'text.secondary'
+                    }}>
+                      <Box>
+                        <WhatsApp sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+                        <Typography variant="h6" gutterBottom>
+                          Selecione um contato
+                        </Typography>
+                        <Typography variant="body2">
+                          Escolha um contato da lista para iniciar uma conversa
+                        </Typography>
+                      </Box>
                     </Box>
                   )}
                 </Grid>

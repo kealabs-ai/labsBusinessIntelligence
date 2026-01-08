@@ -1,0 +1,492 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Manual KEA Labs Business Intelligence</title>
+            <style>
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 2cm;
+                    }
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+                
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    font-size: 12px;
+                }
+                
+                .header {
+                    text-align: center;
+                    margin-bottom: 40px;
+                    padding: 30px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 15px;
+                    page-break-inside: avoid;
+                }
+                
+                .header h1 {
+                    margin: 0;
+                    font-size: 2.5em;
+                    font-weight: bold;
+                }
+                
+                .header p {
+                    margin: 10px 0;
+                    font-size: 1.2em;
+                }
+                
+                h1 {
+                    color: #667eea;
+                    border-bottom: 3px solid #667eea;
+                    padding-bottom: 10px;
+                    page-break-before: always;
+                    font-size: 1.8em;
+                }
+                
+                h1:first-of-type {
+                    page-break-before: avoid;
+                }
+                
+                h2 {
+                    color: #764ba2;
+                    border-bottom: 2px solid #ddd;
+                    padding-bottom: 8px;
+                    margin-top: 30px;
+                    font-size: 1.4em;
+                }
+                
+                h3 {
+                    color: #555;
+                    margin-top: 25px;
+                    font-size: 1.2em;
+                }
+                
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 20px 0;
+                    page-break-inside: avoid;
+                }
+                
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 12px;
+                    text-align: left;
+                }
+                
+                th {
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #333;
+                }
+                
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                
+                code {
+                    background-color: #f4f4f4;
+                    padding: 3px 6px;
+                    border-radius: 4px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 0.9em;
+                }
+                
+                blockquote {
+                    border-left: 4px solid #667eea;
+                    margin: 20px 0;
+                    padding-left: 20px;
+                    color: #666;
+                    font-style: italic;
+                }
+                
+                ul, ol {
+                    margin: 15px 0;
+                    padding-left: 25px;
+                }
+                
+                li {
+                    margin: 8px 0;
+                }
+                
+                .footer {
+                    text-align: center;
+                    margin-top: 50px;
+                    padding: 25px;
+                    background-color: #f8f9fa;
+                    border-radius: 15px;
+                    border: 2px solid #e9ecef;
+                    page-break-inside: avoid;
+                }
+                
+                .footer p {
+                    margin: 5px 0;
+                    color: #666;
+                }
+                
+                .page-break {
+                    page-break-before: always;
+                }
+                
+                /* Melhor quebra de página */
+                h1, h2, h3 {
+                    page-break-after: avoid;
+                }
+                
+                p, li {
+                    page-break-inside: avoid;
+                    orphans: 2;
+                    widows: 2;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>KEA Labs Business Intelligence</h1>
+                <p><strong>Manual de Utilização Completo</strong></p>
+                <p>Sistema de Gestão Empresarial</p>
+                <p>Versão 2.0 - 2024</p>
+            </div>
+            
+            <h1 id="manual-de-utilizacao-kea-labs-business-intelligence">Manual de Utilização - KEA Labs Business Intelligence</h1>
+<h2 id="indice">Índice</h2>
+<ol>
+<li><a href="#introdução">Introdução</a></li>
+<li><a href="#acesso-ao-sistema">Acesso ao Sistema</a></li>
+<li><a href="#módulos-do-sistema">Módulos do Sistema</a></li>
+<li><a href="#gerenciamento-de-agenda">Gerenciamento de Agenda</a></li>
+<li><a href="#gestão-de-clientes">Gestão de Clientes</a></li>
+<li><a href="#whatsapp-manager">WhatsApp Manager</a></li>
+<li><a href="#caixa-e-transações">Caixa e Transações</a></li>
+<li><a href="#serviços">Serviços</a></li>
+<li><a href="#recursos">Recursos</a></li>
+<li><a href="#configurações">Configurações</a></li>
+<li><a href="#solução-de-problemas">Solução de Problemas</a></li>
+</ol>
+<hr />
+<h2 id="introducao">Introdução</h2>
+<p>O <strong>KEA Labs Business Intelligence</strong> é um sistema completo de gestão empresarial que oferece funcionalidades para agendamento, gestão de clientes, comunicação via WhatsApp, controle financeiro e muito mais.</p>
+<h3 id="principais-funcionalidades">Principais Funcionalidades</h3>
+<ul>
+<li>✅ Agendamento de serviços</li>
+<li>✅ Gestão de clientes</li>
+<li>✅ Comunicação WhatsApp integrada</li>
+<li>✅ Controle financeiro</li>
+<li>✅ Gestão de serviços e recursos</li>
+<li>✅ Relatórios e dashboards</li>
+<li>✅ Sistema multi-unidade</li>
+</ul>
+<hr />
+<h2 id="acesso-ao-sistema">Acesso ao Sistema</h2>
+<h3 id="1-login">1. Login</h3>
+<ol>
+<li>Acesse a URL do sistema</li>
+<li>Digite seu <strong>usuário</strong> e <strong>senha</strong></li>
+<li>Clique em <strong>"Entrar"</strong></li>
+</ol>
+<h3 id="2-recuperacao-de-senha">2. Recuperação de Senha</h3>
+<ul>
+<li>Clique em <strong>"Esqueci minha senha"</strong></li>
+<li>Digite seu email cadastrado</li>
+<li>Verifique sua caixa de entrada</li>
+</ul>
+<hr />
+<h2 id="modulos-do-sistema">Módulos do Sistema</h2>
+<p>O sistema é organizado em módulos acessíveis pelo menu lateral:</p>
+<table>
+<thead>
+<tr>
+<th>Módulo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📅 <strong>Agendamentos</strong></td>
+<td>Gestão de agenda e eventos</td>
+</tr>
+<tr>
+<td>👥 <strong>Clientes</strong></td>
+<td>Cadastro e gestão de clientes</td>
+</tr>
+<tr>
+<td>💰 <strong>Caixa</strong></td>
+<td>Controle financeiro e transações</td>
+</tr>
+<tr>
+<td>🔧 <strong>Serviços</strong></td>
+<td>Cadastro de serviços oferecidos</td>
+</tr>
+<tr>
+<td>👨‍💼 <strong>Recursos</strong></td>
+<td>Gestão de funcionários/recursos</td>
+</tr>
+<tr>
+<td>⚙️ <strong>Configurações</strong></td>
+<td>Configurações da unidade</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gerenciamento-de-agenda">Gerenciamento de Agenda</h2>
+<h3 id="visualizacao-da-agenda">Visualização da Agenda</h3>
+<ul>
+<li><strong>Lista de Eventos</strong>: Visualize todos os agendamentos</li>
+<li><strong>Busca</strong>: Digite nome do cliente ou serviço para filtrar</li>
+<li><strong>Paginação</strong>: Navegue entre páginas de resultados</li>
+</ul>
+<h3 id="criar-novo-agendamento">Criar Novo Agendamento</h3>
+<ol>
+<li>Clique no botão <strong>"ADICIONAR AGENDAMENTO"</strong></li>
+<li>Preencha os campos obrigatórios:</li>
+<li><strong>Cliente</strong>: Nome do cliente</li>
+<li><strong>Serviço</strong>: Serviço a ser prestado</li>
+<li><strong>Data</strong>: Data do agendamento</li>
+<li><strong>Hora</strong>: Horário do agendamento</li>
+<li><strong>Valor</strong>: Valor do serviço</li>
+<li><strong>Opcionais</strong>:</li>
+<li><strong>WhatsApp</strong>: Número para notificações</li>
+<li><strong>Mensagem personalizada</strong>: Texto da notificação</li>
+<li><strong>Habilitar notificação</strong>: Ativar avisos automáticos</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="editar-agendamento">Editar Agendamento</h3>
+<ol>
+<li>Clique no ícone ✏️ ao lado do agendamento</li>
+<li>Modifique os campos desejados</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="excluir-agendamento">Excluir Agendamento</h3>
+<ol>
+<li>Clique no ícone 🗑️ ao lado do agendamento</li>
+<li>Confirme a exclusão</li>
+</ol>
+<h3 id="funcionalidades-especiais">Funcionalidades Especiais</h3>
+<ul>
+<li><strong>📺 Modo TV</strong>: Visualização em tela cheia para TVs</li>
+<li><strong>🔔 Configurar Avisos</strong>: Definir notificações padrão</li>
+<li><strong>🔄 Atualização Automática</strong>: Lista atualiza automaticamente</li>
+</ul>
+<hr />
+<h2 id="gestao-de-clientes">Gestão de Clientes</h2>
+<h3 id="visualizar-clientes">Visualizar Clientes</h3>
+<ul>
+<li>Lista completa de clientes cadastrados</li>
+<li>Status ativo/inativo visível</li>
+<li>Informações de contato</li>
+</ul>
+<h3 id="cadastrar-cliente">Cadastrar Cliente</h3>
+<ol>
+<li>Clique em <strong>"Novo Cliente"</strong></li>
+<li>Preencha:</li>
+<li><strong>Nome completo</strong></li>
+<li><strong>Telefone</strong> (único no sistema)</li>
+<li><strong>Email</strong></li>
+<li><strong>Endereço</strong></li>
+<li><strong>Observações</strong></li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="editar-cliente">Editar Cliente</h3>
+<ol>
+<li>Clique no ícone ✏️ ao lado do cliente</li>
+<li>Modifique os dados necessários</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="ativarinativar-cliente">Ativar/Inativar Cliente</h3>
+<ul>
+<li>Use o botão de status para ativar/inativar clientes</li>
+</ul>
+<hr />
+<h2 id="whatsapp-manager">WhatsApp Manager</h2>
+<h3 id="configuracao-inicial">Configuração Inicial</h3>
+<ol>
+<li>Acesse <strong>Configurações</strong> → <strong>WhatsApp</strong></li>
+<li>Configure sua instância da Evolution API</li>
+<li>Escaneie o QR Code com seu WhatsApp</li>
+</ol>
+<h3 id="gerenciar-conversas">Gerenciar Conversas</h3>
+<ol>
+<li><strong>Lista de Contatos</strong>: Visualize todos os contatos</li>
+<li><strong>Selecionar Contato</strong>: Clique em um contato para abrir o chat</li>
+<li><strong>Enviar Mensagem</strong>:</li>
+<li>Digite sua mensagem na caixa de texto</li>
+<li>Pressione <strong>Enter</strong> ou clique em <strong>Enviar</strong></li>
+<li><strong>Histórico</strong>: Visualize mensagens anteriores</li>
+</ol>
+<h3 id="recursos-do-chat">Recursos do Chat</h3>
+<ul>
+<li>✅ <strong>Status Online</strong>: Indicador verde para contatos online</li>
+<li>✅ <strong>Contador de Mensagens</strong>: Badge com número de mensagens</li>
+<li>✅ <strong>Auto-atualização</strong>: Chat atualiza automaticamente</li>
+<li>✅ <strong>Mensagens Enviadas/Recebidas</strong>: Diferenciação visual</li>
+</ul>
+<hr />
+<h2 id="caixa-e-transacoes">Caixa e Transações</h2>
+<h3 id="visualizar-resumo-financeiro">Visualizar Resumo Financeiro</h3>
+<ul>
+<li><strong>Receitas</strong>: Total de entradas</li>
+<li><strong>Despesas</strong>: Total de saídas</li>
+<li><strong>Saldo</strong>: Diferença entre receitas e despesas</li>
+</ul>
+<h3 id="registrar-transacao">Registrar Transação</h3>
+<ol>
+<li>Clique em <strong>"Nova Transação"</strong></li>
+<li>Selecione o <strong>Tipo</strong>:</li>
+<li><strong>Receita</strong>: Entrada de dinheiro</li>
+<li><strong>Despesa</strong>: Saída de dinheiro</li>
+<li>Preencha:</li>
+<li><strong>Descrição</strong>: Detalhes da transação</li>
+<li><strong>Valor</strong>: Quantia</li>
+<li><strong>Data</strong>: Data da transação</li>
+<li><strong>Categoria</strong>: Classificação</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="editarexcluir-transacao">Editar/Excluir Transação</h3>
+<ul>
+<li><strong>Editar</strong>: Clique no ícone ✏️</li>
+<li><strong>Excluir</strong>: Clique no ícone 🗑️ e confirme</li>
+</ul>
+<hr />
+<h2 id="servicos">Serviços</h2>
+<h3 id="cadastrar-servico">Cadastrar Serviço</h3>
+<ol>
+<li>Clique em <strong>"Novo Serviço"</strong></li>
+<li>Preencha:</li>
+<li><strong>Nome</strong>: Nome do serviço</li>
+<li><strong>Descrição</strong>: Detalhes do serviço</li>
+<li><strong>Preço</strong>: Valor padrão</li>
+<li><strong>Duração</strong>: Tempo estimado</li>
+<li><strong>Categoria</strong>: Classificação</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="gerenciar-servicos">Gerenciar Serviços</h3>
+<ul>
+<li><strong>Editar</strong>: Modifique informações do serviço</li>
+<li><strong>Inativar</strong>: Desative serviços não utilizados</li>
+<li><strong>Filtrar</strong>: Use a busca para encontrar serviços</li>
+</ul>
+<hr />
+<h2 id="recursos">Recursos</h2>
+<h3 id="cadastrar-recursofuncionario">Cadastrar Recurso/Funcionário</h3>
+<ol>
+<li>Clique em <strong>"Novo Recurso"</strong></li>
+<li>Preencha:</li>
+<li><strong>Nome</strong>: Nome completo</li>
+<li><strong>Tipo</strong>: Funcionário, Equipamento, etc.</li>
+<li><strong>Especialidade</strong>: Área de atuação</li>
+<li><strong>Email</strong>: Contato</li>
+<li><strong>Telefone</strong>: Número de contato</li>
+<li><strong>Observações</strong>: Informações adicionais</li>
+<li>Clique em <strong>"Salvar"</strong></li>
+</ol>
+<h3 id="gerenciar-recursos">Gerenciar Recursos</h3>
+<ul>
+<li><strong>Editar</strong>: Atualize informações</li>
+<li><strong>Excluir</strong>: Remove recurso (confirme a ação)</li>
+<li><strong>Filtrar</strong>: Busque por nome ou especialidade</li>
+</ul>
+<hr />
+<h2 id="configuracoes">Configurações</h2>
+<h3 id="configuracoes-da-unidade">Configurações da Unidade</h3>
+<ol>
+<li><strong>Informações Básicas</strong>:</li>
+<li>Nome da unidade</li>
+<li>Endereço</li>
+<li>Contatos</li>
+<li><strong>WhatsApp</strong>:</li>
+<li>Configurar instância</li>
+<li>Gerar QR Code</li>
+<li>Testar conexão</li>
+</ol>
+<h3 id="permissoes-de-usuario">Permissões de Usuário</h3>
+<ul>
+<li>Defina quais módulos cada usuário pode acessar</li>
+<li>Configure níveis de acesso (visualizar, editar, excluir)</li>
+</ul>
+<hr />
+<h2 id="solucao-de-problemas">Solução de Problemas</h2>
+<h3 id="problemas-comuns">Problemas Comuns</h3>
+<h4 id="1-nao-consigo-fazer-login">1. Não consigo fazer login</h4>
+<ul>
+<li>✅ Verifique usuário e senha</li>
+<li>✅ Certifique-se de que o Caps Lock está desligado</li>
+<li>✅ Tente recuperar a senha</li>
+</ul>
+<h4 id="2-whatsapp-nao-conecta">2. WhatsApp não conecta</h4>
+<ul>
+<li>✅ Verifique a configuração da Evolution API</li>
+<li>✅ Gere um novo QR Code</li>
+<li>✅ Certifique-se de que o WhatsApp está ativo no celular</li>
+</ul>
+<h4 id="3-agendamentos-nao-aparecem">3. Agendamentos não aparecem</h4>
+<ul>
+<li>✅ Verifique os filtros de data</li>
+<li>✅ Limpe a busca</li>
+<li>✅ Atualize a página</li>
+</ul>
+<h4 id="4-erro-ao-salvar-dados">4. Erro ao salvar dados</h4>
+<ul>
+<li>✅ Verifique campos obrigatórios</li>
+<li>✅ Certifique-se de que não há dados duplicados</li>
+<li>✅ Tente novamente após alguns segundos</li>
+</ul>
+<h3 id="contato-para-suporte">Contato para Suporte</h3>
+<ul>
+<li><strong>Email</strong>: suporte@kealabs.com</li>
+<li><strong>Telefone</strong>: (11) 9999-9999</li>
+<li><strong>Horário</strong>: Segunda a Sexta, 8h às 18h</li>
+</ul>
+<hr />
+<h2 id="dicas-de-uso">Dicas de Uso</h2>
+<h3 id="produtividade">💡 Produtividade</h3>
+<ul>
+<li>Use <strong>Ctrl+F</strong> para buscar rapidamente na página</li>
+<li>Configure notificações automáticas para agendamentos</li>
+<li>Mantenha os dados de clientes sempre atualizados</li>
+</ul>
+<h3 id="organizacao">💡 Organização</h3>
+<ul>
+<li>Use categorias para organizar serviços e transações</li>
+<li>Revise regularmente os agendamentos do dia</li>
+<li>Mantenha backup dos dados importantes</li>
+</ul>
+<h3 id="comunicacao">💡 Comunicação</h3>
+<ul>
+<li>Personalize mensagens de WhatsApp para cada tipo de serviço</li>
+<li>Responda rapidamente às mensagens dos clientes</li>
+<li>Use o modo TV para exibir a agenda em locais visíveis</li>
+</ul>
+<hr />
+<h2 id="atualizacoes-do-sistema">Atualizações do Sistema</h2>
+<p>O sistema é atualizado regularmente com novas funcionalidades e correções. Fique atento às notificações de atualização e novidades.</p>
+<h3 id="versao-atual-20">Versão Atual: 2.0</h3>
+<ul>
+<li>✅ WhatsApp Manager integrado</li>
+<li>✅ Sistema multi-unidade</li>
+<li>✅ Interface responsiva</li>
+<li>✅ Notificações automáticas</li>
+<li>✅ Modo TV para agendamentos</li>
+</ul>
+<hr />
+<p><em>© 2024 KEA Labs - Business Intelligence System. Todos os direitos reservados.</em></p>
+            
+            <div class="footer">
+                <p><strong>© 2024 KEA Labs - Business Intelligence System</strong></p>
+                <p>Todos os direitos reservados</p>
+                <p>Para suporte: suporte@kealabs.com | (11) 9999-9999</p>
+            </div>
+        </body>
+        </html>
+        

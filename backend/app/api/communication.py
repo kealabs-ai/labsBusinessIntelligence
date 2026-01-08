@@ -160,6 +160,113 @@ async def check_environment():
         "env_file_configured": True
     }
 
+@router.post("/chat-messages")
+async def get_chat_messages(request: ChatClientRequest, user=Depends(get_current_user)):
+    """Endpoint otimizado para buscar mensagens de chat com melhor formatação"""
+    try:
+        current_api_key = await get_user_api_key(user)
+        current_instance = await get_user_instance_name(user)
+
+        if not current_api_key or not current_instance:
+            raise HTTPException(status_code=503, detail="Evolution API service not configured")
+
+        headers = {
+            "Content-Type": "application/json",
+            "apikey": current_api_key.strip()
+        }
+
+        url = f"{env.get('URL_EVOLUTION_API', 'https://comunication-with-client-evolution-api.t37hka.easypanel.host')}/chat/findMessages/{current_instance.strip()}"
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await _post_with_retry(client, url, request.dict(), headers)
+            
+            if response.status_code < 200 or response.status_code >= 300:
+                error_data = None
+                try:
+                    error_data = response.json()
+                except:
+                    error_data = response.text
+                raise HTTPException(status_code=response.status_code, detail={"external_error": error_data})
+            
+            data = response.json()
+            logger.info(f"Raw API response: {data}")
+            
+            # Processar mensagens para melhor apresentação
+            processed_messages = []
+            messages_data = []
+            
+            if isinstance(data, dict):
+                if "messages" in data:
+                    messages_data = data["messages"].get("records", []) if isinstance(data["messages"], dict) else data["messages"]
+                elif "records" in data:
+                    messages_data = data["records"]
+                else:
+                    messages_data = [data] if data else []
+            elif isinstance(data, list):
+                messages_data = data
+            
+            logger.info(f"Found {len(messages_data)} messages to process")
+            
+            for i, msg in enumerate(messages_data):
+                if isinstance(msg, dict):
+                    logger.info(f"Processing message {i}: {msg.get('id', 'no-id')}")
+                    
+                    processed_msg = {
+                        "id": msg.get("id", f"msg_{i}"),
+                        "timestamp": msg.get("messageTimestamp", msg.get("timestamp", "")),
+                        "from": msg.get("key", {}).get("remoteJid", "").replace("@s.whatsapp.net", ""),
+                        "fromMe": msg.get("key", {}).get("fromMe", False),
+                        "text": "",
+                        "type": "text",
+                        "raw_message": msg  # Para debug
+                    }
+                    
+                    # Extrair texto da mensagem com mais opções
+                    message_content = msg.get("message", {})
+                    text_found = False
+                    
+                    if "conversation" in message_content:
+                        processed_msg["text"] = message_content["conversation"]
+                        text_found = True
+                    elif "extendedTextMessage" in message_content:
+                        processed_msg["text"] = message_content["extendedTextMessage"].get("text", "")
+                        text_found = True
+                    elif "textMessage" in message_content:
+                        processed_msg["text"] = message_content["textMessage"].get("text", "")
+                        text_found = True
+                    elif "text" in message_content:
+                        processed_msg["text"] = message_content["text"]
+                        text_found = True
+                    
+                    if not text_found:
+                        # Tentar extrair de outros campos
+                        for key in message_content.keys():
+                            if isinstance(message_content[key], dict) and "text" in message_content[key]:
+                                processed_msg["text"] = message_content[key]["text"]
+                                text_found = True
+                                break
+                    
+                    logger.info(f"Message {i} text: '{processed_msg['text'][:50]}...' (found: {text_found})")
+                    processed_messages.append(processed_msg)
+                else:
+                    logger.warning(f"Message {i} is not a dict: {type(msg)}")
+            
+            logger.info(f"Processed {len(processed_messages)} messages successfully")
+            
+            return {
+                "success": True,
+                "messages": {
+                    "total": len(processed_messages),
+                    "records": processed_messages
+                }
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in chat_messages: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/chat-client")
 async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)):
     try:
@@ -203,16 +310,44 @@ async def chat_client(request: ChatClientRequest, user=Depends(get_current_user)
             logger.info(f"Response data keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
 
             # Tratar estrutura de response esperada
-            if isinstance(data, dict) and "messages" in data:
-                return {
-                    "success": True,
-                    "messages": {
-                        "total": data["messages"].get("total", 0),
-                        "pages": data["messages"].get("pages", 1),
-                        "currentPage": data["messages"].get("currentPage", 1),
-                        "records": data["messages"].get("records", [])
+            if isinstance(data, dict):
+                # Se tem estrutura de mensagens
+                if "messages" in data:
+                    messages = data["messages"]
+                    if isinstance(messages, dict):
+                        return {
+                            "success": True,
+                            "messages": {
+                                "total": messages.get("total", 0),
+                                "pages": messages.get("pages", 1),
+                                "currentPage": messages.get("currentPage", 1),
+                                "records": messages.get("records", [])
+                            }
+                        }
+                    elif isinstance(messages, list):
+                        return {
+                            "success": True,
+                            "messages": {
+                                "total": len(messages),
+                                "pages": 1,
+                                "currentPage": 1,
+                                "records": messages
+                            }
+                        }
+                # Se a resposta é diretamente uma lista de mensagens
+                elif isinstance(data, list):
+                    return {
+                        "success": True,
+                        "messages": {
+                            "total": len(data),
+                            "pages": 1,
+                            "currentPage": 1,
+                            "records": data
+                        }
                     }
-                }
+                # Outros formatos de resposta
+                else:
+                    return {"success": True, "data": data}
             else:
                 return {"success": False, "data": data}
 

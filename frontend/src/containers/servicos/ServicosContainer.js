@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import ServicosPresentational from '../../components/presentational/ServicosPresentational';
 import ServicoModal from '../../components/presentational/ServicoModal';
+import Footer from '../../components/presentational/Footer';
 import { serviceService } from '../../services/serviceService';
 
 const ServicosContainer = () => {
@@ -92,14 +93,18 @@ const ServicosContainer = () => {
   };
 
   return (
-    <Box>
-      <ServicosPresentational
-        servicos={servicos}
-        loading={loading}
-        onOpenModal={handleOpenModal}
-        onEditServico={handleEditServico}
-        onDeleteServico={handleDeleteServico}
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <ServicosPresentational
+          servicos={servicos}
+          loading={loading}
+          onOpenModal={handleOpenModal}
+          onEditServico={handleEditServico}
+          onDeleteServico={handleDeleteServico}
+        />
+      </Box>
+      
+      <Footer />
       
       <ServicoModal
         open={modalOpen}

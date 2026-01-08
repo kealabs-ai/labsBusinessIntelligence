@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import CaixaPresentational from '../../components/presentational/CaixaPresentational';
 import TransacaoModal from '../../components/presentational/TransacaoModal';
+import Footer from '../../components/presentational/Footer';
 import { transacaoService } from '../../services/transacaoService';
 
 const CaixaContainer = () => {
@@ -103,15 +104,19 @@ const CaixaContainer = () => {
   };
 
   return (
-    <Box>
-      <CaixaPresentational
-        transacoes={transacoes}
-        resumo={resumo}
-        loading={loading}
-        onOpenModal={handleOpenModal}
-        onEditTransacao={handleEditTransacao}
-        onDeleteTransacao={handleDeleteTransacao}
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <CaixaPresentational
+          transacoes={transacoes}
+          resumo={resumo}
+          loading={loading}
+          onOpenModal={handleOpenModal}
+          onEditTransacao={handleEditTransacao}
+          onDeleteTransacao={handleDeleteTransacao}
+        />
+      </Box>
+      
+      <Footer />
       
       <TransacaoModal
         open={modalOpen}

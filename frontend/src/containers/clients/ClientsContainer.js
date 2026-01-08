@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import ClientsPresentational from '../../components/presentational/ClientsPresentational';
 import ClientModal from '../../components/presentational/ClientModal';
+import Footer from '../../components/presentational/Footer';
 import { clientService } from '../../services/clientService';
 
 const ClientsContainer = () => {
@@ -94,14 +95,18 @@ const ClientsContainer = () => {
   };
 
   return (
-    <Box>
-      <ClientsPresentational
-        clients={clients}
-        loading={loading}
-        onOpenModal={handleOpenModal}
-        onEditClient={handleEditClient}
-        onToggleStatus={handleToggleStatus}
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <ClientsPresentational
+          clients={clients}
+          loading={loading}
+          onOpenModal={handleOpenModal}
+          onEditClient={handleEditClient}
+          onToggleStatus={handleToggleStatus}
+        />
+      </Box>
+      
+      <Footer />
       
       <ClientModal
         open={modalOpen}

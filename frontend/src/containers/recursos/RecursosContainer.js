@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import RecursosPresentational from '../../components/presentational/RecursosPresentational';
 import RecursoModal from '../../components/presentational/RecursoModal';
+import Footer from '../../components/presentational/Footer';
 import { getAllResources, createResource, updateResource, deleteResource } from '../../services/resourceService';
 
 const RecursosContainer = () => {
@@ -119,14 +120,18 @@ const RecursosContainer = () => {
 
 
   return (
-    <Box>
-      <RecursosPresentational
-        recursos={recursos}
-        loading={loading}
-        onOpenModal={handleOpenModal}
-        onEditRecurso={handleEditRecurso}
-        onDeleteRecurso={handleDeleteRecurso}
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <RecursosPresentational
+          recursos={recursos}
+          loading={loading}
+          onOpenModal={handleOpenModal}
+          onEditRecurso={handleEditRecurso}
+          onDeleteRecurso={handleDeleteRecurso}
+        />
+      </Box>
+      
+      <Footer />
       
       <RecursoModal
         open={modalOpen}

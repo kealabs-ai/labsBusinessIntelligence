@@ -43,6 +43,7 @@ import ServicosContainer from '../servicos/ServicosContainer';
 import RecursosContainer from '../recursos/RecursosContainer';
 import ConfiguracoesPresentational from '../../components/presentational/ConfiguracoesPresentational';
 import ToolbarContainer from '../toolbar/ToolbarContainer';
+import Footer from '../../components/presentational/Footer';
 import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
@@ -178,14 +179,15 @@ const AgendaContainer = () => {
     }
   };
 
-  const handleSearch = async (term) => {
+  const handleSearch = async (term, page = 1) => {
     setSearchTerm(term);
     const dateFilter = selectedDate.toISOString().split('T')[0];
     
     if (term.trim()) {
       try {
-        setEvents([]); // Limpa eventos antes de buscar
-        const response = await agendaService.getAgendamentos(1, 5, term, dateFilter);
+        setLoading(true);
+        setEvents([]);
+        const response = await agendaService.getAgendamentos(page, 5, term, dateFilter);
         const agendamentos = response.items || response.data || response;
         const formattedEvents = Array.isArray(agendamentos) ? await Promise.all(agendamentos.map(async ag => ({
           id: ag.id,
@@ -201,7 +203,6 @@ const AgendaContainer = () => {
           unit_name: ag.unit_name || await loadUnitName(ag.unit_id) || 'Sem unidade'
         }))) : [];
         
-        // Remove duplicatas baseado no ID
         const uniqueEvents = formattedEvents.filter((event, index, self) => 
           index === self.findIndex(e => e.id === event.id)
         );
@@ -209,15 +210,17 @@ const AgendaContainer = () => {
         setEvents(uniqueEvents);
         
         setPagination({
-          currentPage: 1,
+          currentPage: page,
           totalPages: response.pages || Math.ceil((response.total || 0) / 5),
           totalItems: response.total || 0
         });
       } catch (error) {
         console.error('Erro ao buscar agendamentos:', error);
+      } finally {
+        setLoading(false);
       }
     } else {
-      loadAgendamentos(1);
+      loadAgendamentos(page);
     }
   };
 
@@ -386,7 +389,11 @@ const AgendaContainer = () => {
 
   const handlePageChange = (event, page) => {
     console.log('Mudando para página:', page);
-    loadAgendamentos(page);
+    if (searchTerm.trim()) {
+      handleSearch(searchTerm, page);
+    } else {
+      loadAgendamentos(page);
+    }
   };
 
   const loadChatMessages = async (contact) => {
@@ -397,20 +404,39 @@ const AgendaContainer = () => {
       
       if (response.success && response.messages && response.messages.records) {
         const chatMessages = response.messages.records
-          .map((msg, index) => ({
-            id: msg.key?.id || `${msg.messageTimestamp}-${index}`,
-            contactId: contact.id,
-            message: msg.message?.conversation || msg.message?.extendedTextMessage?.text || 'Mensagem não suportada',
-            sent: msg.key?.fromMe || false,
-            timestamp: new Date(msg.messageTimestamp * 1000).toLocaleString('pt-BR', { 
-              day: '2-digit', 
-              month: '2-digit', 
-              year: 'numeric', 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            }),
-            messageTimestamp: msg.messageTimestamp
-          }))
+          .filter(msg => msg && msg.message) // Filter out invalid messages
+          .map((msg, index) => {
+            const messageContent = msg.message;
+            let messageText = '';
+            
+            // Extract message text with better handling
+            if (messageContent.conversation) {
+              messageText = messageContent.conversation;
+            } else if (messageContent.extendedTextMessage?.text) {
+              messageText = messageContent.extendedTextMessage.text;
+            } else if (messageContent.textMessage?.text) {
+              messageText = messageContent.textMessage.text;
+            } else if (messageContent.text) {
+              messageText = messageContent.text;
+            } else {
+              messageText = 'Mensagem não suportada';
+            }
+            
+            return {
+              id: msg.key?.id || `${msg.messageTimestamp}-${index}`,
+              contactId: contact.id,
+              message: messageText,
+              sent: msg.key?.fromMe || false,
+              timestamp: new Date(msg.messageTimestamp * 1000).toLocaleString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }),
+              messageTimestamp: msg.messageTimestamp
+            };
+          })
           .sort((a, b) => b.messageTimestamp - a.messageTimestamp);
         
         setMessages(chatMessages);
@@ -418,13 +444,11 @@ const AgendaContainer = () => {
           setLastMessageId(chatMessages[0].id);
         }
       } else {
-        // Se a resposta não tem sucesso, limpa as mensagens
         console.warn('Chat messages not available:', response.error || 'Unknown error');
         setMessages([]);
       }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
-      // Não lança erro, apenas limpa as mensagens
       setMessages([]);
     }
   };
@@ -453,10 +477,14 @@ const AgendaContainer = () => {
     setLastMessageId(null);
     setMessages([]);
     
+    // Load messages immediately
     loadChatMessages(contact);
     
-    setPollingActive(true);
-    startChatAutoUpdate(contact);
+    // Start auto-update with delay to avoid conflicts
+    setTimeout(() => {
+      setPollingActive(true);
+      startChatAutoUpdate(contact);
+    }, 1000);
   };
 
   const handleSendMessage = async (contactId, message) => {
@@ -665,7 +693,9 @@ const AgendaContainer = () => {
         p: 3, 
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#f5f5f5'
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <Toolbar />
         {currentView === 'agendamentos' && hasPermission('agendamentos') ? (
@@ -701,7 +731,7 @@ const AgendaContainer = () => {
         ) : currentView === 'configuracoes' && hasPermission('configuracoes') ? (
           <UnitsContainer />
         ) : (
-          <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Box sx={{ p: 3, textAlign: 'center', flexGrow: 1 }}>
             <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
               Acesso Negado
             </Typography>
@@ -710,6 +740,7 @@ const AgendaContainer = () => {
             </Typography>
           </Box>
         )}
+        <Footer />
       </Box>
       
       <AgendaModal
