@@ -15,6 +15,7 @@ class Unit:
     appointment_interval: int = 30
     notifications_enabled: bool = True
     notification_advance_hours: int = 24
+    kea_client_id: Optional[int] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -31,6 +32,7 @@ class Unit:
             'appointment_interval': self.appointment_interval,
             'notifications_enabled': self.notifications_enabled,
             'notification_advance_hours': self.notification_advance_hours,
+            'kea_client_id': self.kea_client_id,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }

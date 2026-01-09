@@ -10,8 +10,13 @@ import {
   FormControlLabel,
   Switch,
   Box,
-  Typography
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
+import { keaClientService } from '../../services/keaClientService';
 
 const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
   const [formData, setFormData] = useState({
@@ -23,8 +28,25 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
     closing_time: '18:00',
     appointment_interval: 30,
     notifications_enabled: true,
-    notification_advance_hours: 24
+    notification_advance_hours: 24,
+    kea_client_id: ''
   });
+  const [keaClients, setKeaClients] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      loadKeaClients();
+    }
+  }, [open]);
+
+  const loadKeaClients = async () => {
+    try {
+      const clients = await keaClientService.getKeaClients();
+      setKeaClients(clients);
+    } catch (error) {
+      console.error('Erro ao carregar clientes KEA:', error);
+    }
+  };
 
   useEffect(() => {
     if (unit) {
@@ -37,7 +59,8 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
         closing_time: unit.closing_time ? unit.closing_time.substring(0, 5) : '18:00',
         appointment_interval: unit.appointment_interval || 30,
         notifications_enabled: unit.notifications_enabled !== undefined ? unit.notifications_enabled : true,
-        notification_advance_hours: unit.notification_advance_hours || 24
+        notification_advance_hours: unit.notification_advance_hours || 24,
+        kea_client_id: unit.kea_client_id || ''
       });
     } else {
       setFormData({
@@ -49,7 +72,8 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
         closing_time: '18:00',
         appointment_interval: 30,
         notifications_enabled: true,
-        notification_advance_hours: 24
+        notification_advance_hours: 24,
+        kea_client_id: ''
       });
     }
   }, [unit, open]);
@@ -66,7 +90,8 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
     const submitData = {
       ...formData,
       opening_time: formData.opening_time + ':00',
-      closing_time: formData.closing_time + ':00'
+      closing_time: formData.closing_time + ':00',
+      kea_client_id: formData.kea_client_id || null
     };
     onSave(submitData);
   };
@@ -102,6 +127,26 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
                 onChange={handleChange('unit_name')}
                 required
               />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Cliente KEA</InputLabel>
+                <Select
+                  value={formData.kea_client_id}
+                  onChange={handleChange('kea_client_id')}
+                  label="Cliente KEA"
+                >
+                  <MenuItem value="">
+                    <em>Selecione um cliente</em>
+                  </MenuItem>
+                  {keaClients.map((client) => (
+                    <MenuItem key={client.id} value={client.id}>
+                      {client.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             
             <Grid item xs={12}>

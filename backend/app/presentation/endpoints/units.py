@@ -20,6 +20,7 @@ class UnitCreate(BaseModel):
     appointment_interval: int = 30
     notifications_enabled: bool = True
     notification_advance_hours: int = 24
+    kea_client_id: int = None
 
 class UnitResponse(BaseModel):
     id: int
@@ -33,6 +34,7 @@ class UnitResponse(BaseModel):
     appointment_interval: int
     notifications_enabled: bool
     notification_advance_hours: int
+    kea_client_id: int = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 

@@ -39,6 +39,26 @@ const UnitsPresentational = ({
   onDeleteUnit
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [keaClients, setKeaClients] = useState([]);
+
+  // Carregar clientes KEA para exibir os nomes
+  React.useEffect(() => {
+    const loadKeaClients = async () => {
+      try {
+        const { keaClientService } = await import('../../services/keaClientService');
+        const clients = await keaClientService.getKeaClients();
+        setKeaClients(clients);
+      } catch (error) {
+        console.error('Erro ao carregar clientes KEA:', error);
+      }
+    };
+    loadKeaClients();
+  }, []);
+
+  const getKeaClientName = (clientId) => {
+    const client = keaClients.find(c => c.id === clientId);
+    return client ? client.name : 'N/A';
+  };
 
   const filteredUnits = units.filter(unit =>
     unit.unit_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,6 +136,7 @@ const UnitsPresentational = ({
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Unidade</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Cliente KEA</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Contato</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Horário</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Configurações</TableCell>
@@ -150,6 +171,15 @@ const UnitsPresentational = ({
                             )}
                           </Box>
                         </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Chip
+                          label={unit.kea_client_id ? getKeaClientName(unit.kea_client_id) : 'Não definido'}
+                          size="small"
+                          color={unit.kea_client_id ? 'primary' : 'default'}
+                          variant={unit.kea_client_id ? 'filled' : 'outlined'}
+                        />
                       </TableCell>
                       
                       <TableCell>

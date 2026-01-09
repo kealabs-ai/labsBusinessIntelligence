@@ -22,7 +22,8 @@ class UnitService:
             closing_time=closing_time,
             appointment_interval=unit_data.get('appointment_interval', 30),
             notifications_enabled=unit_data.get('notifications_enabled', True),
-            notification_advance_hours=unit_data.get('notification_advance_hours', 24)
+            notification_advance_hours=unit_data.get('notification_advance_hours', 24),
+            kea_client_id=unit_data.get('kea_client_id')
         )
         
         return self.unit_repository.create_unit(unit)
@@ -49,7 +50,8 @@ class UnitService:
             closing_time=closing_time,
             appointment_interval=unit_data.get('appointment_interval', 30),
             notifications_enabled=unit_data.get('notifications_enabled', True),
-            notification_advance_hours=unit_data.get('notification_advance_hours', 24)
+            notification_advance_hours=unit_data.get('notification_advance_hours', 24),
+            kea_client_id=unit_data.get('kea_client_id')
         )
         
         return self.unit_repository.update_unit(unit)

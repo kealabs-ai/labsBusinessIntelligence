@@ -29,21 +29,21 @@ class UnitRepository:
                 query = """
                 INSERT INTO unit_settings (user_id, unit_name, address, phone, email, 
                                          opening_time, closing_time, appointment_interval, 
-                                         notifications_enabled, notification_advance_hours)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                         notifications_enabled, notification_advance_hours, kea_client_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
             else:  # SQL Server
                 query = """
                 INSERT INTO unit_settings (user_id, unit_name, address, phone, email, 
                                          opening_time, closing_time, appointment_interval, 
-                                         notifications_enabled, notification_advance_hours)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                         notifications_enabled, notification_advance_hours, kea_client_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
             
             cursor.execute(query, (
                 unit.user_id, unit.unit_name, unit.address, unit.phone, unit.email,
                 unit.opening_time, unit.closing_time, unit.appointment_interval,
-                unit.notifications_enabled, unit.notification_advance_hours
+                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id
             ))
             
             unit.id = cursor.lastrowid
@@ -63,9 +63,9 @@ class UnitRepository:
         
         try:
             if self.db_type == "mysql":
-                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE user_id = %s ORDER BY created_at DESC"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, kea_client_id, created_at, updated_at FROM unit_settings WHERE user_id = %s ORDER BY created_at DESC"
             else:
-                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE user_id = ? ORDER BY created_at DESC"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, kea_client_id, created_at, updated_at FROM unit_settings WHERE user_id = ? ORDER BY created_at DESC"
             
             cursor.execute(query, (user_id,))
             rows = cursor.fetchall()
@@ -84,8 +84,9 @@ class UnitRepository:
                     appointment_interval=row[8] if row[8] else 30,
                     notifications_enabled=bool(row[9]) if row[9] is not None else True,
                     notification_advance_hours=row[10] if row[10] else 24,
-                    created_at=str(row[11]) if row[11] else None,
-                    updated_at=str(row[12]) if row[12] else None
+                    kea_client_id=row[11],
+                    created_at=str(row[12]) if row[12] else None,
+                    updated_at=str(row[13]) if row[13] else None
                 )
                 units.append(unit)
             
@@ -105,7 +106,7 @@ class UnitRepository:
                 UPDATE unit_settings 
                 SET unit_name = %s, address = %s, phone = %s, email = %s,
                     opening_time = %s, closing_time = %s, appointment_interval = %s,
-                    notifications_enabled = %s, notification_advance_hours = %s
+                    notifications_enabled = %s, notification_advance_hours = %s, kea_client_id = %s
                 WHERE id = %s AND user_id = %s
                 """
             else:
@@ -113,14 +114,14 @@ class UnitRepository:
                 UPDATE unit_settings 
                 SET unit_name = ?, address = ?, phone = ?, email = ?,
                     opening_time = ?, closing_time = ?, appointment_interval = ?,
-                    notifications_enabled = ?, notification_advance_hours = ?
+                    notifications_enabled = ?, notification_advance_hours = ?, kea_client_id = ?
                 WHERE id = ? AND user_id = ?
                 """
             
             cursor.execute(query, (
                 unit.unit_name, unit.address, unit.phone, unit.email,
                 unit.opening_time, unit.closing_time, unit.appointment_interval,
-                unit.notifications_enabled, unit.notification_advance_hours,
+                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id,
                 unit.id, unit.user_id
             ))
             
@@ -140,9 +141,9 @@ class UnitRepository:
         
         try:
             if self.db_type == "mysql":
-                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE id = %s"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, kea_client_id, created_at, updated_at FROM unit_settings WHERE id = %s"
             else:
-                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, created_at, updated_at FROM unit_settings WHERE id = ?"
+                query = "SELECT id, user_id, unit_name, address, phone, email, opening_time, closing_time, appointment_interval, notifications_enabled, notification_advance_hours, kea_client_id, created_at, updated_at FROM unit_settings WHERE id = ?"
             
             cursor.execute(query, (unit_id,))
             row = cursor.fetchone()
@@ -160,8 +161,9 @@ class UnitRepository:
                     appointment_interval=row[8] if row[8] else 30,
                     notifications_enabled=bool(row[9]) if row[9] is not None else True,
                     notification_advance_hours=row[10] if row[10] else 24,
-                    created_at=str(row[11]) if row[11] else None,
-                    updated_at=str(row[12]) if row[12] else None
+                    kea_client_id=row[11],
+                    created_at=str(row[12]) if row[12] else None,
+                    updated_at=str(row[13]) if row[13] else None
                 )
             return None
             
