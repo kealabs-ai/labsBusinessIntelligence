@@ -42,12 +42,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await auth_service.get_current_user(credentials.credentials)
     if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
-    return {"user_id": user.id}
+    return {"user_id": user.id, "role_id": user.role}
 
 @router.post("/units", response_model=UnitResponse)
 async def create_unit(unit_data: UnitCreate, current_user: dict = Depends(get_current_user)):
     try:
-        unit = unit_service.create_unit(current_user["user_id"], unit_data.dict())
+        unit = unit_service.create_unit(current_user["user_id"], current_user["role_id"], unit_data.dict())
         return unit.to_dict()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -69,7 +69,7 @@ async def get_units(id: Optional[int] = None, current_user: dict = Depends(get_c
 @router.put("/units/{unit_id}", response_model=UnitResponse)
 async def update_unit(unit_id: int, unit_data: UnitCreate, current_user: dict = Depends(get_current_user)):
     try:
-        unit = unit_service.update_unit(current_user["user_id"], unit_id, unit_data.dict())
+        unit = unit_service.update_unit(current_user["user_id"], current_user["role_id"], unit_id, unit_data.dict())
         return unit.to_dict()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

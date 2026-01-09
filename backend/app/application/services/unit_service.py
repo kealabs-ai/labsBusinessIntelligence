@@ -7,7 +7,7 @@ class UnitService:
     def __init__(self):
         self.unit_repository = UnitRepository()
 
-    def create_unit(self, user_id: int, unit_data: dict) -> Unit:
+    def create_unit(self, user_id: int, role_id: int, unit_data: dict) -> Unit:
         # Parse time strings
         opening_time = time.fromisoformat(unit_data.get('opening_time', '08:00:00'))
         closing_time = time.fromisoformat(unit_data.get('closing_time', '18:00:00'))
@@ -26,7 +26,7 @@ class UnitService:
             kea_client_id=unit_data.get('kea_client_id')
         )
         
-        return self.unit_repository.create_unit(unit)
+        return self.unit_repository.create_unit(unit, role_id)
 
     def get_user_units(self, user_id: int) -> List[Unit]:
         return self.unit_repository.get_units_by_user(user_id)
@@ -34,7 +34,7 @@ class UnitService:
     def get_unit_by_id(self, unit_id: int) -> Unit:
         return self.unit_repository.get_unit_by_id(unit_id)
 
-    def update_unit(self, user_id: int, unit_id: int, unit_data: dict) -> Unit:
+    def update_unit(self, user_id: int, role_id: int, unit_id: int, unit_data: dict) -> Unit:
         # Parse time strings
         opening_time = time.fromisoformat(unit_data.get('opening_time', '08:00:00'))
         closing_time = time.fromisoformat(unit_data.get('closing_time', '18:00:00'))
@@ -54,7 +54,7 @@ class UnitService:
             kea_client_id=unit_data.get('kea_client_id')
         )
         
-        return self.unit_repository.update_unit(unit)
+        return self.unit_repository.update_unit(unit, role_id)
 
     def delete_unit(self, user_id: int, unit_id: int) -> bool:
         return self.unit_repository.delete_unit(unit_id, user_id)

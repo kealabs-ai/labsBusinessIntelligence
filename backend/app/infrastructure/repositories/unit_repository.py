@@ -20,7 +20,7 @@ class UnitRepository:
     def get_connection(self):
         return mysql.connector.connect(**self.connection_config)
 
-    def create_unit(self, unit: Unit) -> Unit:
+    def create_unit(self, unit: Unit, role_id: int) -> Unit:
         connection = self.get_connection()
         cursor = connection.cursor()
         
@@ -29,21 +29,21 @@ class UnitRepository:
                 query = """
                 INSERT INTO unit_settings (user_id, unit_name, address, phone, email, 
                                          opening_time, closing_time, appointment_interval, 
-                                         notifications_enabled, notification_advance_hours, kea_client_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                         notifications_enabled, notification_advance_hours, kea_client_id, role_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
             else:  # SQL Server
                 query = """
                 INSERT INTO unit_settings (user_id, unit_name, address, phone, email, 
                                          opening_time, closing_time, appointment_interval, 
-                                         notifications_enabled, notification_advance_hours, kea_client_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                         notifications_enabled, notification_advance_hours, kea_client_id, role_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
             
             cursor.execute(query, (
                 unit.user_id, unit.unit_name, unit.address, unit.phone, unit.email,
                 unit.opening_time, unit.closing_time, unit.appointment_interval,
-                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id
+                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id, role_id
             ))
             
             unit.id = cursor.lastrowid
@@ -96,7 +96,7 @@ class UnitRepository:
             cursor.close()
             connection.close()
 
-    def update_unit(self, unit: Unit) -> Unit:
+    def update_unit(self, unit: Unit, role_id: int) -> Unit:
         connection = self.get_connection()
         cursor = connection.cursor()
         
@@ -106,7 +106,8 @@ class UnitRepository:
                 UPDATE unit_settings 
                 SET unit_name = %s, address = %s, phone = %s, email = %s,
                     opening_time = %s, closing_time = %s, appointment_interval = %s,
-                    notifications_enabled = %s, notification_advance_hours = %s, kea_client_id = %s
+                    notifications_enabled = %s, notification_advance_hours = %s, kea_client_id = %s,
+                    role_id = %s
                 WHERE id = %s AND user_id = %s
                 """
             else:
@@ -114,14 +115,15 @@ class UnitRepository:
                 UPDATE unit_settings 
                 SET unit_name = ?, address = ?, phone = ?, email = ?,
                     opening_time = ?, closing_time = ?, appointment_interval = ?,
-                    notifications_enabled = ?, notification_advance_hours = ?, kea_client_id = ?
+                    notifications_enabled = ?, notification_advance_hours = ?, kea_client_id = ?,
+                    role_id = ?
                 WHERE id = ? AND user_id = ?
                 """
             
             cursor.execute(query, (
                 unit.unit_name, unit.address, unit.phone, unit.email,
                 unit.opening_time, unit.closing_time, unit.appointment_interval,
-                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id,
+                unit.notifications_enabled, unit.notification_advance_hours, unit.kea_client_id, role_id,
                 unit.id, unit.user_id
             ))
             
