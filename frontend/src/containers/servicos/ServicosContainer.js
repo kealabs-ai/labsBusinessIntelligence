@@ -104,8 +104,6 @@ const ServicosContainer = () => {
         />
       </Box>
       
-      <Footer />
-      
       <ServicoModal
         open={modalOpen}
         onClose={handleCloseModal}

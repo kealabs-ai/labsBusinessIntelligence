@@ -106,8 +106,6 @@ const ClientsContainer = () => {
         />
       </Box>
       
-      <Footer />
-      
       <ClientModal
         open={modalOpen}
         onClose={handleCloseModal}

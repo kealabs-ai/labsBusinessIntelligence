@@ -131,8 +131,6 @@ const RecursosContainer = () => {
         />
       </Box>
       
-      <Footer />
-      
       <RecursoModal
         open={modalOpen}
         onClose={handleCloseModal}

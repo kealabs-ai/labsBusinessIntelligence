@@ -106,8 +106,6 @@ const UnitsContainer = () => {
         />
       </Box>
       
-      <Footer />
-      
       <UnitModal
         open={modalOpen}
         onClose={handleCloseModal}

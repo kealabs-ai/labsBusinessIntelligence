@@ -116,8 +116,6 @@ const CaixaContainer = () => {
         />
       </Box>
       
-      <Footer />
-      
       <TransacaoModal
         open={modalOpen}
         onClose={handleCloseModal}
