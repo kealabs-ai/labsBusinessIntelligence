@@ -35,9 +35,26 @@ export const keaClientService = {
     }
   },
 
+  async getKeaClient(clientId) {
+    try {
+      const response = await axios.post(`${API_URL}/api/v1/kea-clients/${clientId}`, {
+        _method: 'GET'
+      }, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar cliente KEA específico:', error);
+      throw error;
+    }
+  },
+
   async updateKeaClient(clientId, clientData) {
     try {
-      const response = await axios.put(`${API_URL}/api/v1/kea-clients/${clientId}`, clientData, {
+      const response = await axios.post(`${API_URL}/api/v1/kea-clients/${clientId}`, {
+        ...clientData,
+        _method: 'PUT'
+      }, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -49,7 +66,9 @@ export const keaClientService = {
 
   async deleteKeaClient(clientId) {
     try {
-      const response = await axios.delete(`${API_URL}/api/v1/kea-clients/${clientId}`, {
+      const response = await axios.post(`${API_URL}/api/v1/kea-clients/${clientId}`, {
+        _method: 'DELETE'
+      }, {
         headers: getAuthHeaders()
       });
       return response.data;

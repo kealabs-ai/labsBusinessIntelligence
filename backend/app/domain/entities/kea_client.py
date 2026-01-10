@@ -20,6 +20,7 @@ class KeaClient:
     user_quantity: int = 1
     last_payment_date: Optional[date] = None
     segmento: Optional[List[str]] = None
+    color_palette: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -40,6 +41,7 @@ class KeaClient:
             'user_quantity': self.user_quantity,
             'last_payment_date': str(self.last_payment_date) if self.last_payment_date else None,
             'segmento': self.segmento,
+            'color_palette': self.color_palette,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }

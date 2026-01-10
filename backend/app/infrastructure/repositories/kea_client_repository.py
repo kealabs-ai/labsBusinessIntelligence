@@ -36,8 +36,8 @@ class KeaClientRepository:
             query = """
             INSERT INTO kea_clients (name, cpf_cnpj, kea_identifier, email, site, 
                                    phone_number, cell_phone, whatsapp_number, address, 
-                                   status, payment_plan, user_quantity, last_payment_date, segment)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                   status, payment_plan, user_quantity, last_payment_date, segment, color_palette)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
@@ -45,7 +45,8 @@ class KeaClientRepository:
                 kea_client.email, kea_client.site, kea_client.phone_number,
                 kea_client.cell_phone, kea_client.whatsapp_number, kea_client.address,
                 kea_client.status, kea_client.payment_plan, kea_client.user_quantity,
-                kea_client.last_payment_date, json.dumps(kea_client.segmento) if kea_client.segmento else None
+                kea_client.last_payment_date, json.dumps(kea_client.segmento) if kea_client.segmento else None,
+                kea_client.color_palette
             ))
             
             kea_client.id = cursor.lastrowid
@@ -67,7 +68,7 @@ class KeaClientRepository:
             query = """
             SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
                    cell_phone, whatsapp_number, address, status, payment_plan, 
-                   user_quantity, last_payment_date, segment, created_at, updated_at 
+                   user_quantity, last_payment_date, segment, color_palette, created_at, updated_at 
             FROM kea_clients ORDER BY created_at DESC
             """
             
@@ -99,8 +100,9 @@ class KeaClientRepository:
                     user_quantity=row[12],
                     last_payment_date=row[13],
                     segmento=segmento_data,
-                    created_at=str(row[15]) if row[15] else None,
-                    updated_at=str(row[16]) if row[16] else None
+                    color_palette=row[15],
+                    created_at=str(row[16]) if row[16] else None,
+                    updated_at=str(row[17]) if row[17] else None
                 )
                 clients.append(client)
             
@@ -118,7 +120,7 @@ class KeaClientRepository:
             query = """
             SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
                    cell_phone, whatsapp_number, address, status, payment_plan, 
-                   user_quantity, last_payment_date, segment, created_at, updated_at 
+                   user_quantity, last_payment_date, segment, color_palette, created_at, updated_at 
             FROM kea_clients WHERE id = %s
             """
             
@@ -151,8 +153,9 @@ class KeaClientRepository:
                 user_quantity=row[12],
                 last_payment_date=row[13],
                 segmento=segmento_data,
-                created_at=str(row[15]) if row[15] else None,
-                updated_at=str(row[16]) if row[16] else None
+                color_palette=row[15],
+                created_at=str(row[16]) if row[16] else None,
+                updated_at=str(row[17]) if row[17] else None
             )
             
         finally:
@@ -168,7 +171,7 @@ class KeaClientRepository:
             UPDATE kea_clients 
             SET name = %s, cpf_cnpj = %s, email = %s, site = %s, phone_number = %s,
                 cell_phone = %s, whatsapp_number = %s, address = %s, status = %s,
-                payment_plan = %s, user_quantity = %s, last_payment_date = %s, segment = %s
+                payment_plan = %s, user_quantity = %s, last_payment_date = %s, segment = %s, color_palette = %s
             WHERE id = %s
             """
             
@@ -177,7 +180,8 @@ class KeaClientRepository:
                 kea_client.phone_number, kea_client.cell_phone, kea_client.whatsapp_number,
                 kea_client.address, kea_client.status, kea_client.payment_plan,
                 kea_client.user_quantity, kea_client.last_payment_date, 
-                json.dumps(kea_client.segmento) if kea_client.segmento else None, kea_client.id
+                json.dumps(kea_client.segmento) if kea_client.segmento else None, 
+                kea_client.color_palette, kea_client.id
             ))
             
             connection.commit()
