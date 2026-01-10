@@ -53,6 +53,10 @@ class AdminService:
             print(f"❌ Role_id inválido: {user_data['role_id']}")
             raise ValueError("Invalid role_id")
         
+        # Handle unit_id conversion
+        if 'unit_id' in user_data and user_data['unit_id'] is None:
+            user_data['unit_id'] = 0
+        
         print(f"Dados finais para User: {user_data}")
         
         try:

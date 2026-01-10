@@ -16,7 +16,14 @@ class AdminService {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      const error = new Error(`HTTP error! status: ${response.status}`);
+      error.response = {
+        status: response.status,
+        data: errorData,
+        headers: response.headers
+      };
+      throw error;
     }
     
     return await response.json();

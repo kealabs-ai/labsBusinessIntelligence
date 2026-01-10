@@ -126,6 +126,11 @@ const UserManagement = () => {
       const dataToSend = { ...formData };
       delete dataToSend.confirmPassword; // Remove confirmPassword antes do envio
       
+      // Converter unit_id null para 0
+      if (dataToSend.unit_id === null || dataToSend.unit_id === '') {
+        dataToSend.unit_id = 0;
+      }
+      
       console.log('✅ Validações passaram');
       console.log('Dados para envio:', dataToSend);
       
