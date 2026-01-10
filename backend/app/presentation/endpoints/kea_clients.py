@@ -91,6 +91,7 @@ async def get_kea_client(client_id: str, current_user: dict = Depends(get_curren
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/kea-clients/{client_id:path}", response_model=KeaClientResponse)
 @router.post("/kea-clients/{client_id:path}/update", response_model=KeaClientResponse)
 async def update_kea_client(client_id: str, client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
