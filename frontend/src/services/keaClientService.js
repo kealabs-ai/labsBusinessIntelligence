@@ -66,9 +66,7 @@ export const keaClientService = {
 
   async deleteKeaClient(clientId) {
     try {
-      const response = await axios.post(`${API_URL}/api/v1/kea-clients/${clientId}`, {
-        _method: 'DELETE'
-      }, {
+      const response = await axios.post(`${API_URL}/api/v1/kea-clients/${clientId}/delete`, {}, {
         headers: getAuthHeaders()
       });
       return response.data;

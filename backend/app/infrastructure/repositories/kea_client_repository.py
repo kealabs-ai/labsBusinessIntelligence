@@ -100,7 +100,7 @@ class KeaClientRepository:
                     user_quantity=row[12],
                     last_payment_date=row[13],
                     segmento=segmento_data,
-                    color_palette=row[15],
+                    color_palette=row[15] if row[15] is not None else "",
                     created_at=str(row[16]) if row[16] else None,
                     updated_at=str(row[17]) if row[17] else None
                 )
@@ -153,7 +153,7 @@ class KeaClientRepository:
                 user_quantity=row[12],
                 last_payment_date=row[13],
                 segmento=segmento_data,
-                color_palette=row[15],
+                color_palette=row[15] if row[15] is not None else "",
                 created_at=str(row[16]) if row[16] else None,
                 updated_at=str(row[17]) if row[17] else None
             )

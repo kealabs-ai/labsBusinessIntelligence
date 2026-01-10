@@ -20,7 +20,7 @@ class KeaClient:
     user_quantity: int = 1
     last_payment_date: Optional[date] = None
     segmento: Optional[List[str]] = None
-    color_palette: Optional[str] = None
+    color_palette: Optional[str] = ""
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
