@@ -19,6 +19,7 @@ import {
   OutlinedInput
 } from '@mui/material';
 import { serviceService } from '../../services/serviceService';
+import { getPaletteOptions } from '../../utils/colorPalettes';
 
 const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
   const [formData, setFormData] = useState({
@@ -34,7 +35,8 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
     payment_plan: '',
     user_quantity: 1,
     last_payment_date: '',
-    segmento: []
+    segmento: [],
+    color_palette: 'KEA_LABS'
   });
 
   const [segmentos, setSegmentos] = useState([]);
@@ -76,7 +78,8 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
         payment_plan: client.payment_plan || '',
         user_quantity: client.user_quantity || 1,
         last_payment_date: client.last_payment_date || '',
-        segmento: client.segmento || []
+        segmento: client.segmento || [],
+        color_palette: client.color_palette || 'KEA_LABS'
       });
     } else {
       setFormData({
@@ -92,7 +95,8 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
         payment_plan: '',
         user_quantity: 1,
         last_payment_date: '',
-        segmento: []
+        segmento: [],
+        color_palette: 'KEA_LABS'
       });
     }
   }, [client, open]);
@@ -222,6 +226,22 @@ const KeaClientModal = ({ open, onClose, onSave, client, loading }) => {
                 {paymentPlans.map((plan) => (
                   <MenuItem key={plan.value} value={plan.value}>
                     {plan.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                select
+                label="Paleta de Cores"
+                value={formData.color_palette}
+                onChange={handleChange('color_palette')}
+              >
+                {getPaletteOptions().map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
                   </MenuItem>
                 ))}
               </TextField>

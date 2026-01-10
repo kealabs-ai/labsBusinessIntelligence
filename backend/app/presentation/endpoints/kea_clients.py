@@ -24,6 +24,7 @@ class KeaClientCreate(BaseModel):
     user_quantity: int = 1
     last_payment_date: Optional[str] = None
     segmento: Optional[List[str]] = None
+    color_palette: str = "KEA_LABS"
 
 class KeaClientResponse(BaseModel):
     id: int
@@ -41,6 +42,7 @@ class KeaClientResponse(BaseModel):
     user_quantity: int
     last_payment_date: Optional[str] = None
     segmento: Optional[List[str]] = None
+    color_palette: str = "KEA_LABS"
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 

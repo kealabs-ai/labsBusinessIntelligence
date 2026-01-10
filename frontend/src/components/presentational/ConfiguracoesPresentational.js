@@ -18,6 +18,7 @@ import {
   Schedule,
   Notifications
 } from '@mui/icons-material';
+import ColorPaletteConfig from './ColorPaletteConfig';
 
 const ConfiguracoesPresentational = ({
   configuracoes,
@@ -85,6 +86,11 @@ const ConfiguracoesPresentational = ({
       </Box>
 
       <Grid container spacing={3}>
+        {/* Configuração de Paleta de Cores */}
+        <Grid item xs={12}>
+          <ColorPaletteConfig />
+        </Grid>
+
         {/* Informações da Unidade */}
         <Grid item xs={12}>
           <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>

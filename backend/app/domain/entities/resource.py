@@ -6,7 +6,7 @@ class Resource(BaseModel):
     id: Optional[int] = None
     user_id: int
     name: str
-    type: str
+    type: Optional[str] = ""
     specialty: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None

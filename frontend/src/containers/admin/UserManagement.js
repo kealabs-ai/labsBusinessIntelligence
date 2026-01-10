@@ -24,7 +24,7 @@ const UserManagement = () => {
     password: '',
     role: 'user',
     kea_client_id: '',
-    unit_id: ''
+    unit_id: null
   });
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const UserManagement = () => {
       }
       setModalOpen(false);
       setEditingUser(null);
-      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '', unit_id: '' });
+      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '', unit_id: null });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
@@ -99,7 +99,7 @@ const UserManagement = () => {
       password: '',
       role: user.role,
       kea_client_id: user.kea_client_id || '',
-      unit_id: user.unit_id || ''
+      unit_id: user.unit_id || null
     });
     setModalOpen(true);
   };
@@ -273,8 +273,8 @@ const UserManagement = () => {
           <FormControl fullWidth margin="normal">
             <InputLabel>Unidade</InputLabel>
             <Select
-              value={formData.unit_id}
-              onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })}
+              value={formData.unit_id || ''}
+              onChange={(e) => setFormData({ ...formData, unit_id: e.target.value || null })}
             >
               <MenuItem value="">
                 <em>Nenhuma unidade</em>

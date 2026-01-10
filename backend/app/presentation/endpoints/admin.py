@@ -13,7 +13,7 @@ class UserCreateRequest(BaseModel):
     username: str
     email: str
     password: str
-    role: str = '4'
+    role: str = 'user'
     kea_client_id: str = None
     unit_id: int = None
 
