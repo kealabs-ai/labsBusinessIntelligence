@@ -74,39 +74,51 @@ async def get_kea_clients(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/kea-clients/{client_id}", response_model=KeaClientResponse)
-async def get_kea_client(client_id: int, current_user: dict = Depends(get_current_user)):
+@router.get("/kea-clients/{client_id:path}", response_model=KeaClientResponse)
+async def get_kea_client(client_id: str, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
-        client = kea_client_service.get_kea_client_by_id(client_id)
+        # Extrair ID numérico se contém dois pontos
+        actual_id = int(client_id.split(':')[0]) if ':' in client_id else int(client_id)
+        client = kea_client_service.get_kea_client_by_id(actual_id)
         if not client:
             raise HTTPException(status_code=404, detail="Cliente não encontrado")
         return client.to_dict()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID inválido")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/kea-clients/{client_id}/update", response_model=KeaClientResponse)
-async def update_kea_client(client_id: int, client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
+@router.post("/kea-clients/{client_id:path}/update", response_model=KeaClientResponse)
+async def update_kea_client(client_id: str, client_data: KeaClientCreate, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
-        client = kea_client_service.update_kea_client(client_id, client_data.dict())
+        # Extrair ID numérico se contém dois pontos
+        actual_id = int(client_id.split(':')[0]) if ':' in client_id else int(client_id)
+        client = kea_client_service.update_kea_client(actual_id, client_data.dict())
         return client.to_dict()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID inválido")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/kea-clients/{client_id}")
-async def delete_kea_client(client_id: int, current_user: dict = Depends(get_current_user)):
+@router.post("/kea-clients/{client_id:path}/delete")
+async def delete_kea_client(client_id: str, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
-        success = kea_client_service.delete_kea_client(client_id)
+        # Extrair ID numérico se contém dois pontos
+        actual_id = int(client_id.split(':')[0]) if ':' in client_id else int(client_id)
+        success = kea_client_service.delete_kea_client(actual_id)
         if not success:
             raise HTTPException(status_code=404, detail="Cliente não encontrado")
         return {"message": "Cliente excluído com sucesso"}
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID inválido")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
