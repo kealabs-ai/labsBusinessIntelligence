@@ -10,6 +10,7 @@ import { Add, Edit, Delete, People } from '@mui/icons-material';
 import { adminService } from '../../services/adminService';
 import { roleService } from '../../services/roleService';
 import { keaClientService } from '../../services/keaClientService';
+import { formatPhoneBR } from '../../utils/phoneUtils';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -20,9 +21,13 @@ const UserManagement = () => {
   const [keaClients, setKeaClients] = useState([]);
   const [units, setUnits] = useState([]);
   const [formData, setFormData] = useState({
+    name: '',
     username: '',
     email: '',
+    phone: '',
+    mobile: '',
     password: '',
+    confirmPassword: '',
     role: '4',
     kea_client_id: '',
     unit_id: null
@@ -95,13 +100,18 @@ const UserManagement = () => {
       setLoading(true);
       
       // Validate required fields
-      if (!formData.username || !formData.email) {
-        showAlert('Usuário e email são obrigatórios', 'error');
+      if (!formData.name || !formData.username || !formData.email) {
+        showAlert('Nome, usuário e email são obrigatórios', 'error');
         return;
       }
       
       if (!editingUser && !formData.password) {
         showAlert('Senha é obrigatória para novos usuários', 'error');
+        return;
+      }
+      
+      if (!editingUser && formData.password !== formData.confirmPassword) {
+        showAlert('As senhas não coincidem', 'error');
         return;
       }
       
@@ -116,7 +126,7 @@ const UserManagement = () => {
       
       setModalOpen(false);
       setEditingUser(null);
-      setFormData({ username: '', email: '', password: '', role: '4', kea_client_id: '', unit_id: null });
+      setFormData({ name: '', username: '', email: '', phone: '', mobile: '', password: '', confirmPassword: '', role: '4', kea_client_id: '', unit_id: null });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
@@ -130,11 +140,15 @@ const UserManagement = () => {
   const handleEdit = (user) => {
     setEditingUser(user);
     setFormData({
+      name: user.name || '',
       username: user.username,
       email: user.email,
+      phone: user.phone || '',
+      mobile: user.mobile || '',
       password: '',
-      role: user.role,
-      kea_client_id: user.kea_client_id || '',
+      confirmPassword: '',
+      role: user.role_id || '4',
+      kea_client_id: user.kea_client_id ? String(user.kea_client_id) : '',
       unit_id: user.unit_id || null
     });
     setModalOpen(true);
@@ -205,6 +219,7 @@ const UserManagement = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
+                  <TableCell>Nome</TableCell>
                   <TableCell>Usuário</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Role</TableCell>
@@ -216,6 +231,7 @@ const UserManagement = () => {
                 {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.id}</TableCell>
+                    <TableCell>{user.name}</TableCell>
                     <TableCell>{user.username}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
@@ -261,18 +277,44 @@ const UserManagement = () => {
         <DialogContent>
           <TextField
             fullWidth
-            label="Usuário"
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            label="Nome do Usuário (apelido)"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             margin="normal"
+            required
           />
           <TextField
             fullWidth
-            label="Email"
+            label="E-mail"
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Telefone"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: formatPhoneBR(e.target.value) })}
+            margin="normal"
+            placeholder="+55(19)99999-9999"
+          />
+          <TextField
+            fullWidth
+            label="Celular"
+            value={formData.mobile}
+            onChange={(e) => setFormData({ ...formData, mobile: formatPhoneBR(e.target.value) })}
+            margin="normal"
+            placeholder="+55(19)99999-9999"
+          />
+          <TextField
+            fullWidth
+            label="Usuário"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            margin="normal"
+            required
           />
           <TextField
             fullWidth
@@ -282,7 +324,19 @@ const UserManagement = () => {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             margin="normal"
             helperText={editingUser ? "Deixe em branco para manter a senha atual" : ""}
+            required={!editingUser}
           />
+          {!editingUser && (
+            <TextField
+              fullWidth
+              label="Confirme sua senha"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              margin="normal"
+              required
+            />
+          )}
           <FormControl fullWidth margin="normal">
             <InputLabel>Perfil</InputLabel>
             <Select
@@ -312,22 +366,24 @@ const UserManagement = () => {
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Unidade</InputLabel>
-            <Select
-              value={formData.unit_id || ''}
-              onChange={(e) => setFormData({ ...formData, unit_id: e.target.value || null })}
-            >
-              <MenuItem value="">
-                <em>Nenhuma unidade</em>
-              </MenuItem>
-              {units.map((unit) => (
-                <MenuItem key={unit.id} value={unit.id}>
-                  {unit.unit_name}
+          {formData.kea_client_id && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Unidade</InputLabel>
+              <Select
+                value={formData.unit_id || ''}
+                onChange={(e) => setFormData({ ...formData, unit_id: e.target.value || null })}
+              >
+                <MenuItem value="">
+                  <em>Nenhuma unidade</em>
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.unit_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setModalOpen(false)} disabled={loading}>Cancelar</Button>
@@ -342,6 +398,7 @@ const UserManagement = () => {
         autoHideDuration={6000}
         onClose={handleCloseAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{ zIndex: 9999 }}
       >
         <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
           {alert.message}

@@ -23,8 +23,8 @@ class AdminService:
 
     def create_user(self, user_data: dict) -> User:
         # Validate required fields
-        if not user_data.get('username') or not user_data.get('email') or not user_data.get('password'):
-            raise ValueError("Username, email and password are required")
+        if not user_data.get('name') or not user_data.get('username') or not user_data.get('email') or not user_data.get('password'):
+            raise ValueError("Name, username, email and password are required")
         
         # Hash password
         user_data['password_hash'] = TokenManager.get_password_hash(user_data.pop('password'))

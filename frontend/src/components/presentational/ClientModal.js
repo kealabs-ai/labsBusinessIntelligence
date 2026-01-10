@@ -92,8 +92,8 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
 
     if (!formData.phone_whatsapp.trim()) {
       newErrors.phone_whatsapp = 'Telefone WhatsApp é obrigatório';
-    } else if (!/^\+55 \(\d{2}\) \d{5}-\d{4}$/.test(formData.phone_whatsapp)) {
-      newErrors.phone_whatsapp = 'Formato esperado: +55 (XX) XXXXX-XXXX';
+    } else if (!/^\+55\(\d{2}\)\d{5}-\d{4}$/.test(formData.phone_whatsapp)) {
+      newErrors.phone_whatsapp = 'Formato esperado: +55(XX)XXXXX-XXXX';
     }
 
     if (!formData.email.trim()) {
@@ -133,7 +133,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
     }
   };
 
-  // Formata o telefone para '+55 (XX) XXXXX-XXXX' e força o código do país
+  // Formata o telefone para '+55(XX)XXXXX-XXXX' e força o código do país
   const formatPhoneInput = (value) => {
     let digits = value.replace(/\D/g, '');
     // Garante que começa com 55 (Brasil)
@@ -144,11 +144,11 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
     if (digits.length <= 2) {
       return `+${digits}`;
     } else if (digits.length <= 4) {
-      return `+${digits.slice(0,2)} (${digits.slice(2)}`;
+      return `+${digits.slice(0,2)}(${digits.slice(2)}`;
     } else if (digits.length <= 9) {
-      return `+${digits.slice(0,2)} (${digits.slice(2,4)}) ${digits.slice(4)}`;
+      return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4)}`;
     } else {
-      return `+${digits.slice(0,2)} (${digits.slice(2,4)}) ${digits.slice(4,9)}-${digits.slice(9)}`;
+      return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4,9)}-${digits.slice(9)}`;
     }
   };
 
@@ -210,7 +210,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
               onChange={handlePhoneChange}
               error={!!errors.phone_whatsapp}
               helperText={errors.phone_whatsapp}
-              placeholder="+55 (19) 99999-9999"
+              placeholder="+55(19)99999-9999"
               required
               inputProps={{ maxLength: 20 }}
             />

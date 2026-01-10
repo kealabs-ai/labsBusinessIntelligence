@@ -173,11 +173,11 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     // Remove tudo que não é número
     const numbers = value.replace(/\D/g, '');
     
-    // Formatar para +55 (XX) XXXXX-XXXX
+    // Formatar para +55(XX)XXXXX-XXXX
     if (numbers.length <= 2) return `+${numbers}`;
-    if (numbers.length <= 4) return `+${numbers.slice(0, 2)} (${numbers.slice(2)}`;
-    if (numbers.length <= 9) return `+${numbers.slice(0, 2)} (${numbers.slice(2, 4)}) ${numbers.slice(4)}`;
-    return `+${numbers.slice(0, 2)} (${numbers.slice(2, 4)}) ${numbers.slice(4, 9)}-${numbers.slice(9, 13)}`;
+    if (numbers.length <= 4) return `+${numbers.slice(0, 2)}(${numbers.slice(2)}`;
+    if (numbers.length <= 9) return `+${numbers.slice(0, 2)}(${numbers.slice(2, 4)})${numbers.slice(4)}`;
+    return `+${numbers.slice(0, 2)}(${numbers.slice(2, 4)})${numbers.slice(4, 9)}-${numbers.slice(9, 13)}`;
   };
 
   return (
@@ -186,7 +186,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
             <DialogMui open={openDialog} onClose={() => setOpenDialog(false)}>
               <DialogTitleMui>Formato do número WhatsApp</DialogTitleMui>
               <DialogContentMui>
-                <Typography>O número do WhatsApp deve conter o código do país. Exemplo para Brasil: <b>+55 (19) 99999-9999</b></Typography>
+                <Typography>O número do WhatsApp deve conter o código do país. Exemplo para Brasil: <b>+55(19)99999-9999</b></Typography>
               </DialogContentMui>
               <DialogActionsMui>
                 <Button onClick={() => setOpenDialog(false)} autoFocus>OK</Button>
@@ -291,7 +291,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
               <TextField
                 fullWidth
                 label="Número WhatsApp"
-                placeholder="+55 (11) 99999-9999"
+                placeholder="+55(11)99999-9999"
                 value={formData.whatsappNumber}
                 onChange={(e) => handleChange('whatsappNumber', formatPhoneNumber(e.target.value))}
                 helperText="Preenchido automaticamente ao selecionar cliente"

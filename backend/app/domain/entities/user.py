@@ -4,8 +4,11 @@ from datetime import datetime
 
 class User(BaseModel):
     id: Optional[int] = None
+    name: str = Field(description="User display name")
     username: str
     email: str
+    phone: Optional[str] = Field(default=None, description="User phone number")
+    mobile: Optional[str] = Field(default=None, description="User mobile number")
     password_hash: str
     role_id: int = Field(default=4, description="User role ID")
     role: Optional[str] = Field(default=None, description="User role name")

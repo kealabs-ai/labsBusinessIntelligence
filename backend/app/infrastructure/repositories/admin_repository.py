@@ -16,7 +16,7 @@ class AdminRepository:
             # Get paginated users with role names
             offset = (page - 1) * limit
             cursor.execute("""
-                SELECT u.id, u.username, u.email, u.role_id, r.name as role_name, 
+                SELECT u.id, u.name, u.username, u.email, u.phone, u.mobile, u.role_id, r.name as role_name, 
                        u.kea_client_id, u.unit_id, u.is_active, u.created_at, u.updated_at 
                 FROM users u
                 LEFT JOIN roles r ON u.role_id = r.role_id
@@ -51,9 +51,9 @@ class AdminRepository:
                 raise ValueError("Username or email already exists")
             
             cursor.execute("""
-                INSERT INTO users (username, email, password_hash, role_id, kea_client_id, unit_id, is_active)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (user.username, user.email, user.password_hash, user.role_id, 
+                INSERT INTO users (name, username, email, phone, mobile, password_hash, role_id, kea_client_id, unit_id, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user.name, user.username, user.email, user.phone, user.mobile, user.password_hash, user.role_id, 
                   user.kea_client_id, user.unit_id, user.is_active))
             
             user.id = cursor.lastrowid
@@ -98,7 +98,7 @@ class AdminRepository:
             
             # Return updated user with role name
             cursor.execute("""
-                SELECT u.id, u.username, u.email, u.role_id, r.name as role_name,
+                SELECT u.id, u.name, u.username, u.email, u.phone, u.mobile, u.role_id, r.name as role_name,
                        u.kea_client_id, u.unit_id, u.is_active, u.created_at, u.updated_at 
                 FROM users u
                 LEFT JOIN roles r ON u.role_id = r.role_id
