@@ -22,7 +22,7 @@ const UserManagement = () => {
     username: '',
     email: '',
     password: '',
-    role: 'user',
+    role: '4',
     kea_client_id: '',
     unit_id: null
   });
@@ -84,7 +84,7 @@ const UserManagement = () => {
       }
       setModalOpen(false);
       setEditingUser(null);
-      setFormData({ username: '', email: '', password: '', role: 'user', kea_client_id: '', unit_id: null });
+      setFormData({ username: '', email: '', password: '', role: '4', kea_client_id: '', unit_id: null });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);

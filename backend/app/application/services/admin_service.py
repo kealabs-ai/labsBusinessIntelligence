@@ -24,7 +24,8 @@ class AdminService:
     def create_user(self, user_data: dict) -> User:
         user_data['password_hash'] = TokenManager.get_password_hash(user_data.pop('password'))
         if 'role' in user_data:
-            user_data['role_id'] = int(user_data.pop('role'))
+            role_value = user_data.pop('role')
+            user_data['role_id'] = int(role_value)
         user = User(**user_data)
         return self.repository.create_user(user)
 
@@ -32,7 +33,8 @@ class AdminService:
         if 'password' in user_data:
             user_data['password_hash'] = TokenManager.get_password_hash(user_data.pop('password'))
         if 'role' in user_data:
-            user_data['role_id'] = int(user_data.pop('role'))
+            role_value = user_data.pop('role')
+            user_data['role_id'] = int(role_value)
         return self.repository.update_user(user_id, user_data)
 
     def delete_user(self, user_id: int):
