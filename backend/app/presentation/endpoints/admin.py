@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from typing import Optional
 from application.services.auth_service import AuthService
 from application.services.admin_service import AdminService
 import logging
@@ -24,6 +25,10 @@ class UserUpdateRequest(BaseModel):
     kea_client_id: str = None
     unit_id: int = None
     is_active: bool = None
+    _method: str = None
+
+class UserDeleteRequest(BaseModel):
+    _method: str
 
 async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     auth_service = AuthService()
@@ -52,30 +57,37 @@ async def create_user(request: UserCreateRequest, admin=Depends(get_current_admi
     try:
         service = AdminService()
         user = service.create_user(request.dict())
-        return {"success": True, "data": user.dict()}
+        return {"success": True, "message": "Usuário criado com sucesso", "data": user.dict()}
+    except ValueError as e:
+        logger.error(f"Validation error creating user: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error creating user: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
-@router.put("/users/{user_id}")
-async def update_user(user_id: int, request: UserUpdateRequest, admin=Depends(get_current_admin)):
+@router.post("/users/{user_id}")
+async def update_or_delete_user(user_id: int, request: dict, admin=Depends(get_current_admin)):
     try:
         service = AdminService()
-        user = service.update_user(user_id, request.dict(exclude_unset=True))
-        return {"success": True, "data": user.dict()}
+        
+        if request.get('_method') == 'DELETE':
+            service.delete_user(user_id)
+            return {"success": True, "message": "Usuário desativado com sucesso"}
+        elif request.get('_method') == 'PUT':
+            # Remove _method from request data
+            update_data = {k: v for k, v in request.items() if k != '_method'}
+            user = service.update_user(user_id, update_data)
+            if not user:
+                raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            return {"success": True, "message": "Usuário atualizado com sucesso", "data": user.dict()}
+        else:
+            raise HTTPException(status_code=400, detail="Método não especificado")
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error updating user: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.delete("/users/{user_id}")
-async def delete_user(user_id: int, admin=Depends(get_current_admin)):
-    try:
-        service = AdminService()
-        service.delete_user(user_id)
-        return {"success": True, "message": "User deactivated"}
-    except Exception as e:
-        logger.error(f"Error deleting user: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error processing user operation: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 @router.get("/modules")
 async def get_modules(admin=Depends(get_current_admin)):

@@ -3,7 +3,8 @@ import {
   Box, Typography, Card, CardContent, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Button, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField, Select,
-  MenuItem, FormControl, InputLabel, Chip, IconButton, Pagination
+  MenuItem, FormControl, InputLabel, Chip, IconButton, Pagination,
+  Alert, Snackbar
 } from '@mui/material';
 import { Add, Edit, Delete, People } from '@mui/icons-material';
 import { adminService } from '../../services/adminService';
@@ -26,6 +27,8 @@ const UserManagement = () => {
     kea_client_id: '',
     unit_id: null
   });
+  const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -33,6 +36,14 @@ const UserManagement = () => {
     loadKeaClients();
     loadUnits();
   }, [pagination.page]);
+
+  const showAlert = (message, severity = 'success') => {
+    setAlert({ open: true, message, severity });
+  };
+
+  const handleCloseAlert = () => {
+    setAlert({ ...alert, open: false });
+  };
 
   const loadRoles = async () => {
     try {
@@ -63,6 +74,7 @@ const UserManagement = () => {
 
   const loadUsers = async () => {
     try {
+      setLoading(true);
       const response = await adminService.getUsers(pagination.page, 10);
       setUsers(response.users);
       setPagination({
@@ -72,22 +84,46 @@ const UserManagement = () => {
       });
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
+      showAlert('Erro ao carregar usuários', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSave = async () => {
     try {
-      if (editingUser) {
-        await adminService.updateUser(editingUser.id, formData);
-      } else {
-        await adminService.createUser(formData);
+      setLoading(true);
+      
+      // Validate required fields
+      if (!formData.username || !formData.email) {
+        showAlert('Usuário e email são obrigatórios', 'error');
+        return;
       }
+      
+      if (!editingUser && !formData.password) {
+        showAlert('Senha é obrigatória para novos usuários', 'error');
+        return;
+      }
+      
+      let response;
+      if (editingUser) {
+        response = await adminService.updateUser(editingUser.id, formData);
+        showAlert(response.message || 'Usuário atualizado com sucesso', 'success');
+      } else {
+        response = await adminService.createUser(formData);
+        showAlert(response.message || 'Usuário criado com sucesso', 'success');
+      }
+      
       setModalOpen(false);
       setEditingUser(null);
       setFormData({ username: '', email: '', password: '', role: '4', kea_client_id: '', unit_id: null });
       loadUsers();
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Erro ao salvar usuário';
+      showAlert(errorMessage, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,10 +143,16 @@ const UserManagement = () => {
   const handleDelete = async (userId) => {
     if (window.confirm('Deseja desativar este usuário?')) {
       try {
-        await adminService.deleteUser(userId);
+        setLoading(true);
+        const response = await adminService.deleteUser(userId);
+        showAlert(response.message || 'Usuário desativado com sucesso', 'success');
         loadUsers();
       } catch (error) {
         console.error('Erro ao desativar usuário:', error);
+        const errorMessage = error.response?.data?.detail || error.message || 'Erro ao desativar usuário';
+        showAlert(errorMessage, 'error');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -288,10 +330,23 @@ const UserManagement = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
-          <Button onClick={handleSave} variant="contained">Salvar</Button>
+          <Button onClick={() => setModalOpen(false)} disabled={loading}>Cancelar</Button>
+          <Button onClick={handleSave} variant="contained" disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

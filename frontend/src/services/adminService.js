@@ -36,13 +36,14 @@ class AdminService {
   async updateUser(userId, userData) {
     return this.request(`/admin/users/${userId}`, {
       method: 'POST',
-      body: JSON.stringify(userData)
+      body: JSON.stringify({ ...userData, _method: 'PUT' })
     });
   }
 
   async deleteUser(userId) {
     return this.request(`/admin/users/${userId}`, {
-      method: 'POST'
+      method: 'POST',
+      body: JSON.stringify({ _method: 'DELETE' })
     });
   }
 

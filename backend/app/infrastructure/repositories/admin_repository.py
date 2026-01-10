@@ -13,14 +13,22 @@ class AdminRepository:
             cursor.execute("SELECT COUNT(*) as total FROM users")
             total = cursor.fetchone()['total']
             
-            # Get paginated users
+            # Get paginated users with role names
             offset = (page - 1) * limit
             cursor.execute("""
-                SELECT id, username, email, role_id, kea_client_id, is_active, created_at, updated_at 
-                FROM users ORDER BY created_at DESC LIMIT %s OFFSET %s
+                SELECT u.id, u.username, u.email, u.role_id, r.name as role_name, 
+                       u.kea_client_id, u.unit_id, u.is_active, u.created_at, u.updated_at 
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.role_id
+                ORDER BY u.created_at DESC LIMIT %s OFFSET %s
             """, (limit, offset))
             
-            users = [User(**row, password_hash='') for row in cursor.fetchall()]
+            users_data = cursor.fetchall()
+            users = []
+            for row in users_data:
+                user_dict = dict(row)
+                user_dict['role'] = user_dict.pop('role_name', 'Usuário')
+                users.append(User(**user_dict, password_hash=''))
             
             return {
                 "users": users,
@@ -34,10 +42,19 @@ class AdminRepository:
     def create_user(self, user: User) -> User:
         cursor = self.connection.cursor(dictionary=True)
         try:
+            # Check if username or email already exists
+            cursor.execute(
+                "SELECT COUNT(*) as count FROM users WHERE username = %s OR email = %s",
+                (user.username, user.email)
+            )
+            if cursor.fetchone()['count'] > 0:
+                raise ValueError("Username or email already exists")
+            
             cursor.execute("""
-                INSERT INTO users (username, email, password_hash, role_id, kea_client_id, is_active)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (user.username, user.email, user.password_hash, user.role_id, user.kea_client_id, user.is_active))
+                INSERT INTO users (username, email, password_hash, role_id, kea_client_id, unit_id, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (user.username, user.email, user.password_hash, user.role_id, 
+                  user.kea_client_id, user.unit_id, user.is_active))
             
             user.id = cursor.lastrowid
             self.connection.commit()
@@ -48,6 +65,23 @@ class AdminRepository:
     def update_user(self, user_id: int, user_data: dict) -> User:
         cursor = self.connection.cursor(dictionary=True)
         try:
+            # Check if username or email already exists for other users
+            if 'username' in user_data or 'email' in user_data:
+                conditions = []
+                params = []
+                if 'username' in user_data:
+                    conditions.append("username = %s")
+                    params.append(user_data['username'])
+                if 'email' in user_data:
+                    conditions.append("email = %s")
+                    params.append(user_data['email'])
+                
+                query = f"SELECT COUNT(*) as count FROM users WHERE ({' OR '.join(conditions)}) AND id != %s"
+                params.append(user_id)
+                cursor.execute(query, params)
+                if cursor.fetchone()['count'] > 0:
+                    raise ValueError("Username or email already exists")
+            
             # Build dynamic update query
             fields = []
             values = []
@@ -62,10 +96,20 @@ class AdminRepository:
                 cursor.execute(query, values)
                 self.connection.commit()
             
-            # Return updated user
-            cursor.execute("SELECT id, username, email, role_id, kea_client_id, is_active, created_at, updated_at FROM users WHERE id = %s", (user_id,))
+            # Return updated user with role name
+            cursor.execute("""
+                SELECT u.id, u.username, u.email, u.role_id, r.name as role_name,
+                       u.kea_client_id, u.unit_id, u.is_active, u.created_at, u.updated_at 
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.role_id
+                WHERE u.id = %s
+            """, (user_id,))
             result = cursor.fetchone()
-            return User(**result, password_hash='') if result else None
+            if result:
+                user_dict = dict(result)
+                user_dict['role'] = user_dict.pop('role_name', 'Usuário')
+                return User(**user_dict, password_hash='')
+            return None
         finally:
             cursor.close()
 
