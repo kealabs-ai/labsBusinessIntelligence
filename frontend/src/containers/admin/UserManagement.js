@@ -407,13 +407,13 @@ const UserManagement = () => {
             <InputLabel>Cliente</InputLabel>
             <Select
               value={formData.kea_client_id}
-              onChange={(e) => setFormData({ ...formData, kea_client_id: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, kea_client_id: String(e.target.value) })}
             >
               <MenuItem value="">
                 <em>Nenhum cliente</em>
               </MenuItem>
               {keaClients.map((client) => (
-                <MenuItem key={client.id} value={client.id}>
+                <MenuItem key={client.id} value={String(client.kea_identifier)}>
                   {client.name} ({client.kea_identifier})
                 </MenuItem>
               ))}
