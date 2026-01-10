@@ -4,7 +4,7 @@ from datetime import datetime
 
 class User(BaseModel):
     id: Optional[int] = None
-    name: str = Field(description="User display name")
+    name: Optional[str] = Field(default=None, description="User display name")
     username: str
     email: str
     phone: Optional[str] = Field(default=None, description="User phone number")
