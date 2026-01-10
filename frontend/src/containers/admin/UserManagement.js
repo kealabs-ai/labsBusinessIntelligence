@@ -131,6 +131,13 @@ const UserManagement = () => {
         dataToSend.unit_id = 0;
       }
       
+      // Garantir que kea_client_id seja string
+      if (dataToSend.kea_client_id !== null && dataToSend.kea_client_id !== undefined && dataToSend.kea_client_id !== '') {
+        dataToSend.kea_client_id = String(dataToSend.kea_client_id);
+      } else {
+        dataToSend.kea_client_id = '';
+      }
+      
       console.log('✅ Validações passaram');
       console.log('Dados para envio:', dataToSend);
       
