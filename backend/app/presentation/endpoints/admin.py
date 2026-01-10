@@ -11,12 +11,15 @@ security = HTTPBearer()
 logger = logging.getLogger(__name__)
 
 class UserCreateRequest(BaseModel):
+    name: str
     username: str
     email: str
+    phone: Optional[str] = None
+    mobile: Optional[str] = None
     password: str
-    role: str = 'user'
-    kea_client_id: str = None
-    unit_id: int = None
+    role: str = '4'
+    kea_client_id: Optional[str] = None
+    unit_id: Optional[int] = None
 
 class UserUpdateRequest(BaseModel):
     username: str = None
@@ -55,13 +58,25 @@ async def get_users(page: int = 1, limit: int = 10, admin=Depends(get_current_ad
 @router.post("/users")
 async def create_user(request: UserCreateRequest, admin=Depends(get_current_admin)):
     try:
+        print(f"=== ENDPOINT CREATE USER ===")
+        print(f"Request recebido: {request}")
+        print(f"Request dict: {request.dict()}")
+        print(f"Admin: {admin}")
+        
         service = AdminService()
         user = service.create_user(request.dict())
-        return {"success": True, "message": "Usuário criado com sucesso", "data": user.dict()}
+        
+        result = {"success": True, "message": "Usuário criado com sucesso", "data": user.dict()}
+        print(f"✅ Resultado final: {result}")
+        return result
+        
     except ValueError as e:
+        print(f"❌ Validation error: {str(e)}")
         logger.error(f"Validation error creating user: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
+        print(f"❌ Exception error: {str(e)}")
+        print(f"Exception type: {type(e)}")
         logger.error(f"Error creating user: {str(e)}")
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
 

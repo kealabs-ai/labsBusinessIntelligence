@@ -22,26 +22,48 @@ class AdminService:
         return self.repository.get_all_users(page, limit)
 
     def create_user(self, user_data: dict) -> User:
+        print(f"=== ADMIN SERVICE - CREATE USER ===")
+        print(f"Dados recebidos: {user_data}")
+        
         # Validate required fields
         if not user_data.get('name') or not user_data.get('username') or not user_data.get('email') or not user_data.get('password'):
+            print(f"❌ Validação falhou - campos obrigatórios")
+            print(f"name: {user_data.get('name')}")
+            print(f"username: {user_data.get('username')}")
+            print(f"email: {user_data.get('email')}")
+            print(f"password: {'***' if user_data.get('password') else None}")
             raise ValueError("Name, username, email and password are required")
         
         # Hash password
-        user_data['password_hash'] = TokenManager.get_password_hash(user_data.pop('password'))
+        password = user_data.pop('password')
+        user_data['password_hash'] = TokenManager.get_password_hash(password)
+        print(f"✅ Senha hasheada")
         
         # Handle role_id conversion
         if 'role' in user_data:
             role_value = user_data.pop('role')
             user_data['role_id'] = int(role_value) if role_value else 4
+            print(f"✅ Role convertido: {role_value} -> {user_data['role_id']}")
         elif 'role_id' not in user_data:
             user_data['role_id'] = 4  # Default role
+            print(f"✅ Role padrão definido: 4")
         
         # Validate role_id exists
         if not self._validate_role_id(user_data['role_id']):
+            print(f"❌ Role_id inválido: {user_data['role_id']}")
             raise ValueError("Invalid role_id")
         
-        user = User(**user_data)
-        return self.repository.create_user(user)
+        print(f"Dados finais para User: {user_data}")
+        
+        try:
+            user = User(**user_data)
+            print(f"✅ Entidade User criada: {user}")
+            result = self.repository.create_user(user)
+            print(f"✅ Usuário salvo no banco: {result}")
+            return result
+        except Exception as e:
+            print(f"❌ Erro ao criar User ou salvar: {e}")
+            raise
 
     def update_user(self, user_id: int, user_data: dict) -> User:
         # Hash password if provided

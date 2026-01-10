@@ -99,28 +99,46 @@ const UserManagement = () => {
     try {
       setLoading(true);
       
+      console.log('=== INÍCIO CRIAÇÃO/EDIÇÃO USUÁRIO ===');
+      console.log('Editing User:', editingUser);
+      console.log('Form Data Original:', formData);
+      
       // Validate required fields
       if (!formData.name || !formData.username || !formData.email) {
+        console.log('❌ Validação falhou - campos obrigatórios');
         showAlert('Nome, usuário e email são obrigatórios', 'error');
         return;
       }
       
       if (!editingUser && !formData.password) {
+        console.log('❌ Validação falhou - senha obrigatória');
         showAlert('Senha é obrigatória para novos usuários', 'error');
         return;
       }
       
       if (!editingUser && formData.password !== formData.confirmPassword) {
+        console.log('❌ Validação falhou - senhas não coincidem');
         showAlert('As senhas não coincidem', 'error');
         return;
       }
       
+      // Preparar dados para envio
+      const dataToSend = { ...formData };
+      delete dataToSend.confirmPassword; // Remove confirmPassword antes do envio
+      
+      console.log('✅ Validações passaram');
+      console.log('Dados para envio:', dataToSend);
+      
       let response;
       if (editingUser) {
-        response = await adminService.updateUser(editingUser.id, formData);
+        console.log('🔄 Atualizando usuário ID:', editingUser.id);
+        response = await adminService.updateUser(editingUser.id, dataToSend);
+        console.log('✅ Usuário atualizado:', response);
         showAlert(response.message || 'Usuário atualizado com sucesso', 'success');
       } else {
-        response = await adminService.createUser(formData);
+        console.log('🆕 Criando novo usuário');
+        response = await adminService.createUser(dataToSend);
+        console.log('✅ Usuário criado:', response);
         showAlert(response.message || 'Usuário criado com sucesso', 'success');
       }
       
@@ -128,9 +146,32 @@ const UserManagement = () => {
       setEditingUser(null);
       setFormData({ name: '', username: '', email: '', phone: '', mobile: '', password: '', confirmPassword: '', role: '4', kea_client_id: '', unit_id: null });
       loadUsers();
+      
+      console.log('=== FIM CRIAÇÃO/EDIÇÃO USUÁRIO ===');
     } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
-      const errorMessage = error.response?.data?.detail || error.message || 'Erro ao salvar usuário';
+      console.log('=== ERRO NA CRIAÇÃO/EDIÇÃO USUÁRIO ===');
+      console.error('Erro completo:', error);
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
+      console.error('Headers:', error.response?.headers);
+      console.error('Config:', error.config);
+      
+      let errorMessage = 'Erro ao salvar usuário';
+      
+      if (error.response?.status === 422) {
+        console.log('🚨 Erro 422 - Dados inválidos');
+        if (error.response?.data?.detail) {
+          if (Array.isArray(error.response.data.detail)) {
+            errorMessage = error.response.data.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ');
+          } else {
+            errorMessage = error.response.data.detail;
+          }
+        }
+      } else {
+        errorMessage = error.response?.data?.detail || error.message || errorMessage;
+      }
+      
+      console.log('Mensagem de erro final:', errorMessage);
       showAlert(errorMessage, 'error');
     } finally {
       setLoading(false);
