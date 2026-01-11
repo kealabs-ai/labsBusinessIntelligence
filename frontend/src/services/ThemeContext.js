@@ -18,31 +18,27 @@ export const ThemeContextProvider = ({ children }) => {
   const loadClientPalette = async (keaClientId) => {
     try {
       const token = localStorage.getItem('token');
-      const roleId = localStorage.getItem('role_id');
       if (!token || !keaClientId || keaClientId === '') return;
       
-      // Aguardar um pouco para garantir que o token seja válido
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Se não for admin, usar paleta padrão
-      if (roleId !== '1') {
-        console.log('Usuário não é admin - usando paleta padrão');
-        setCurrentPalette('KEA_LABS');
-        return;
-      }
+      console.log('Carregando paleta para cliente:', keaClientId);
+      console.log('Token:', token ? `${token.substring(0, 20)}...` : 'Não encontrado');
       
       // Buscar cliente diretamente por kea_client_id
       const clientResponse = await fetch(`http://72.60.140.128:6002/api/v1/kea-clients/${keaClientId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
+      console.log('Status da resposta:', clientResponse.status);
+      console.log('Headers da resposta:', clientResponse.headers);
+      
       if (clientResponse.ok) {
         const client = await clientResponse.json();
+        console.log('Cliente carregado:', client);
         
         if (client && client.color_palette && COLOR_PALETTES[client.color_palette]) {
-          console.log('Cliente encontrado:', client);
           console.log('Aplicando paleta:', client.color_palette);
           setCurrentPalette(client.color_palette);
         } else {
@@ -50,6 +46,8 @@ export const ThemeContextProvider = ({ children }) => {
           setCurrentPalette('KEA_LABS');
         }
       } else {
+        const errorText = await clientResponse.text();
+        console.log('Erro na resposta:', errorText);
         console.log('Erro ao carregar cliente - usando paleta padrão');
         setCurrentPalette('KEA_LABS');
       }

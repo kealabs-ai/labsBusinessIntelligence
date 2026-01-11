@@ -86,9 +86,6 @@ async def get_kea_clients(kea_client_id: str = None, current_user: dict = Depend
 
 @router.get("/kea-clients/{client_id:path}", response_model=KeaClientResponse)
 async def get_kea_client(client_id: str, current_user: dict = Depends(get_current_user)):
-    if current_user.get("role_id") != 1:
-        raise HTTPException(status_code=403, detail="Acesso negado")
-    
     try:
         # Verificar se é um kea_identifier (contém letras) ou ID numérico
         if client_id.startswith('kea') or not client_id.replace(':', '').isdigit():
