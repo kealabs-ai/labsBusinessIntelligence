@@ -31,23 +31,22 @@ export const ThemeContextProvider = ({ children }) => {
         return;
       }
       
-      // Buscar cliente específico por kea_client_id
-      const clientsResponse = await fetch(`http://72.60.140.128:6002/api/v1/kea-clients?kea_client_id=${keaClientId}`, {
+      // Buscar cliente diretamente por kea_client_id
+      const clientResponse = await fetch(`http://72.60.140.128:6002/api/v1/kea-clients/${keaClientId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (clientsResponse.ok) {
-        const clients = await clientsResponse.json();
-        const client = clients[0]; // Primeiro resultado
+      if (clientResponse.ok) {
+        const client = await clientResponse.json();
         
         if (client && client.color_palette && COLOR_PALETTES[client.color_palette]) {
           console.log('Cliente encontrado:', client);
           console.log('Aplicando paleta:', client.color_palette);
           setCurrentPalette(client.color_palette);
         } else {
-          console.log('Cliente não encontrado ou sem paleta - usando padrão');
+          console.log('Cliente sem paleta - usando padrão');
           setCurrentPalette('KEA_LABS');
         }
       } else {

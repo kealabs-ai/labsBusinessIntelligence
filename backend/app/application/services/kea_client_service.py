@@ -35,6 +35,9 @@ class KeaClientService:
     def get_all_kea_clients(self) -> List[KeaClient]:
         return self.kea_client_repository.get_all_kea_clients()
     
+    def get_kea_client_by_identifier(self, kea_identifier: str) -> KeaClient:
+        return self.kea_client_repository.get_kea_client_by_identifier(kea_identifier)
+
     def get_kea_client_by_id(self, client_id: int) -> KeaClient:
         return self.kea_client_repository.get_kea_client_by_id(client_id)
 

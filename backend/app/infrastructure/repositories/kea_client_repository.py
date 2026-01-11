@@ -112,6 +112,56 @@ class KeaClientRepository:
             cursor.close()
             connection.close()
     
+    def get_kea_client_by_identifier(self, kea_identifier: str) -> Optional[KeaClient]:
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        
+        try:
+            query = """
+            SELECT id, name, cpf_cnpj, kea_identifier, email, site, phone_number, 
+                   cell_phone, whatsapp_number, address, status, payment_plan, 
+                   user_quantity, last_payment_date, segment, color_palette, created_at, updated_at 
+            FROM kea_clients WHERE kea_identifier = %s
+            """
+            
+            cursor.execute(query, (kea_identifier,))
+            row = cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            segmento_data = None
+            if row[14]:  # segment field
+                try:
+                    segmento_data = json.loads(row[14])
+                except:
+                    segmento_data = []
+            
+            return KeaClient(
+                id=row[0],
+                name=row[1],
+                cpf_cnpj=row[2],
+                kea_identifier=row[3],
+                email=row[4],
+                site=row[5],
+                phone_number=row[6],
+                cell_phone=row[7],
+                whatsapp_number=row[8],
+                address=row[9],
+                status=bool(row[10]),
+                payment_plan=row[11],
+                user_quantity=row[12],
+                last_payment_date=row[13],
+                segmento=segmento_data,
+                color_palette=row[15] if row[15] is not None else "",
+                created_at=str(row[16]) if row[16] else None,
+                updated_at=str(row[17]) if row[17] else None
+            )
+            
+        finally:
+            cursor.close()
+            connection.close()
+
     def get_kea_client_by_id(self, client_id: int) -> Optional[KeaClient]:
         connection = self.get_connection()
         cursor = connection.cursor()

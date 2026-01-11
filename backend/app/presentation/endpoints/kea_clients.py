@@ -90,12 +90,20 @@ async def get_kea_client(client_id: str, current_user: dict = Depends(get_curren
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
-        # Extrair ID numérico se contém dois pontos
-        actual_id = int(client_id.split(':')[0]) if ':' in client_id else int(client_id)
-        client = kea_client_service.get_kea_client_by_id(actual_id)
-        if not client:
-            raise HTTPException(status_code=404, detail="Cliente não encontrado")
-        return client.to_dict()
+        # Verificar se é um kea_identifier (contém letras) ou ID numérico
+        if client_id.startswith('kea') or not client_id.replace(':', '').isdigit():
+            # Buscar por kea_identifier
+            client = kea_client_service.get_kea_client_by_identifier(client_id)
+            if not client:
+                raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            return client.to_dict()
+        else:
+            # Buscar por ID numérico (extrair se contém dois pontos)
+            actual_id = int(client_id.split(':')[0]) if ':' in client_id else int(client_id)
+            client = kea_client_service.get_kea_client_by_id(actual_id)
+            if not client:
+                raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            return client.to_dict()
     except ValueError:
         raise HTTPException(status_code=400, detail="ID inválido")
     except Exception as e:
