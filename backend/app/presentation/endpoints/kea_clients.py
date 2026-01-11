@@ -64,13 +64,23 @@ async def create_kea_client(client_data: KeaClientCreate, current_user: dict = D
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/kea-clients", response_model=List[KeaClientResponse])
-async def get_kea_clients(current_user: dict = Depends(get_current_user)):
+async def get_kea_clients(kea_client_id: str = None, current_user: dict = Depends(get_current_user)):
     if current_user.get("role_id") != 1:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     try:
-        clients = kea_client_service.get_all_kea_clients()
-        return [client.to_dict() for client in clients]
+        if kea_client_id:
+            # Buscar cliente específico por kea_identifier
+            clients = kea_client_service.get_all_kea_clients()
+            client = next((c for c in clients if c.kea_identifier == kea_client_id), None)
+            if client:
+                return [client.to_dict()]
+            else:
+                raise HTTPException(status_code=404, detail="Cliente não encontrado")
+        else:
+            # Retornar todos os clientes
+            clients = kea_client_service.get_all_kea_clients()
+            return [client.to_dict() for client in clients]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
