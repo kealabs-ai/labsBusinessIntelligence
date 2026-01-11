@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from './authService';
+import { useTheme } from './ThemeContext';
 
 const AuthContext = createContext();
 
@@ -85,6 +86,10 @@ export const AuthProvider = ({ children }) => {
       const userData = await authService.getCurrentUser();
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Disparar evento customizado para atualizar tema
+      window.dispatchEvent(new Event('themeUpdate'));
+      
       return true;
     } catch (error) {
       return false;

@@ -15,54 +15,62 @@ export const useTheme = () => {
 export const ThemeContextProvider = ({ children }) => {
   const [currentPalette, setCurrentPalette] = useState('KEA_LABS');
 
-  useEffect(() => {
-    // Carregar paleta do cliente logado
-    const keaClientId = localStorage.getItem('kea_client_id');
-    if (keaClientId) {
-      loadClientPalette(keaClientId);
-    }
-  }, []);
-
   const loadClientPalette = async (keaClientId) => {
     try {
+      const token = localStorage.getItem('token');
+      const roleId = localStorage.getItem('role_id');
+      if (!token || !keaClientId || keaClientId === '') return;
+      
+      // Aguardar um pouco para garantir que o token seja válido
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Se não for admin, usar paleta padrão
+      if (roleId !== '1') {
+        console.log('Usuário não é admin - usando paleta padrão');
+        setCurrentPalette('KEA_LABS');
+        return;
+      }
+      
       const response = await fetch(`http://72.60.140.128:6002/api/v1/kea-clients/${keaClientId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
       if (response.ok) {
         const client = await response.json();
+        console.log('Cliente carregado:', client);
         if (client.color_palette && COLOR_PALETTES[client.color_palette]) {
+          console.log('Aplicando paleta:', client.color_palette);
           setCurrentPalette(client.color_palette);
         }
+      } else {
+        console.log('Erro ao carregar cliente - usando paleta padrão');
+        setCurrentPalette('KEA_LABS');
       }
     } catch (error) {
       console.error('Erro ao carregar paleta do cliente:', error);
+      setCurrentPalette('KEA_LABS');
     }
   };
 
-  const updateClientPalette = async (keaClientId, paletteId) => {
-    try {
-      const response = await fetch(`http://72.60.140.128:6002/api/v1/kea-clients/${keaClientId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ color_palette: paletteId })
-      });
-      
-      if (response.ok) {
-        setCurrentPalette(paletteId);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Erro ao atualizar paleta do cliente:', error);
-      return false;
+  useEffect(() => {
+    const keaClientId = localStorage.getItem('kea_client_id');
+    if (keaClientId && keaClientId !== '') {
+      loadClientPalette(keaClientId);
     }
-  };
+    
+    // Listener para evento customizado de atualização de tema
+    const handleThemeUpdate = () => {
+      const newKeaClientId = localStorage.getItem('kea_client_id');
+      if (newKeaClientId && newKeaClientId !== '') {
+        loadClientPalette(newKeaClientId);
+      }
+    };
+    
+    window.addEventListener('themeUpdate', handleThemeUpdate);
+    return () => window.removeEventListener('themeUpdate', handleThemeUpdate);
+  }, []);
 
   const palette = COLOR_PALETTES[currentPalette];
   
@@ -100,19 +108,29 @@ export const ThemeContextProvider = ({ children }) => {
           },
         },
       },
+      MuiButton: {
+        styleOverrides: {
+          contained: {
+            background: palette.gradient,
+            '&:hover': {
+              background: palette.primary,
+            },
+          },
+        },
+      },
     },
   });
 
   return (
-    <ThemeContext.Provider value={{ 
-      currentPalette, 
-      palette, 
-      updateClientPalette,
-      loadClientPalette 
-    }}>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <ThemeContext.Provider value={{ 
+        currentPalette, 
+        palette,
+        loadClientPalette,
+        setCurrentPalette
+      }}>
         {children}
-      </ThemeProvider>
-    </ThemeContext.Provider>
+      </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };

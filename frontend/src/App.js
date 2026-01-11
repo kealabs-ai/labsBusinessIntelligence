@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import LoginContainer from './containers/login/LoginContainer';
 import MenuContainer from './containers/menu/MenuContainer';
@@ -11,18 +10,9 @@ import AdminContainer from './containers/admin/AdminContainer';
 import CaixaContainer from './containers/caixa/CaixaContainer';
 import UnitsContainer from './containers/units/UnitsContainer';
 import { AuthProvider, useAuth } from './services/AuthContext';
+import { ThemeContextProvider } from './services/ThemeContext';
 import InstanceQRCodeContainer from './containers/configuracoes/InstanceQRCodeContainer';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -31,9 +21,9 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeContextProvider>
+        <CssBaseline />
         <Router>
           <Routes>
             <Route path="/login" element={<LoginContainer />} />
@@ -80,8 +70,8 @@ function App() {
             <Route path="/" element={<Navigate to="/menu" />} />
           </Routes>
         </Router>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeContextProvider>
+    </AuthProvider>
   );
 }
 
