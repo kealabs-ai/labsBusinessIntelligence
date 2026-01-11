@@ -26,7 +26,8 @@ class KeaClientService:
             payment_plan=client_data.get('payment_plan'),
             user_quantity=client_data.get('user_quantity', 1),
             last_payment_date=last_payment_date,
-            segmento=client_data.get('segmento')
+            segmento=client_data.get('segmento'),
+            color_palette=client_data.get('color_palette')
         )
         
         return self.kea_client_repository.create_kea_client(kea_client)
@@ -57,7 +58,8 @@ class KeaClientService:
             payment_plan=client_data.get('payment_plan'),
             user_quantity=client_data.get('user_quantity', 1),
             last_payment_date=last_payment_date,
-            segmento=client_data.get('segmento')
+            segmento=client_data.get('segmento'),
+            color_palette=client_data.get('color_palette')
         )
         
         return self.kea_client_repository.update_kea_client(kea_client)
