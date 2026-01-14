@@ -16,12 +16,13 @@ import {
   Person
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { toolbarStyles } from './ToolbarPresentational.styles';
+import { getToolbarStyles } from './ToolbarPresentational.styles';
 import logoKea from '../../assets/logotipo_kea.png';
 
-const ToolbarPresentational = ({ user, onLogout }) => {
+const ToolbarPresentational = ({ user, onLogout, colorPalette = 'KEA_LABS' }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const navigate = useNavigate();
+  const toolbarStyles = getToolbarStyles(colorPalette);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -57,11 +58,7 @@ const ToolbarPresentational = ({ user, onLogout }) => {
           {user && (
             <Typography 
               variant="body2" 
-              sx={{ 
-                color: 'white', 
-                marginRight: 1,
-                fontWeight: 500
-              }}
+              sx={toolbarStyles.userName}
             >
               {user.username || user.email || 'Usuário'}
             </Typography>
@@ -83,17 +80,17 @@ const ToolbarPresentational = ({ user, onLogout }) => {
             sx={toolbarStyles.menu}
           >
             <MenuItem onClick={handleClose} sx={toolbarStyles.menuItem}>
-              <Person sx={{ mr: 1 }} />
-              Conta
+              <Person sx={toolbarStyles.menuItemIcon} />
+              <Typography sx={toolbarStyles.menuItemText}>Conta</Typography>
             </MenuItem>
             <MenuItem onClick={handleClose} sx={toolbarStyles.menuItem}>
-              <Settings sx={{ mr: 1 }} />
-              Configurações
+              <Settings sx={toolbarStyles.menuItemIcon} />
+              <Typography sx={toolbarStyles.menuItemText}>Configurações</Typography>
             </MenuItem>
-            <Divider />
+            <Divider sx={toolbarStyles.divider} />
             <MenuItem onClick={handleLogout} sx={toolbarStyles.menuItem}>
-              <ExitToApp sx={{ mr: 1 }} />
-              Sair
+              <ExitToApp sx={toolbarStyles.menuItemIcon} />
+              <Typography sx={toolbarStyles.menuItemText}>Sair</Typography>
             </MenuItem>
           </Menu>
         </Box>
