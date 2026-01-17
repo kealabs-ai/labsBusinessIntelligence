@@ -9,7 +9,8 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { loginStyles } from './LoginPresentational.styles';
+import { getLoginStyles } from './LoginPresentational.styles';
+import { useColorPalette } from '../../utils/useColorPalette';
 import logoKea from '../../assets/logotipo_kea.png';
 
 const LoginPresentational = ({
@@ -21,6 +22,9 @@ const LoginPresentational = ({
   onPasswordChange,
   onSubmit
 }) => {
+  const colorPalette = useColorPalette();
+  const loginStyles = getLoginStyles(colorPalette);
+
   return (
     <Box sx={loginStyles.container}>
       <Paper elevation={0} sx={loginStyles.loginCard}>

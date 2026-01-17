@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from './authService';
-import { useTheme } from './ThemeContext';
+import { styleManager } from '../utils/styleManager';
 
 const AuthContext = createContext();
 
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
       
       if (token && loginTime) {
         const now = Date.now();
-        const sessionDuration = 15 * 60 * 1000; // 15 minutos
+        const sessionDuration = 15 * 60 * 1000;
         
         if (now - parseInt(loginTime) > sessionDuration) {
           logout();
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
           if (userData) {
             setUser(userData);
             setIsAuthenticated(true);
+            styleManager.setAuthenticated(true);
           } else {
             logout();
           }
@@ -49,31 +50,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkSession();
-    const interval = setInterval(checkSession, 60000); // Verifica a cada minuto
+    const interval = setInterval(checkSession, 60000);
     
     return () => clearInterval(interval);
   }, []);
 
-  const decodeToken = (token) => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        id: parseInt(payload.sub),
-        role: payload.role || 'user',
-        is_active: payload.is_active
-      };
-    } catch (error) {
-      return null;
-    }
-  };
-
   const login = async (username, password) => {
     try {
       const response = await authService.login(username, password);
-      console.log('Login response:', response);
-      console.log('kea_client_id from response:', response.kea_client_id);
-      console.log('role_id from response:', response.role_id);
-      console.log('unit_id from response:', response.unit_id);
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('loginTime', Date.now().toString());
@@ -81,14 +65,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('role_id', response.role_id || '1');
       localStorage.setItem('unit_id', response.unit_id || '0');
       
-      console.log('Saved to localStorage - kea_client_id:', localStorage.getItem('kea_client_id'));
-      
       const userData = await authService.getCurrentUser();
       setUser(userData);
       setIsAuthenticated(true);
-      
-      // Disparar evento customizado para atualizar tema
-      window.dispatchEvent(new Event('themeUpdate'));
+      styleManager.setAuthenticated(true);
       
       return true;
     } catch (error) {
@@ -104,16 +84,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('unit_id');
     setUser(null);
     setIsAuthenticated(false);
+    styleManager.setAuthenticated(false);
   };
 
   const hasPermission = (moduleId) => {
     if (!user || !user.role_id) return false;
     
     const permissions = {
-      1: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'configuracoes'], // Administrador
-      2: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos'], // Gerente
-      3: ['agendamentos', 'clientes', 'caixa'], // Recepcionista
-      4: ['agendamentos'] // Profissional
+      1: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'configuracoes'],
+      2: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos'],
+      3: ['agendamentos', 'clientes', 'caixa'],
+      4: ['agendamentos']
     };
     
     return permissions[user.role_id]?.includes(moduleId) || false;

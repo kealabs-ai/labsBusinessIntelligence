@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../services/AuthContext';
-import { colorPaletteService } from '../../services/colorPaletteService';
+import { useColorPalette } from '../../utils/useColorPalette';
 import ToolbarPresentational from '../../components/presentational/ToolbarPresentational';
 
 const ToolbarContainer = () => {
   const { user, logout } = useAuth();
-  const [colorPalette, setColorPalette] = useState('KEA_LABS');
-
-  useEffect(() => {
-    const fetchColorPalette = async () => {
-      const palette = await colorPaletteService.getColorPalette();
-      setColorPalette(palette);
-    };
-    
-    fetchColorPalette();
-  }, []);
+  const colorPalette = useColorPalette();
 
   const handleLogout = () => {
     logout();
