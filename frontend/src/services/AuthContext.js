@@ -88,16 +88,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const hasPermission = (moduleId) => {
-    if (!user || !user.role_id) return false;
+    if (!user || !user.role_id) {
+      console.log(`hasPermission(${moduleId}): user ou role_id não encontrado`, user);
+      return false;
+    }
     
     const permissions = {
-      1: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'configuracoes'],
-      2: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos'],
+      1: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'configuracoes', 'unidades'],
+      2: ['agendamentos', 'clientes', 'caixa', 'servicos', 'recursos', 'unidades', 'configuracoes'],
       3: ['agendamentos', 'clientes', 'caixa'],
       4: ['agendamentos']
     };
     
-    return permissions[user.role_id]?.includes(moduleId) || false;
+    const hasAccess = permissions[user.role_id]?.includes(moduleId) || false;
+    console.log(`hasPermission(${moduleId}): role_id=${user.role_id}, hasAccess=${hasAccess}`);
+    return hasAccess;
   };
 
   const value = {

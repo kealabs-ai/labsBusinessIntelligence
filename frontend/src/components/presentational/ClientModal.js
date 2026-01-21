@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Save, Cancel } from '@mui/icons-material';
 
-const ClientModal = ({ open, onClose, onSave, editingClient }) => {
+const ClientModal = ({ open, onClose, onSave, editingClient, palette }) => {
   const [formData, setFormData] = useState({
     full_name: '',
     phone_whatsapp: '',
@@ -39,7 +39,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
         full_name: editingClient.full_name || '',
         phone_whatsapp: editingClient.phone_whatsapp || '',
         email: editingClient.email || '',
-        birth_date: editingClient.birth_date || '',
+        birth_date: editingClient.birth_date ? new Date(editingClient.birth_date).toISOString().split('T')[0] : '',
         note: editingClient.note || '',
         status: editingClient.status !== undefined ? editingClient.status : true,
         unit_id: editingClient.unit_id || '',
@@ -117,12 +117,8 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
       [field]: value
     }));
 
-    // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -133,37 +129,23 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
     }
   };
 
-  // Formata o telefone para '+55(XX)XXXXX-XXXX' e força o código do país
   const formatPhoneInput = (value) => {
     let digits = value.replace(/\D/g, '');
-    // Garante que começa com 55 (Brasil)
     if (!digits.startsWith('55')) {
       digits = '55' + digits;
     }
-    digits = digits.slice(0, 13); // +55 XX XXXXX XXXX
-    if (digits.length <= 2) {
-      return `+${digits}`;
-    } else if (digits.length <= 4) {
-      return `+${digits.slice(0,2)}(${digits.slice(2)}`;
-    } else if (digits.length <= 9) {
-      return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4)}`;
-    } else {
-      return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4,9)}-${digits.slice(9)}`;
-    }
+    digits = digits.slice(0, 13);
+    if (digits.length <= 2) return `+${digits}`;
+    if (digits.length <= 4) return `+${digits.slice(0,2)}(${digits.slice(2)}`;
+    if (digits.length <= 9) return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4)}`;
+    return `+${digits.slice(0,2)}(${digits.slice(2,4)})${digits.slice(4,9)}-${digits.slice(9)}`;
   };
 
   const handlePhoneChange = (event) => {
     const formatted = formatPhoneInput(event.target.value);
-    setFormData(prev => ({
-      ...prev,
-      phone_whatsapp: formatted
-    }));
-
+    setFormData(prev => ({ ...prev, phone_whatsapp: formatted }));
     if (errors.phone_whatsapp) {
-      setErrors(prev => ({
-        ...prev,
-        phone_whatsapp: ''
-      }));
+      setErrors(prev => ({ ...prev, phone_whatsapp: '' }));
     }
   };
 
@@ -176,19 +158,20 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
       PaperProps={{
         sx: {
           borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          bgcolor: palette.surface
         }
       }}
     >
       <DialogTitle sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: palette.gradient,
         color: 'white',
         fontWeight: 600
       }}>
         {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
       </DialogTitle>
       
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, backgroundColor: palette.surface }}>
         <Grid container spacing={3} sx={{ mt: 0 }}>
           <Grid item xs={12}>
             <TextField
@@ -236,9 +219,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
               type="date"
               value={formData.birth_date}
               onChange={handleChange('birth_date')}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
             />
           </Grid>
           
@@ -248,10 +229,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
               <Select
                 value={formData.unit_id}
                 onChange={(event) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    unit_id: event.target.value
-                  }));
+                  setFormData(prev => ({ ...prev, unit_id: event.target.value }));
                   if (errors.unit_id) {
                     setErrors(prev => ({ ...prev, unit_id: '' }));
                   }
@@ -288,7 +266,7 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
                 }
                 label={
                   <Box>
-                    <Typography variant="body1">
+                    <Typography variant="body1" sx={{ color: palette.textPrimary }}>
                       Status: {formData.status ? 'Ativo' : 'Inativo'}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
@@ -314,11 +292,11 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
         </Grid>
       </DialogContent>
       
-      <DialogActions sx={{ p: 3, gap: 1 }}>
+      <DialogActions sx={{ p: 3, gap: 1, backgroundColor: palette.surface }}>
         <Button
           onClick={onClose}
           startIcon={<Cancel />}
-          sx={{ color: '#666' }}
+          sx={{ color: palette.textSecondary }}
         >
           Cancelar
         </Button>
@@ -326,12 +304,6 @@ const ClientModal = ({ open, onClose, onSave, editingClient }) => {
           onClick={handleSubmit}
           variant="contained"
           startIcon={<Save />}
-          sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-            }
-          }}
         >
           {editingClient ? 'Atualizar' : 'Salvar'}
         </Button>

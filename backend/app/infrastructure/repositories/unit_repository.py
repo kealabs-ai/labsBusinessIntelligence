@@ -21,6 +21,10 @@ class UnitRepository:
         return mysql.connector.connect(**self.connection_config)
 
     def create_unit(self, unit: Unit, role_id: int) -> Unit:
+        # Verificar se o usuário tem permissão para criar unidades
+        if role_id not in [1, 2]:  # Administrador (1) ou Gerente (2)
+            raise Exception("Usuário não tem permissão para criar unidades")
+            
         connection = self.get_connection()
         cursor = connection.cursor()
         
@@ -97,6 +101,10 @@ class UnitRepository:
             connection.close()
 
     def update_unit(self, unit: Unit, role_id: int) -> Unit:
+        # Verificar se o usuário tem permissão para editar unidades
+        if role_id not in [1, 2]:  # Administrador (1) ou Gerente (2)
+            raise Exception("Usuário não tem permissão para editar unidades")
+            
         connection = self.get_connection()
         cursor = connection.cursor()
         

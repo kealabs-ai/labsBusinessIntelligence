@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../services/AuthContext';
+import { useTheme } from '../../services/ThemeContext';
 import { 
   Box, 
   Drawer, 
@@ -47,6 +48,7 @@ import Footer from '../../components/presentational/Footer';
 import { agendaService } from '../../services/agendaService';
 
 const AgendaContainer = () => {
+  const { palette } = useTheme();
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorDialogMsg, setErrorDialogMsg] = useState('');
   const [successAlertOpen, setSuccessAlertOpen] = useState(false);
@@ -586,14 +588,18 @@ const AgendaContainer = () => {
     { id: 'configuracoes', label: 'Configurações da Unidade', icon: <Settings /> }
   ];
 
-  const menuItems = allMenuItems.filter(item => hasPermission(item.id));
+  const menuItems = allMenuItems.filter(item => {
+    const hasAccess = hasPermission(item.id);
+    console.log(`Menu item ${item.id}: hasPermission = ${hasAccess}`);
+    return hasAccess;
+  });
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{ 
         zIndex: 1201,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: palette.gradient,
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
@@ -627,7 +633,7 @@ const AgendaContainer = () => {
           '& .MuiDrawer-paper': {
             width: 280,
             boxSizing: 'border-box',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: palette.gradient,
             color: 'white',
             zIndex: 1300
           }
@@ -693,7 +699,7 @@ const AgendaContainer = () => {
         p: 3, 
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: palette.background,
         display: 'flex',
         flexDirection: 'column'
       }}>
@@ -732,10 +738,10 @@ const AgendaContainer = () => {
           <UnitsContainer />
         ) : (
           <Box sx={{ p: 3, textAlign: 'center', flexGrow: 1 }}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: palette.text }}>
               Acesso Negado
             </Typography>
-            <Typography variant="body1" color="textSecondary">
+            <Typography variant="body1" color={palette.textSecondary}>
               Você não tem permissão para acessar este módulo.
             </Typography>
           </Box>

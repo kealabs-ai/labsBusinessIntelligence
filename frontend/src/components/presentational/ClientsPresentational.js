@@ -13,7 +13,8 @@ import {
   IconButton,
   Chip,
   TextField,
-  Grid
+  Grid,
+  CircularProgress
 } from '@mui/material';
 import {
   Add,
@@ -30,28 +31,34 @@ const ClientsPresentational = ({
   loading,
   onOpenModal,
   onEditClient,
-  onToggleStatus
+  onToggleStatus,
+  palette
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClients = clients.filter(client =>
-    client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone_whatsapp.includes(searchTerm)
+    (client.full_name && client.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (client.phone_whatsapp && client.phone_whatsapp.includes(searchTerm))
   );
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Não informado';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch (e) {
+      return 'Data inválida';
+    }
   };
 
   const formatPhone = (phone) => {
+    if (!phone) return 'Não informado';
     return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-    <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <Box sx={{ p: 3, backgroundColor: palette.background, minHeight: '100%' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: palette.gradient }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ 
             display: 'flex', 
@@ -90,7 +97,7 @@ const ClientsPresentational = ({
         </CardContent>
       </Card>
 
-      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent>
           <TextField
             fullWidth
@@ -103,10 +110,11 @@ const ClientsPresentational = ({
         </CardContent>
       </Card>
 
-      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent sx={{ p: 0 }}>
           {loading ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ p: 3, textAlign: 'center', color: palette.textPrimary }}>
+              <CircularProgress />
               <Typography>Carregando clientes...</Typography>
             </Box>
           ) : filteredClients.length === 0 ? (
@@ -121,18 +129,19 @@ const ClientsPresentational = ({
                 <ListItem
                   key={client.client_id}
                   sx={{
-                    borderBottom: index < filteredClients.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    borderBottom: index < filteredClients.length - 1 ? `1px solid ${palette.background}` : 'none',
                     py: 2,
                     '&:hover': {
-                      backgroundColor: '#f8f9fa'
+                      backgroundColor: palette.background
                     }
                   }}
                 >
                   <ListItemAvatar>
                     <Avatar sx={{ 
-                      bgcolor: client.status ? '#4caf50' : '#f44336',
+                      bgcolor: client.status ? palette.success : palette.error,
                       width: 50,
-                      height: 50
+                      height: 50,
+                      color: 'white'
                     }}>
                       <Person />
                     </Avatar>
@@ -142,7 +151,7 @@ const ClientsPresentational = ({
                     sx={{ flex: 1, ml: 2 }}
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: palette.textPrimary }}>
                           {client.full_name}
                         </Typography>
                         <Chip
@@ -156,13 +165,13 @@ const ClientsPresentational = ({
                       <Grid container spacing={2} sx={{ mt: 0.5 }}>
                         <Grid item xs={12} sm={6}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            <Email sx={{ fontSize: 16, color: '#666' }} />
+                            <Email sx={{ fontSize: 16, color: palette.textSecondary }} />
                             <Typography variant="body2" color="textSecondary">
                               {client.email}
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Phone sx={{ fontSize: 16, color: '#666' }} />
+                            <Phone sx={{ fontSize: 16, color: palette.textSecondary }} />
                             <Typography variant="body2" color="textSecondary">
                               {formatPhone(client.phone_whatsapp)}
                             </Typography>
@@ -188,14 +197,14 @@ const ClientsPresentational = ({
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <IconButton
                       onClick={() => onEditClient(client)}
-                      sx={{ color: '#1976d2' }}
+                      sx={{ color: palette.primary }}
                       title="Editar cliente"
                     >
                       <Edit />
                     </IconButton>
                     <IconButton
                       onClick={() => onToggleStatus(client.client_id, !client.status)}
-                      sx={{ color: client.status ? '#f44336' : '#4caf50' }}
+                      sx={{ color: client.status ? palette.error : palette.success }}
                       title={client.status ? 'Inativar cliente' : 'Ativar cliente'}
                     >
                       {client.status ? <Block /> : <CheckCircle />}

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Save, Cancel } from '@mui/icons-material';
 
-const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
+const TransacaoModal = ({ open, onClose, onSave, editingTransacao, palette }) => {
   const [formData, setFormData] = useState({
     tipo: 'entrada',
     categoria: '',
@@ -104,29 +104,12 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.categoria.trim()) {
-      newErrors.categoria = 'Categoria é obrigatória';
-    }
-
-    if (!formData.descricao.trim()) {
-      newErrors.descricao = 'Descrição é obrigatória';
-    }
-
-    if (!formData.valor || parseFloat(formData.valor) <= 0) {
-      newErrors.valor = 'Valor deve ser maior que zero';
-    }
-
-    if (!formData.data_transacao) {
-      newErrors.data_transacao = 'Data é obrigatória';
-    }
-
-    if (!formData.metodo_pagamento.trim()) {
-      newErrors.metodo_pagamento = 'Método de pagamento é obrigatório';
-    }
-
-    if (!formData.unit_id) {
-      newErrors.unit_id = 'Unidade é obrigatória';
-    }
+    if (!formData.categoria.trim()) newErrors.categoria = 'Categoria é obrigatória';
+    if (!formData.descricao.trim()) newErrors.descricao = 'Descrição é obrigatória';
+    if (!formData.valor || parseFloat(formData.valor) <= 0) newErrors.valor = 'Valor deve ser maior que zero';
+    if (!formData.data_transacao) newErrors.data_transacao = 'Data é obrigatória';
+    if (!formData.metodo_pagamento.trim()) newErrors.metodo_pagamento = 'Método de pagamento é obrigatório';
+    if (!formData.unit_id) newErrors.unit_id = 'Unidade é obrigatória';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -134,16 +117,9 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
 
   const handleChange = (field) => (event) => {
     const value = event.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -174,28 +150,21 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
       PaperProps={{
         sx: {
           borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          bgcolor: palette.surface
         }
       }}
     >
-      <DialogTitle sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        fontWeight: 600
-      }}>
+      <DialogTitle sx={{ background: palette.gradient, color: 'white', fontWeight: 600 }}>
         {editingTransacao ? 'Editar Transação' : 'Nova Transação'}
       </DialogTitle>
       
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, backgroundColor: palette.surface }}>
         <Grid container spacing={3} sx={{ mt: 0 }}>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.tipo}>
               <InputLabel>Tipo</InputLabel>
-              <Select
-                value={formData.tipo}
-                onChange={handleChange('tipo')}
-                label="Tipo"
-              >
+              <Select value={formData.tipo} onChange={handleChange('tipo')} label="Tipo">
                 <MenuItem value="entrada">Entrada</MenuItem>
                 <MenuItem value="saida">Saída</MenuItem>
               </Select>
@@ -205,156 +174,57 @@ const TransacaoModal = ({ open, onClose, onSave, editingTransacao }) => {
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.categoria}>
               <InputLabel>Categoria</InputLabel>
-              <Select
-                value={formData.categoria}
-                onChange={handleChange('categoria')}
-                label="Categoria"
-              >
-                {categorias.map((categoria) => (
-                  <MenuItem key={categoria} value={categoria}>
-                    {categoria}
-                  </MenuItem>
-                ))}
+              <Select value={formData.categoria} onChange={handleChange('categoria')} label="Categoria">
+                {categorias.map((cat) => <MenuItem key={cat} value={cat}>{cat}</MenuItem>)}
               </Select>
-              {errors.categoria && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                  {errors.categoria}
-                </Typography>
-              )}
+              {errors.categoria && <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>{errors.categoria}</Typography>}
             </FormControl>
           </Grid>
           
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Descrição"
-              value={formData.descricao}
-              onChange={handleChange('descricao')}
-              error={!!errors.descricao}
-              helperText={errors.descricao}
-              required
-            />
+            <TextField fullWidth label="Descrição" value={formData.descricao} onChange={handleChange('descricao')} error={!!errors.descricao} helperText={errors.descricao} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Valor"
-              type="number"
-              value={formData.valor}
-              onChange={handleChange('valor')}
-              error={!!errors.valor}
-              helperText={errors.valor}
-              inputProps={{ min: 0, step: 0.01 }}
-              required
-            />
+            <TextField fullWidth label="Valor" type="number" value={formData.valor} onChange={handleChange('valor')} error={!!errors.valor} helperText={errors.valor} inputProps={{ min: 0, step: 0.01 }} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Data da Transação"
-              type="date"
-              value={formData.data_transacao}
-              onChange={handleChange('data_transacao')}
-              error={!!errors.data_transacao}
-              helperText={errors.data_transacao}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              required
-            />
+            <TextField fullWidth label="Data da Transação" type="date" value={formData.data_transacao} onChange={handleChange('data_transacao')} error={!!errors.data_transacao} helperText={errors.data_transacao} InputLabelProps={{ shrink: true }} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.metodo_pagamento}>
               <InputLabel>Método de Pagamento</InputLabel>
-              <Select
-                value={formData.metodo_pagamento}
-                onChange={handleChange('metodo_pagamento')}
-                label="Método de Pagamento"
-              >
-                {metodosPagamento.map((metodo) => (
-                  <MenuItem key={metodo} value={metodo}>
-                    {metodo}
-                  </MenuItem>
-                ))}
+              <Select value={formData.metodo_pagamento} onChange={handleChange('metodo_pagamento')} label="Método de Pagamento">
+                {metodosPagamento.map((metodo) => <MenuItem key={metodo} value={metodo}>{metodo}</MenuItem>)}
               </Select>
-              {errors.metodo_pagamento && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                  {errors.metodo_pagamento}
-                </Typography>
-              )}
+              {errors.metodo_pagamento && <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>{errors.metodo_pagamento}</Typography>}
             </FormControl>
           </Grid>
           
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.unit_id}>
               <InputLabel>Unidade *</InputLabel>
-              <Select
-                value={formData.unit_id}
-                onChange={(event) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    unit_id: event.target.value
-                  }));
-                  if (errors.unit_id) {
-                    setErrors(prev => ({ ...prev, unit_id: '' }));
-                  }
-                }}
-                label="Unidade *"
-                required
-              >
-                <MenuItem value="">
-                  <em>Selecione uma unidade</em>
-                </MenuItem>
-                {units.map((unit) => (
-                  <MenuItem key={unit.id} value={unit.id}>
-                    {unit.unit_name}
-                  </MenuItem>
-                ))}
+              <Select value={formData.unit_id} onChange={handleChange('unit_id')} label="Unidade *" required>
+                <MenuItem value=""><em>Selecione uma unidade</em></MenuItem>
+                {units.map((unit) => <MenuItem key={unit.id} value={unit.id}>{unit.unit_name}</MenuItem>)}
               </Select>
-              {errors.unit_id && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                  {errors.unit_id}
-                </Typography>
-              )}
+              {errors.unit_id && <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>{errors.unit_id}</Typography>}
             </FormControl>
           </Grid>
           
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Observações"
-              multiline
-              rows={3}
-              value={formData.observacoes}
-              onChange={handleChange('observacoes')}
-              placeholder="Informações adicionais sobre a transação..."
-            />
+            <TextField fullWidth label="Observações" multiline rows={3} value={formData.observacoes} onChange={handleChange('observacoes')} placeholder="Informações adicionais..." />
           </Grid>
         </Grid>
       </DialogContent>
       
-      <DialogActions sx={{ p: 3, gap: 1 }}>
-        <Button
-          onClick={onClose}
-          startIcon={<Cancel />}
-          sx={{ color: '#666' }}
-        >
+      <DialogActions sx={{ p: 3, gap: 1, backgroundColor: palette.surface }}>
+        <Button onClick={onClose} startIcon={<Cancel />} sx={{ color: palette.textSecondary }}>
           Cancelar
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          startIcon={<Save />}
-          sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-            }
-          }}
-        >
+        <Button onClick={handleSubmit} variant="contained" startIcon={<Save />}>
           {editingTransacao ? 'Atualizar' : 'Salvar'}
         </Button>
       </DialogActions>

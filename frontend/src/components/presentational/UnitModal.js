@@ -10,13 +10,9 @@ import {
   FormControlLabel,
   Switch,
   Box,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  Typography
 } from '@mui/material';
-import { keaClientService } from '../../services/keaClientService';
+import { authService } from '../../services/authService';
 
 const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
   const [formData, setFormData] = useState({
@@ -28,23 +24,22 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
     closing_time: '18:00',
     appointment_interval: 30,
     notifications_enabled: true,
-    notification_advance_hours: 24,
-    kea_client_id: ''
+    notification_advance_hours: 24
   });
-  const [keaClients, setKeaClients] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     if (open) {
-      loadKeaClients();
+      loadCurrentUser();
     }
   }, [open]);
 
-  const loadKeaClients = async () => {
+  const loadCurrentUser = async () => {
     try {
-      const clients = await keaClientService.getKeaClients();
-      setKeaClients(clients);
+      const user = await authService.getCurrentUser();
+      setCurrentUser(user);
     } catch (error) {
-      console.error('Erro ao carregar clientes KEA:', error);
+      console.error('Erro ao carregar usuário atual:', error);
     }
   };
 
@@ -59,8 +54,7 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
         closing_time: unit.closing_time ? unit.closing_time.substring(0, 5) : '18:00',
         appointment_interval: unit.appointment_interval || 30,
         notifications_enabled: unit.notifications_enabled !== undefined ? unit.notifications_enabled : true,
-        notification_advance_hours: unit.notification_advance_hours || 24,
-        kea_client_id: unit.kea_client_id || ''
+        notification_advance_hours: unit.notification_advance_hours || 24
       });
     } else {
       setFormData({
@@ -72,8 +66,7 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
         closing_time: '18:00',
         appointment_interval: 30,
         notifications_enabled: true,
-        notification_advance_hours: 24,
-        kea_client_id: ''
+        notification_advance_hours: 24
       });
     }
   }, [unit, open]);
@@ -87,11 +80,19 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
   };
 
   const handleSubmit = () => {
+    // Validate required fields
+    if (!formData.unit_name || formData.unit_name.trim() === '') {
+      return;
+    }
+    
     const submitData = {
       ...formData,
+      unit_name: formData.unit_name.trim(),
       opening_time: formData.opening_time + ':00',
       closing_time: formData.closing_time + ':00',
-      kea_client_id: formData.kea_client_id || null
+      kea_client_id: currentUser?.kea_client_id || null,
+      appointment_interval: parseInt(formData.appointment_interval) || 30,
+      notification_advance_hours: parseInt(formData.notification_advance_hours) || 24
     };
     onSave(submitData);
   };
@@ -130,26 +131,6 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
             </Grid>
             
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Cliente KEA</InputLabel>
-                <Select
-                  value={formData.kea_client_id}
-                  onChange={handleChange('kea_client_id')}
-                  label="Cliente KEA"
-                >
-                  <MenuItem value="">
-                    <em>Selecione um cliente</em>
-                  </MenuItem>
-                  {keaClients.map((client) => (
-                    <MenuItem key={client.id} value={client.id}>
-                      {client.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Endereço"
@@ -166,6 +147,25 @@ const UnitModal = ({ open, onClose, onSave, unit, loading }) => {
                 label="Telefone"
                 value={formData.phone}
                 onChange={handleChange('phone')}
+                placeholder="+55 (99) 99999-9999"
+                inputProps={{
+                  maxLength: 19,
+                  onInput: (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 0) {
+                      if (value.length <= 2) {
+                        value = `+${value}`;
+                      } else if (value.length <= 4) {
+                        value = `+${value.slice(0, 2)} (${value.slice(2)}`;
+                      } else if (value.length <= 9) {
+                        value = `+${value.slice(0, 2)} (${value.slice(2, 4)}) ${value.slice(4)}`;
+                      } else {
+                        value = `+${value.slice(0, 2)} (${value.slice(2, 4)}) ${value.slice(4, 9)}-${value.slice(9, 13)}`;
+                      }
+                    }
+                    e.target.value = value;
+                  }
+                }}
               />
             </Grid>
             

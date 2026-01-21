@@ -22,6 +22,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { Save, Close } from '@mui/icons-material';
+import { useColorPalette } from '../../utils/useColorPalette';
 
 const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
     const [openDialog, setOpenDialog] = useState(false);
@@ -41,6 +42,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
 
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
+  const colorPalette = useColorPalette();
 
   useEffect(() => {
     const loadData = async () => {
@@ -110,6 +112,10 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
       });
     }
   }, [editingEvent, open]);
+
+  if (!colorPalette) {
+    return null;
+  }
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -181,19 +187,19 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth sx={{ '& .MuiPaper-root': { backgroundColor: colorPalette.backgroundCardColor, color: colorPalette.textColor } }}>
             {/* Dialogo de instrução para número WhatsApp */}
-            <DialogMui open={openDialog} onClose={() => setOpenDialog(false)}>
-              <DialogTitleMui>Formato do número WhatsApp</DialogTitleMui>
+            <DialogMui open={openDialog} onClose={() => setOpenDialog(false)} sx={{ '& .MuiPaper-root': { backgroundColor: colorPalette.backgroundCardColor, color: colorPalette.textColor } }}>
+              <DialogTitleMui sx={{ color: colorPalette.textColor }}>Formato do número WhatsApp</DialogTitleMui>
               <DialogContentMui>
-                <Typography>O número do WhatsApp deve conter o código do país. Exemplo para Brasil: <b>+55(19)99999-9999</b></Typography>
+                <Typography sx={{ color: colorPalette.textColor }}>O número do WhatsApp deve conter o código do país. Exemplo para Brasil: <b>+55(19)99999-9999</b></Typography>
               </DialogContentMui>
               <DialogActionsMui>
-                <Button onClick={() => setOpenDialog(false)} autoFocus>OK</Button>
+                <Button onClick={() => setOpenDialog(false)} autoFocus sx={{ color: colorPalette.primaryColor }}>OK</Button>
               </DialogActionsMui>
             </DialogMui>
       <DialogTitle>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: colorPalette.textColor }}>
           {editingEvent ? 'Editar Agendamento' : 'Novo Agendamento'}
         </Typography>
       </DialogTitle>
@@ -203,7 +209,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
-                <InputLabel>Cliente</InputLabel>
+                <InputLabel sx={{ color: colorPalette.textColor }}>Cliente</InputLabel>
                 <Select
                   value={formData.client_id}
                   onChange={(e) => {
@@ -213,6 +219,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                     handleChange('whatsappNumber', selectedClient ? selectedClient.phone_whatsapp : '');
                   }}
                   label="Cliente"
+                  sx={{ 
+                    color: colorPalette.textColor,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: colorPalette.borderColor,
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: colorPalette.textColor,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Selecione um cliente</em>
@@ -227,7 +242,7 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
-                <InputLabel>Serviço</InputLabel>
+                <InputLabel sx={{ color: colorPalette.textColor }}>Serviço</InputLabel>
                 <Select
                   value={formData.service_id?.toString() || ''}
                   onChange={(e) => {
@@ -240,6 +255,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                   }}
                   label="Serviço"
                   multiple={false}
+                  sx={{ 
+                    color: colorPalette.textColor,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: colorPalette.borderColor,
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: colorPalette.textColor,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Selecione um serviço</em>
@@ -260,8 +284,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 label="Data"
                 value={formData.date}
                 onChange={(e) => handleChange('date', e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, sx: { color: colorPalette.textColor } }}
                 required
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: colorPalette.borderColor },
+                        '&:hover fieldset': { borderColor: colorPalette.secondaryColor },
+                        '& input': { color: colorPalette.textColor },
+                    }
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -271,8 +302,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 label="Hora"
                 value={formData.time}
                 onChange={(e) => handleChange('time', e.target.value)}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, sx: { color: colorPalette.textColor } }}
                 required
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: colorPalette.borderColor },
+                        '&:hover fieldset': { borderColor: colorPalette.secondaryColor },
+                        '& input': { color: colorPalette.textColor },
+                    }
+                }}
               />
             </Grid>
             
@@ -284,6 +322,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 onChange={(e) => handleChange('valor', formatCurrency(e.target.value))}
                 placeholder="R$ 0,00"
                 helperText="Valor do serviço em reais"
+                InputLabelProps={{ sx: { color: colorPalette.textColor } }}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: colorPalette.borderColor },
+                        '&:hover fieldset': { borderColor: colorPalette.secondaryColor },
+                        '& input': { color: colorPalette.textColor },
+                    },
+                    '& .MuiFormHelperText-root': { color: colorPalette.textSecondaryColor }
+                }}
               />
             </Grid>
             
@@ -295,13 +342,22 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                 value={formData.whatsappNumber}
                 onChange={(e) => handleChange('whatsappNumber', formatPhoneNumber(e.target.value))}
                 helperText="Preenchido automaticamente ao selecionar cliente"
+                InputLabelProps={{ sx: { color: colorPalette.textColor } }}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: colorPalette.borderColor },
+                        '&:hover fieldset': { borderColor: colorPalette.secondaryColor },
+                        '& input': { color: colorPalette.textColor },
+                    },
+                    '& .MuiFormHelperText-root': { color: colorPalette.textSecondaryColor }
+                }}
               />
             </Grid>
           </Grid>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, borderColor: colorPalette.borderColor }} />
           
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: colorPalette.textColor }}>
             Configuração de Aviso WhatsApp
           </Typography>
           
@@ -313,9 +369,14 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                     checked={formData.enableNotification}
                     onChange={(e) => handleChange('enableNotification', e.target.checked)}
                     color="primary"
+                    sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': { color: colorPalette.primaryColor },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: colorPalette.primaryColor },
+                    }}
                   />
                 }
                 label="Habilitar aviso automático (24h antes)"
+                sx={{ color: colorPalette.textColor }}
               />
             </Grid>
             
@@ -329,6 +390,15 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
                   value={formData.customMessage}
                   onChange={(e) => handleChange('customMessage', e.target.value)}
                   helperText="Use {{nome_cliente}}, {{data_agenda}}, {{hora_agenda}}, {{servico}} para personalizar"
+                  InputLabelProps={{ sx: { color: colorPalette.textColor } }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: colorPalette.borderColor },
+                        '&:hover fieldset': { borderColor: colorPalette.secondaryColor },
+                        '& textarea': { color: colorPalette.textColor },
+                    },
+                    '& .MuiFormHelperText-root': { color: colorPalette.textSecondaryColor }
+                  }}
                 />
               </Grid>
             )}
@@ -336,11 +406,12 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
         </Box>
       </DialogContent>
       
-      <DialogActions sx={{ p: 3 }}>
+      <DialogActions sx={{ p: 3, backgroundColor: colorPalette.backgroundCardColor }}>
         <Button
           onClick={onClose}
           startIcon={<Close />}
           variant="outlined"
+          sx={{ color: colorPalette.buttonTextColor, borderColor: colorPalette.borderColor, '&:hover': { borderColor: colorPalette.secondaryColor } }}
         >
           Cancelar
         </Button>
@@ -349,9 +420,10 @@ const AgendaModal = ({ open, onClose, onSave, editingEvent }) => {
           startIcon={<Save />}
           variant="contained"
           sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)`,
+            color: colorPalette.buttonTextColor,
             '&:hover': {
-              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+              background: `linear-gradient(135deg, ${colorPalette.secondaryColor} 0%, ${colorPalette.primaryColor} 100%)`
             }
           }}
         >

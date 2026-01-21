@@ -11,7 +11,8 @@ import {
   IconButton,
   Chip,
   TextField,
-  Grid
+  Grid,
+  CircularProgress
 } from '@mui/material';
 import {
   Add,
@@ -27,7 +28,8 @@ const ServicosPresentational = ({
   loading,
   onOpenModal,
   onEditServico,
-  onDeleteServico
+  onDeleteServico,
+  palette
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -39,6 +41,7 @@ const ServicosPresentational = ({
   });
 
   const formatCurrency = (value) => {
+    if (value === undefined || value === null) return 'N/A';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -46,8 +49,8 @@ const ServicosPresentational = ({
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <Box sx={{ p: 3, backgroundColor: palette.background, minHeight: '100%' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: palette.gradient }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ 
             display: 'flex', 
@@ -58,10 +61,7 @@ const ServicosPresentational = ({
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Build sx={{ fontSize: 32, color: 'white' }} />
-              <Typography variant="h4" component="h1" sx={{ 
-                fontWeight: 600,
-                color: 'white'
-              }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: 'white' }}>
                 Gerenciamento de Serviços
               </Typography>
             </Box>
@@ -69,16 +69,6 @@ const ServicosPresentational = ({
               variant="contained"
               startIcon={<Add />}
               onClick={onOpenModal}
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                },
-                borderRadius: 2,
-                px: 3,
-                py: 1
-              }}
             >
               Novo Serviço
             </Button>
@@ -86,7 +76,7 @@ const ServicosPresentational = ({
         </CardContent>
       </Card>
 
-      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent>
           <TextField
             fullWidth
@@ -98,10 +88,11 @@ const ServicosPresentational = ({
         </CardContent>
       </Card>
 
-      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent sx={{ p: 0 }}>
           {loading ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ p: 3, textAlign: 'center', color: palette.textPrimary }}>
+              <CircularProgress />
               <Typography>Carregando serviços...</Typography>
             </Box>
           ) : filteredServicos.length === 0 ? (
@@ -114,31 +105,24 @@ const ServicosPresentational = ({
             <List>
               {filteredServicos.map((servico, index) => (
                 <ListItem
-                  key={servico.id}
+                  key={servico.service_id}
                   sx={{
-                    borderBottom: index < filteredServicos.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    borderBottom: `1px solid ${palette.background}`,
                     py: 2,
-                    '&:hover': {
-                      backgroundColor: '#f8f9fa'
-                    }
+                    '&:hover': { backgroundColor: palette.background }
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                    <Work sx={{ color: '#667eea' }} />
+                    <Work sx={{ color: palette.primary }} />
                   </Box>
                   
                   <ListItemText
-                    sx={{ flex: 1 }}
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: palette.textPrimary }}>
                           {servico.nome || servico.name}
                         </Typography>
-                        <Chip
-                          label={servico.categoria || servico.category}
-                          size="small"
-                          sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
-                        />
+                        <Chip label={servico.categoria || servico.category} size="small" />
                         <Chip
                           label={servico.status ? 'Ativo' : 'Inativo'}
                           size="small"
@@ -149,37 +133,23 @@ const ServicosPresentational = ({
                     secondary={
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Preço:</strong> {formatCurrency(servico.preco || servico.price)}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Duração:</strong> {servico.duracao || servico.duration} min
-                          </Typography>
+                          <Typography variant="body2" color="textSecondary"><strong>Preço:</strong> {formatCurrency(servico.preco || servico.price)}</Typography>
+                          <Typography variant="body2" color="textSecondary"><strong>Duração:</strong> {servico.duracao || servico.duration} min</Typography>
                         </Grid>
                         <Grid item xs={12} sm={6}>
                           {(servico.descricao || servico.description) && (
-                            <Typography variant="body2" color="textSecondary">
-                              <strong>Descrição:</strong> {servico.descricao || servico.description}
-                            </Typography>
+                            <Typography variant="body2" color="textSecondary"><strong>Descrição:</strong> {servico.descricao || servico.description}</Typography>
                           )}
                         </Grid>
                       </Grid>
                     }
                   />
                   
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <IconButton
-                      onClick={() => onEditServico(servico)}
-                      sx={{ color: '#1976d2' }}
-                      title="Editar serviço"
-                    >
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton onClick={() => onEditServico(servico)} sx={{ color: palette.primary }} title="Editar serviço">
                       <Edit />
                     </IconButton>
-                    <IconButton
-                      onClick={() => onDeleteServico(servico.id)}
-                      sx={{ color: '#f44336' }}
-                      title="Excluir serviço"
-                    >
+                    <IconButton onClick={() => onDeleteServico(servico.service_id)} sx={{ color: palette.error }} title="Inativar serviço">
                       <Delete />
                     </IconButton>
                   </Box>

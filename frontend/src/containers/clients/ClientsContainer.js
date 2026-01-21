@@ -4,8 +4,10 @@ import ClientsPresentational from '../../components/presentational/ClientsPresen
 import ClientModal from '../../components/presentational/ClientModal';
 import Footer from '../../components/presentational/Footer';
 import { clientService } from '../../services/clientService';
+import { useTheme } from '../../services/ThemeContext';
 
 const ClientsContainer = () => {
+  const { palette } = useTheme();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -95,7 +97,7 @@ const ClientsContainer = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: palette.background }}>
       <Box sx={{ flexGrow: 1 }}>
         <ClientsPresentational
           clients={clients}
@@ -103,6 +105,7 @@ const ClientsContainer = () => {
           onOpenModal={handleOpenModal}
           onEditClient={handleEditClient}
           onToggleStatus={handleToggleStatus}
+          palette={palette}
         />
       </Box>
       
@@ -111,6 +114,7 @@ const ClientsContainer = () => {
         onClose={handleCloseModal}
         onSave={handleSaveClient}
         editingClient={editingClient}
+        palette={palette}
       />
       
       <Snackbar

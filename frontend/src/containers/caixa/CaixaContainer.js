@@ -4,8 +4,10 @@ import CaixaPresentational from '../../components/presentational/CaixaPresentati
 import TransacaoModal from '../../components/presentational/TransacaoModal';
 import Footer from '../../components/presentational/Footer';
 import { transacaoService } from '../../services/transacaoService';
+import { useTheme } from '../../services/ThemeContext';
 
 const CaixaContainer = () => {
+  const { palette } = useTheme();
   const [transacoes, setTransacoes] = useState([]);
   const [resumo, setResumo] = useState({});
   const [loading, setLoading] = useState(false);
@@ -104,7 +106,7 @@ const CaixaContainer = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: palette.background }}>
       <Box sx={{ flexGrow: 1 }}>
         <CaixaPresentational
           transacoes={transacoes}
@@ -113,6 +115,7 @@ const CaixaContainer = () => {
           onOpenModal={handleOpenModal}
           onEditTransacao={handleEditTransacao}
           onDeleteTransacao={handleDeleteTransacao}
+          palette={palette}
         />
       </Box>
       
@@ -121,6 +124,7 @@ const CaixaContainer = () => {
         onClose={handleCloseModal}
         onSave={handleSaveTransacao}
         editingTransacao={editingTransacao}
+        palette={palette}
       />
       
       <Snackbar

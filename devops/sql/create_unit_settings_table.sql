@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS unit_settings (
     appointment_interval INT DEFAULT 30 COMMENT 'Interval in minutes',
     notifications_enabled BOOLEAN DEFAULT TRUE,
     notification_advance_hours INT DEFAULT 24,
+    kea_client_id VARCHAR(50) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id)
@@ -30,6 +31,7 @@ CREATE TABLE unit_settings (
     appointment_interval INT DEFAULT 30, -- Interval in minutes
     notifications_enabled BIT DEFAULT 1,
     notification_advance_hours INT DEFAULT 24,
+    kea_client_id NVARCHAR(50) NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );

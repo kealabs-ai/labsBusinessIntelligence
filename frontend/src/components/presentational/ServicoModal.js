@@ -13,11 +13,12 @@ import {
   MenuItem,
   Grid,
   FormControlLabel,
-  Switch
+  Switch,
+  Typography
 } from '@mui/material';
 import { Save, Cancel } from '@mui/icons-material';
 
-const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
+const ServicoModal = ({ open, onClose, onSave, editingServico, palette }) => {
   const [formData, setFormData] = useState({
     nome: '',
     categoria: '',
@@ -29,7 +30,6 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
   });
 
   const [units, setUnits] = useState([]);
-
   const [errors, setErrors] = useState({});
 
   const categorias = [
@@ -87,25 +87,11 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório';
-    }
-
-    if (!formData.categoria.trim()) {
-      newErrors.categoria = 'Categoria é obrigatória';
-    }
-
-    if (!formData.preco || parseFloat(formData.preco) <= 0) {
-      newErrors.preco = 'Preço deve ser maior que zero';
-    }
-
-    if (!formData.duracao || parseInt(formData.duracao) <= 0) {
-      newErrors.duracao = 'Duração deve ser maior que zero';
-    }
-
-    if (!formData.unit_id) {
-      newErrors.unit_id = 'Unidade é obrigatória';
-    }
+    if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório';
+    if (!formData.categoria.trim()) newErrors.categoria = 'Categoria é obrigatória';
+    if (!formData.preco || parseFloat(formData.preco) <= 0) newErrors.preco = 'Preço deve ser maior que zero';
+    if (!formData.duracao || parseInt(formData.duracao) <= 0) newErrors.duracao = 'Duração deve ser maior que zero';
+    if (!formData.unit_id) newErrors.unit_id = 'Unidade é obrigatória';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -113,16 +99,9 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
 
   const handleChange = (field) => (event) => {
     const value = field === 'status' ? event.target.checked : event.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -156,152 +135,69 @@ const ServicoModal = ({ open, onClose, onSave, editingServico }) => {
       PaperProps={{
         sx: {
           borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          bgcolor: palette.surface
         }
       }}
     >
-      <DialogTitle sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        fontWeight: 600
-      }}>
+      <DialogTitle sx={{ background: palette.gradient, color: 'white', fontWeight: 600 }}>
         {editingServico ? 'Editar Serviço' : 'Novo Serviço'}
       </DialogTitle>
       
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, backgroundColor: palette.surface }}>
         <Grid container spacing={3} sx={{ mt: 0 }}>
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Nome do Serviço"
-              value={formData.nome}
-              onChange={handleChange('nome')}
-              error={!!errors.nome}
-              helperText={errors.nome}
-              required
-            />
+            <TextField fullWidth label="Nome do Serviço" value={formData.nome} onChange={handleChange('nome')} error={!!errors.nome} helperText={errors.nome} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.categoria}>
               <InputLabel>Categoria</InputLabel>
-              <Select
-                value={formData.categoria}
-                onChange={handleChange('categoria')}
-                label="Categoria"
-              >
-                {categorias.map((categoria) => (
-                  <MenuItem key={categoria} value={categoria}>
-                    {categoria}
-                  </MenuItem>
-                ))}
+              <Select value={formData.categoria} onChange={handleChange('categoria')} label="Categoria">
+                {categorias.map((cat) => <MenuItem key={cat} value={cat}>{cat}</MenuItem>)}
               </Select>
+              {errors.categoria && <Typography variant="caption" color="error">{errors.categoria}</Typography>}
             </FormControl>
           </Grid>
           
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Descrição"
-              multiline
-              rows={3}
-              value={formData.descricao}
-              onChange={handleChange('descricao')}
-              placeholder="Descrição detalhada do serviço..."
-            />
+            <TextField fullWidth label="Descrição" multiline rows={3} value={formData.descricao} onChange={handleChange('descricao')} placeholder="Descrição detalhada do serviço..." />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Preço (R$)"
-              type="number"
-              value={formData.preco}
-              onChange={handleChange('preco')}
-              error={!!errors.preco}
-              helperText={errors.preco}
-              inputProps={{ min: 0, step: 0.01 }}
-              required
-            />
+            <TextField fullWidth label="Preço (R$)" type="number" value={formData.preco} onChange={handleChange('preco')} error={!!errors.preco} helperText={errors.preco} inputProps={{ min: 0, step: 0.01 }} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Duração (minutos)"
-              type="number"
-              value={formData.duracao}
-              onChange={handleChange('duracao')}
-              error={!!errors.duracao}
-              helperText={errors.duracao}
-              inputProps={{ min: 15, step: 15 }}
-              required
-            />
+            <TextField fullWidth label="Duração (minutos)" type="number" value={formData.duracao} onChange={handleChange('duracao')} error={!!errors.duracao} helperText={errors.duracao} inputProps={{ min: 15, step: 15 }} required />
           </Grid>
           
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth error={!!errors.unit_id}>
               <InputLabel>Unidade *</InputLabel>
-              <Select
-                value={formData.unit_id}
-                onChange={(event) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    unit_id: event.target.value
-                  }));
-                  if (errors.unit_id) {
-                    setErrors(prev => ({ ...prev, unit_id: '' }));
-                  }
-                }}
-                label="Unidade *"
-                required
-              >
-                <MenuItem value="">
-                  <em>Selecione uma unidade</em>
-                </MenuItem>
-                {units.map((unit) => (
-                  <MenuItem key={unit.id} value={unit.id}>
-                    {unit.unit_name}
-                  </MenuItem>
-                ))}
+              <Select value={formData.unit_id} onChange={handleChange('unit_id')} label="Unidade *" required>
+                <MenuItem value=""><em>Selecione uma unidade</em></MenuItem>
+                {units.map((unit) => <MenuItem key={unit.id} value={unit.id}>{unit.unit_name}</MenuItem>)}
               </Select>
+              {errors.unit_id && <Typography variant="caption" color="error">{errors.unit_id}</Typography>}
             </FormControl>
           </Grid>
           
           <Grid item xs={12} sm={6}>
             <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.status}
-                  onChange={handleChange('status')}
-                  color="primary"
-                />
-              }
+              control={<Switch checked={formData.status} onChange={handleChange('status')} color="primary" />}
               label={`Status: ${formData.status ? 'Ativo' : 'Inativo'}`}
+              sx={{ color: palette.textPrimary }}
             />
           </Grid>
         </Grid>
       </DialogContent>
       
-      <DialogActions sx={{ p: 3, gap: 1 }}>
-        <Button
-          onClick={onClose}
-          startIcon={<Cancel />}
-          sx={{ color: '#666' }}
-        >
+      <DialogActions sx={{ p: 3, gap: 1, backgroundColor: palette.surface }}>
+        <Button onClick={onClose} startIcon={<Cancel />} sx={{ color: palette.textSecondary }}>
           Cancelar
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          startIcon={<Save />}
-          sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-            }
-          }}
-        >
+        <Button onClick={handleSubmit} variant="contained" startIcon={<Save />}>
           {editingServico ? 'Atualizar' : 'Salvar'}
         </Button>
       </DialogActions>

@@ -12,7 +12,8 @@ import {
   Chip,
   TextField,
   Grid,
-  Paper
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import {
   Add,
@@ -24,14 +25,14 @@ import {
   Receipt
 } from '@mui/icons-material';
 
-
 const CaixaPresentational = ({
   transacoes,
   resumo,
   loading,
   onOpenModal,
   onEditTransacao,
-  onDeleteTransacao
+  onDeleteTransacao,
+  palette
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -50,17 +51,18 @@ const CaixaPresentational = ({
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Data não informada';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const getTransacaoIcon = (transacao) => {
     const tipo = transacao.transaction_type || transacao.tipo;
-    return tipo === 'entrada' ? <TrendingUp sx={{ color: '#4caf50' }} /> : <TrendingDown sx={{ color: '#f44336' }} />;
+    return tipo === 'entrada' ? <TrendingUp sx={{ color: palette.success }} /> : <TrendingDown sx={{ color: palette.error }} />;
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <Box sx={{ p: 3, backgroundColor: palette.background, minHeight: '100%' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: palette.gradient }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ 
             display: 'flex', 
@@ -71,10 +73,7 @@ const CaixaPresentational = ({
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <AccountBalance sx={{ fontSize: 32, color: 'white' }} />
-              <Typography variant="h4" component="h1" sx={{ 
-                fontWeight: 600,
-                color: 'white'
-              }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: 'white' }}>
                 Caixa e Transações
               </Typography>
             </Box>
@@ -82,16 +81,6 @@ const CaixaPresentational = ({
               variant="contained"
               startIcon={<Add />}
               onClick={onOpenModal}
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                },
-                borderRadius: 2,
-                px: 3,
-                py: 1
-              }}
             >
               Nova Transação
             </Button>
@@ -99,51 +88,26 @@ const CaixaPresentational = ({
         </CardContent>
       </Card>
 
-      {/* Resumo Financeiro */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-            <TrendingUp sx={{ fontSize: 40, color: '#4caf50', mb: 1 }} />
-            <Typography variant="h6" color="#4caf50">Entradas</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600 }}>
-              {formatCurrency(resumo?.total_entradas || 0)}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-            <TrendingDown sx={{ fontSize: 40, color: '#f44336', mb: 1 }} />
-            <Typography variant="h6" color="#f44336">Saídas</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600 }}>
-              {formatCurrency(resumo?.total_saidas || 0)}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-            <AccountBalance sx={{ fontSize: 40, color: '#2196f3', mb: 1 }} />
-            <Typography variant="h6" color="#2196f3">Saldo</Typography>
-            <Typography variant="h4" sx={{ 
-              fontWeight: 600,
-              color: (resumo?.saldo || 0) >= 0 ? '#4caf50' : '#f44336'
-            }}>
-              {formatCurrency(resumo?.saldo || 0)}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-            <Receipt sx={{ fontSize: 40, color: '#ff9800', mb: 1 }} />
-            <Typography variant="h6" color="#ff9800">Transações</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600 }}>
-              {resumo?.total_transacoes || 0}
-            </Typography>
-          </Paper>
-        </Grid>
+        {[
+          { icon: <TrendingUp sx={{ fontSize: 40, color: palette.success, mb: 1 }} />, title: 'Entradas', value: resumo?.total_entradas, color: palette.success },
+          { icon: <TrendingDown sx={{ fontSize: 40, color: palette.error, mb: 1 }} />, title: 'Saídas', value: resumo?.total_saidas, color: palette.error },
+          { icon: <AccountBalance sx={{ fontSize: 40, color: palette.primary, mb: 1 }} />, title: 'Saldo', value: resumo?.saldo, color: (resumo?.saldo || 0) >= 0 ? palette.success : palette.error },
+          { icon: <Receipt sx={{ fontSize: 40, color: palette.warning, mb: 1 }} />, title: 'Transações', value: resumo?.total_transacoes, color: palette.textPrimary, isCurrency: false }
+        ].map(item => (
+          <Grid item xs={12} sm={6} md={3} key={item.title}>
+            <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface, height: '100%' }}>
+              {item.icon}
+              <Typography variant="h6" sx={{ color: item.color }}>{item.title}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: item.color }}>
+                {item.isCurrency === false ? item.value || 0 : formatCurrency(item.value || 0)}
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
-      {/* Filtro */}
-      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent>
           <TextField
             fullWidth
@@ -155,11 +119,11 @@ const CaixaPresentational = ({
         </CardContent>
       </Card>
 
-      {/* Lista de Transações */}
-      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', bgcolor: palette.surface }}>
         <CardContent sx={{ p: 0 }}>
           {loading ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ p: 3, textAlign: 'center', color: palette.textPrimary }}>
+              <CircularProgress />
               <Typography>Carregando transações...</Typography>
             </Box>
           ) : filteredTransacoes.length === 0 ? (
@@ -174,11 +138,9 @@ const CaixaPresentational = ({
                 <ListItem
                   key={transacao.id}
                   sx={{
-                    borderBottom: index < filteredTransacoes.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    borderBottom: `1px solid ${palette.background}`,
                     py: 2,
-                    '&:hover': {
-                      backgroundColor: '#f8f9fa'
-                    }
+                    '&:hover': { backgroundColor: palette.background }
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
@@ -186,17 +148,12 @@ const CaixaPresentational = ({
                   </Box>
                   
                   <ListItemText
-                    sx={{ flex: 1 }}
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: palette.textPrimary }}>
                           {transacao.description || transacao.descricao}
                         </Typography>
-                        <Chip
-                          label={transacao.category || transacao.categoria}
-                          size="small"
-                          sx={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
-                        />
+                        <Chip label={transacao.category || transacao.categoria} size="small" />
                         <Chip
                           label={transacao.transaction_type || transacao.tipo}
                           size="small"
@@ -207,40 +164,22 @@ const CaixaPresentational = ({
                     secondary={
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Valor:</strong> {formatCurrency(transacao.amount || transacao.valor)}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Data:</strong> {formatDate(transacao.transaction_date || transacao.data_transacao)}
-                          </Typography>
+                          <Typography variant="body2" color="textSecondary"><strong>Valor:</strong> {formatCurrency(transacao.amount || transacao.valor)}</Typography>
+                          <Typography variant="body2" color="textSecondary"><strong>Data:</strong> {formatDate(transacao.transaction_date || transacao.data_transacao)}</Typography>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Método:</strong> {transacao.payment_method || transacao.metodo_pagamento}
-                          </Typography>
-                          {transacao.observacoes && (
-                            <Typography variant="body2" color="textSecondary">
-                              <strong>Obs:</strong> {transacao.observacoes}
-                            </Typography>
-                          )}
+                          <Typography variant="body2" color="textSecondary"><strong>Método:</strong> {transacao.payment_method || transacao.metodo_pagamento}</Typography>
+                          {transacao.observacoes && <Typography variant="body2" color="textSecondary"><strong>Obs:</strong> {transacao.observacoes}</Typography>}
                         </Grid>
                       </Grid>
                     }
                   />
                   
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <IconButton
-                      onClick={() => onEditTransacao(transacao)}
-                      sx={{ color: '#1976d2' }}
-                      title="Editar transação"
-                    >
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton onClick={() => onEditTransacao(transacao)} sx={{ color: palette.primary }} title="Editar transação">
                       <Edit />
                     </IconButton>
-                    <IconButton
-                      onClick={() => onDeleteTransacao(transacao.id)}
-                      sx={{ color: '#f44336' }}
-                      title="Excluir transação"
-                    >
+                    <IconButton onClick={() => onDeleteTransacao(transacao.id)} sx={{ color: palette.error }} title="Excluir transação">
                       <Delete />
                     </IconButton>
                   </Box>

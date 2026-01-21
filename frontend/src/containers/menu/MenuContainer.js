@@ -44,7 +44,13 @@ const MenuContainer = () => {
       path: '/agenda',
       icon: 'CalendarToday'
     },
-
+    {
+      title: 'Unidades',
+      description: 'Gerencie unidades, configurações e recursos',
+      path: '/units',
+      icon: 'Business',
+      managerAccess: true
+    },
     {
       title: 'Administrador',
       description: 'Gerencie usuários, permissões e módulos do sistema',

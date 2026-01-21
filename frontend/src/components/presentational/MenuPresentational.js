@@ -45,7 +45,14 @@ const MenuPresentational = ({ menuItems, onMenuClick, user }) => {
         </Box>
         
         <Grid container spacing={4}>
-          {menuItems.filter(item => !item.adminOnly || (user && user.role_id === 1)).map((item, index) => (
+          {menuItems.filter(item => {
+            // Administrador tem acesso a tudo
+            if (user && user.role_id === 1) return true;
+            // Gerente tem acesso a itens com managerAccess ou sem restrição
+            if (user && user.role_id === 2) return !item.adminOnly;
+            // Outros usuários não têm acesso a itens restritos
+            return !item.adminOnly && !item.managerAccess;
+          }).map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={menuStyles.menuCard}>
                 <CardContent sx={menuStyles.cardContent}>

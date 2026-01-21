@@ -30,4 +30,5 @@ INSERT INTO modules (name, description, route, icon) VALUES
 ('dashboards', 'Visualização de Dashboards', '/charts', 'BarChart'),
 ('ai_assistant', 'Assistente de IA', '/ai-prompt', 'SmartToy'),
 ('agenda', 'Gerenciamento de Agenda', '/agenda', 'CalendarToday'),
+('units', 'Gerenciamento de Unidades', '/units', 'Business'),
 ('admin', 'Painel Administrativo', '/admin', 'AdminPanelSettings');

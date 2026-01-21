@@ -1,7 +1,7 @@
-export const agendaStyles = {
+export const agendaStyles = (colorPalette) => ({
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+    background: colorPalette.backgroundColor,
     pt: 0,
     pb: 4
   },
@@ -19,7 +19,7 @@ export const agendaStyles = {
     mb: { xs: 2, sm: 4 },
     p: { xs: 2, sm: 3 },
     borderRadius: 3,
-    background: 'rgba(255, 255, 255, 0.9)',
+    background: colorPalette.backgroundCardColor,
     backdropFilter: 'blur(10px)',
     boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
     flexDirection: { xs: 'column', sm: 'row' },
@@ -30,7 +30,7 @@ export const agendaStyles = {
     fontSize: { xs: 32, sm: 40 },
     mr: { xs: 0, sm: 2 },
     mb: { xs: 1, sm: 0 },
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)`,
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent'
@@ -39,79 +39,89 @@ export const agendaStyles = {
   title: {
     fontWeight: 700,
     fontSize: { xs: '1.5rem', sm: '2.125rem' },
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)`,
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    WebkitTextFillColor: 'transparent',
+    color: colorPalette.textColor,
   },
   
   mainCard: {
     borderRadius: 3,
     boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-    background: 'rgba(255, 255, 255, 0.95)',
+    background: colorPalette.backgroundCardColor,
     backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    border: `1px solid ${colorPalette.borderColor}`,
     p: { xs: 2, sm: 3 },
     height: { xs: 'auto', md: '900px' },
-    minHeight: { xs: '600px', md: '900px' }
+    minHeight: { xs: '600px', md: '900px' },
+    color: colorPalette.textColor,
   },
   
   whatsappCard: {
     borderRadius: 3,
     boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-    background: 'rgba(255, 255, 255, 0.95)',
+    background: colorPalette.backgroundCardColor,
     backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    border: `1px solid ${colorPalette.borderColor}`,
     p: { xs: 2, sm: 3 },
     height: { xs: 'auto', md: '900px' },
-    minHeight: { xs: '600px', md: '900px' }
+    minHeight: { xs: '600px', md: '900px' },
+    color: colorPalette.textColor,
   },
   
   sectionTitle: {
     fontWeight: 600,
     mb: 2,
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    color: colorPalette.textColor,
   },
   
   calendarIcon: {
     mr: 1,
-    color: '#667eea'
+    color: colorPalette.primaryColor,
   },
   
   whatsappIcon: {
     mr: 1,
-    color: '#25D366'
+    color: colorPalette.successColor,
   },
   
   addEventSection: {
     mb: 3,
     p: 2,
     borderRadius: 2,
-    background: 'rgba(102, 126, 234, 0.05)',
-    border: '1px solid rgba(102, 126, 234, 0.1)'
+    background: colorPalette.backgroundColor,
+    border: `1px solid ${colorPalette.borderColor}`,
+    color: colorPalette.textColor,
   },
   
   textField: {
     '& .MuiOutlinedInput-root': {
       borderRadius: 2,
       '&:hover fieldset': {
-        borderColor: '#667eea'
+        borderColor: colorPalette.secondaryColor,
       },
       '&.Mui-focused fieldset': {
-        borderColor: '#667eea'
-      }
-    }
+        borderColor: colorPalette.primaryColor,
+      },
+      color: colorPalette.textColor,
+    },
+    '& .MuiInputLabel-root': {
+      color: colorPalette.textColor,
+    },
   },
   
   addButton: {
     borderRadius: 2,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)`,
     fontWeight: 600,
+    color: colorPalette.buttonTextColor,
     '&:hover': {
-      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+      background: `linear-gradient(135deg, ${colorPalette.secondaryColor} 0%, ${colorPalette.primaryColor} 100%)`,
       transform: 'translateY(-1px)',
-      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
+      boxShadow: `0 4px 12px ${colorPalette.primaryColor}66`,
     },
     transition: 'all 0.3s ease'
   },
@@ -119,33 +129,36 @@ export const agendaStyles = {
   eventItem: {
     borderRadius: 2,
     mb: 1,
-    background: 'rgba(255, 255, 255, 0.8)',
-    border: '1px solid rgba(102, 126, 234, 0.1)',
+    background: colorPalette.backgroundCardColor,
+    border: `1px solid ${colorPalette.borderColor}`,
+    color: colorPalette.textColor,
     '&:hover': {
-      background: 'rgba(102, 126, 234, 0.05)'
+      background: colorPalette.hoverColor,
     }
   },
   
   contactItem: {
     borderRadius: 2,
     mb: 1,
-    background: 'rgba(255, 255, 255, 0.8)',
-    border: '1px solid rgba(37, 211, 102, 0.2)',
+    background: colorPalette.backgroundCardColor,
+    border: `1px solid ${colorPalette.borderColor}`,
     transition: 'all 0.3s ease',
+    color: colorPalette.textColor,
     '&:hover': {
-      background: 'rgba(37, 211, 102, 0.05)',
+      background: colorPalette.hoverColor,
       transform: 'translateX(4px)'
     },
     '&.Mui-selected': {
-      background: 'rgba(37, 211, 102, 0.1)',
-      borderColor: '#25D366'
+      background: colorPalette.hoverColor,
+      borderColor: colorPalette.primaryColor,
     }
   },
   
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100%'
+    height: '100%',
+    color: colorPalette.textColor,
   },
   
   messagesArea: {
@@ -156,44 +169,53 @@ export const agendaStyles = {
     mb: 2,
     p: 1,
     borderRadius: 2,
-    background: 'rgba(245, 245, 245, 0.5)'
+    background: colorPalette.backgroundColor,
+    color: colorPalette.textColor,
   },
   
   messageCard: {
     mb: 1,
     borderRadius: 2,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    color: colorPalette.textColor,
   },
   
   sentMessage: {
     ml: { xs: 1, sm: 2 },
-    bgcolor: 'rgba(102, 126, 234, 0.1)',
-    borderLeft: '3px solid #667eea'
+    bgcolor: colorPalette.primaryColor,
+    borderLeft: `3px solid ${colorPalette.secondaryColor}`,
+    color: colorPalette.textColor,
   },
   
   receivedMessage: {
     mr: { xs: 1, sm: 2 },
-    bgcolor: 'rgba(245, 245, 245, 0.8)',
-    borderLeft: '3px solid #e0e0e0'
+    bgcolor: colorPalette.secondaryColor,
+    borderLeft: `3px solid ${colorPalette.borderColor}`,
+    color: colorPalette.textColor,
   },
   
   messageInput: {
     '& .MuiOutlinedInput-root': {
       borderRadius: 2,
       '&:hover fieldset': {
-        borderColor: '#25D366'
+        borderColor: colorPalette.secondaryColor,
       },
       '&.Mui-focused fieldset': {
-        borderColor: '#25D366'
-      }
+        borderColor: colorPalette.primaryColor,
+      },
+      color: colorPalette.textColor,
+    },
+    '& .MuiInputBase-input': {
+      color: colorPalette.textColor,
     }
   },
   
   sendButton: {
     borderRadius: 2,
-    background: '#25D366',
+    background: colorPalette.successColor,
+    color: colorPalette.textColor,
     '&:hover': {
-      background: '#20b858',
+      background: colorPalette.primaryColor,
       transform: 'scale(1.05)'
     },
     transition: 'all 0.3s ease'
@@ -204,7 +226,7 @@ export const agendaStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-    color: 'text.secondary',
+    color: colorPalette.textSecondaryColor,
     fontStyle: 'italic'
   },
   
@@ -212,9 +234,9 @@ export const agendaStyles = {
     mt: 2,
     p: 2,
     borderRadius: 2,
-    background: 'rgba(102, 126, 234, 0.05)',
-    border: '1px solid rgba(102, 126, 234, 0.1)',
-    color: 'text.secondary',
+    background: colorPalette.backgroundColor,
+    border: `1px solid ${colorPalette.borderColor}`,
+    color: colorPalette.textSecondaryColor,
     fontStyle: 'italic'
   }
-};
+});

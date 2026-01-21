@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Grid,
   Typography,
@@ -32,6 +32,8 @@ import {
 import TVModal from './TVModal';
 import NotificationModal from './NotificationModal';
 import { agendaStyles } from './AgendaPresentational.styles';
+import { useColorPalette } from '../../utils/useColorPalette';
+
 
 const AgendaPresentational = ({
   selectedDate,
@@ -56,6 +58,15 @@ const AgendaPresentational = ({
   const [messageText, setMessageText] = useState('');
   const [tvModalOpen, setTvModalOpen] = useState(false);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const colorPalette = useColorPalette();
+  
+
+
+  if (!colorPalette) {
+    return null;
+  }
+
+  const styles = agendaStyles(colorPalette);
 
   const isDateScheduled = (date) => {
     const dateStr = date.toISOString().split('T')[0];
@@ -79,12 +90,12 @@ const AgendaPresentational = ({
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-        <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <Box sx={{ p: 3, backgroundColor: colorPalette.backgroundColor }}>
+        <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)` }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <CalendarToday sx={{ fontSize: 32, color: 'white' }} />
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: 'white' }}>
+              <CalendarToday sx={{ fontSize: 32, color: colorPalette.textColor }} />
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600, color: colorPalette.textColor }}>
                 Gerenciamento de Agenda
               </Typography>
             </Box>
@@ -94,9 +105,9 @@ const AgendaPresentational = ({
         <Grid container spacing={3}>
           {/* Google Calendar */}
           <Grid item xs={12} md={6}>
-            <Card sx={agendaStyles.mainCard}>
-              <Typography variant="h6" sx={agendaStyles.sectionTitle}>
-                <CalendarToday sx={agendaStyles.calendarIcon} />
+            <Card sx={{ ...styles.mainCard, backgroundColor: colorPalette.backgroundCardColor }}>
+              <Typography variant="h6" sx={{ ...styles.sectionTitle, color: colorPalette.textColor }}>
+                <CalendarToday sx={{ ...styles.calendarIcon, color: colorPalette.primaryColor }} />
                 Agendamentos
               </Typography>
               <TextField
@@ -105,17 +116,38 @@ const AgendaPresentational = ({
                 value={searchTerm}
                 onChange={(e) => onSearch(e.target.value)}
                 placeholder="Digite o nome do cliente ou serviço..."
-                sx={{ ...agendaStyles.textField, mb: 2 }}
+                sx={{
+                  ...styles.textField,
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: colorPalette.primaryColor,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colorPalette.secondaryColor,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colorPalette.textColor,
+                  },
+                }}
               />
 
-              <Box sx={agendaStyles.addEventSection}>
-                <Typography variant="subtitle1" gutterBottom>Gerenciar Agendamentos</Typography>
+              <Box sx={styles.addEventSection}>
+                <Typography variant="subtitle1" gutterBottom sx={{ color: colorPalette.textColor }}>Gerenciar Agendamentos</Typography>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
                   onClick={onOpenModal}
                   fullWidth
-                  sx={agendaStyles.addButton}
+                  sx={{
+                    ...styles.addButton,
+                    backgroundColor: colorPalette.buttonColor,
+                    color: colorPalette.buttonTextColor,
+                    '&:hover': {
+                      backgroundColor: colorPalette.buttonHoverColor,
+                    },
+                  }}
                 >
                   ADICIONAR AGENDAMENTO
                 </Button>
@@ -123,13 +155,13 @@ const AgendaPresentational = ({
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="subtitle1">Próximos Eventos</Typography>
+                  <Typography variant="subtitle1" sx={{ color: colorPalette.textColor }}>Próximos Eventos</Typography>
                   {loading && <CircularProgress size={16} />}
                   {pagination.totalItems > 0 && (
                     <Chip 
                       label={`${pagination.totalItems} agendamentos`} 
                       size="small" 
-                      color="primary" 
+                      sx={{ backgroundColor: colorPalette.primaryColor, color: colorPalette.textColor }}
                       variant="outlined"
                     />
                   )}
@@ -138,7 +170,7 @@ const AgendaPresentational = ({
                   <IconButton
                     onClick={() => setNotificationModalOpen(true)}
                     sx={{ 
-                      color: '#FF9800',
+                      color: colorPalette.warningColor,
                       '&:hover': {
                         backgroundColor: 'rgba(255, 152, 0, 0.1)'
                       }
@@ -150,7 +182,7 @@ const AgendaPresentational = ({
                   <IconButton
                     onClick={() => setTvModalOpen(true)}
                     sx={{ 
-                      color: 'primary.main',
+                      color: colorPalette.primaryColor,
                       '&:hover': {
                         backgroundColor: 'rgba(102, 126, 234, 0.1)'
                       }
@@ -164,14 +196,15 @@ const AgendaPresentational = ({
               <List sx={{ 
                 maxHeight: { xs: '250px', sm: '600px' }, 
                 overflow: 'auto',
-                minHeight: '200px'
+                minHeight: '200px',
+                backgroundColor: colorPalette.backgroundColor,
               }}>
                 {loading ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                     <CircularProgress />
                   </Box>
                 ) : events.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                  <Box sx={{ textAlign: 'center', p: 3, color: colorPalette.textSecondaryColor }}>
                     <Typography variant="body2">
                       {searchTerm ? 'Nenhum agendamento encontrado para a busca' : 'Nenhum agendamento encontrado'}
                     </Typography>
@@ -181,7 +214,12 @@ const AgendaPresentational = ({
                     <ListItem 
                       key={event.id} 
                       sx={{
-                        ...agendaStyles.eventItem,
+                        ...styles.eventItem,
+                        backgroundColor: colorPalette.backgroundCardColor,
+                        borderBottom: `1px solid ${colorPalette.borderColor}`,
+                        '&:hover': {
+                          backgroundColor: colorPalette.hoverColor,
+                        },
                         flexDirection: { xs: 'column', sm: 'row' },
                         alignItems: { xs: 'flex-start', sm: 'center' },
                         gap: { xs: 1, sm: 0 }
@@ -191,12 +229,12 @@ const AgendaPresentational = ({
                         primary={event.title}
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography variant="body2" sx={{ color: colorPalette.textSecondaryColor }}>
                               {event.date} às {event.time} - {event.description}
                             </Typography>
                             {event.unit_name && (
                               <Typography variant="caption" sx={{ 
-                                color: 'primary.main', 
+                                color: colorPalette.primaryColor, 
                                 fontWeight: 500,
                                 display: 'block',
                                 mt: 0.5
@@ -210,7 +248,8 @@ const AgendaPresentational = ({
                           flex: 1,
                           '& .MuiListItemText-primary': {
                             fontSize: { xs: '0.9rem', sm: '1rem' },
-                            fontWeight: 500
+                            fontWeight: 500,
+                            color: colorPalette.textColor,
                           }
                         }}
                       />
@@ -222,14 +261,14 @@ const AgendaPresentational = ({
                         <IconButton
                           size="small"
                           onClick={() => onEditEvent(event)}
-                          sx={{ color: 'primary.main' }}
+                          sx={{ color: colorPalette.primaryColor }}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
                         <IconButton
                           size="small"
                           onClick={() => onDeleteEvent(event.id)}
-                          sx={{ color: 'error.main' }}
+                          sx={{ color: colorPalette.errorColor }}
                         >
                           <Delete fontSize="small" />
                         </IconButton>
@@ -257,40 +296,41 @@ const AgendaPresentational = ({
 
           {/* WhatsApp Manager */}
           <Grid item xs={12} md={6}>
-            <Card sx={{ ...agendaStyles.whatsappCard, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="h6" sx={agendaStyles.sectionTitle}>
-                <WhatsApp sx={agendaStyles.whatsappIcon} />
+            <Card sx={{ ...styles.whatsappCard, backgroundColor: colorPalette.backgroundCardColor, display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" sx={{...styles.sectionTitle, color: colorPalette.textColor }}>
+                <WhatsApp sx={{...styles.whatsappIcon, color: colorPalette.successColor }} />
                 WhatsApp Manager
               </Typography>
 
               <Grid container spacing={2} sx={{ flexGrow: 1 }}>
                 {/* Lista de Contatos */}
                 <Grid item xs={12} sm={5}>
-                  <Typography variant="subtitle2" gutterBottom>Contatos</Typography>
+                  <Typography variant="subtitle2" gutterBottom sx={{ color: colorPalette.textColor }}>Contatos</Typography>
                   <List sx={{ 
                     maxHeight: { xs: '250px', sm: '600px' }, 
                     overflow: 'auto',
                     overflowY: 'scroll',
-                    border: { xs: '1px solid #e0e0e0', sm: 'none' },
+                    border: { xs: `1px solid ${colorPalette.borderColor}`, sm: 'none' },
                     borderRadius: { xs: 1, sm: 0 },
                     minHeight: '200px',
+                    backgroundColor: colorPalette.backgroundColor,
                     '&::-webkit-scrollbar': {
                       width: '8px'
                     },
                     '&::-webkit-scrollbar-track': {
-                      background: '#f1f1f1',
+                      background: colorPalette.backgroundColor,
                       borderRadius: '4px'
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      background: '#c1c1c1',
+                      background: colorPalette.secondaryColor,
                       borderRadius: '4px',
                       '&:hover': {
-                        background: '#a8a8a8'
+                        background: colorPalette.primaryColor,
                       }
                     }
                   }}>
                     {contacts.length === 0 ? (
-                      <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                      <Box sx={{ textAlign: 'center', p: 3, color: colorPalette.textSecondaryColor }}>
                         <Typography variant="body2">
                           Nenhum contato disponível
                         </Typography>
@@ -303,10 +343,15 @@ const AgendaPresentational = ({
                           selected={selectedContact?.id === contact.id}
                           onClick={() => onSelectContact(contact)}
                           sx={{
-                            ...agendaStyles.contactItem,
+                            ...styles.contactItem,
+                            backgroundColor: colorPalette.backgroundCardColor,
+                            borderBottom: `1px solid ${colorPalette.borderColor}`,
                             py: { xs: 1, sm: 1.5 },
                             '&.Mui-selected': {
-                              backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                              backgroundColor: colorPalette.hoverColor,
+                            },
+                            '&:hover': {
+                                backgroundColor: colorPalette.hoverColor,
                             }
                           }}
                         >
@@ -316,8 +361,8 @@ const AgendaPresentational = ({
                               color="primary"
                               sx={{
                                 '& .MuiBadge-badge': {
-                                  backgroundColor: '#667eea',
-                                  color: 'white',
+                                  backgroundColor: colorPalette.primaryColor,
+                                  color: colorPalette.textColor,
                                   fontSize: '0.75rem',
                                   minWidth: '18px',
                                   height: '18px'
@@ -328,7 +373,7 @@ const AgendaPresentational = ({
                                 color={contact.online ? 'success' : 'default'}
                                 variant="dot"
                               >
-                                <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
+                                <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, backgroundColor: colorPalette.primaryColor, color: colorPalette.textColor }}>
                                   <Person />
                                 </Avatar>
                               </Badge>
@@ -340,13 +385,15 @@ const AgendaPresentational = ({
                             sx={{
                               '& .MuiListItemText-primary': {
                                 fontSize: { xs: '0.9rem', sm: '1rem' },
-                                fontWeight: 500
+                                fontWeight: 500,
+                                color: colorPalette.textColor,
                               },
                               '& .MuiListItemText-secondary': {
                                 fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                color: colorPalette.textSecondaryColor
                               }
                             }}
                           />
@@ -359,21 +406,22 @@ const AgendaPresentational = ({
                 {/* Chat */}
                 <Grid item xs={12} sm={7}>
                   {selectedContact ? (
-                    <Box sx={agendaStyles.chatContainer}>
-                      <Typography variant="subtitle2" gutterBottom>
+                    <Box sx={styles.chatContainer}>
+                      <Typography variant="subtitle2" gutterBottom sx={{ color: colorPalette.textColor }}>
                         Chat com {selectedContact.name}
                       </Typography>
                       
                       <Box sx={{ 
-                        ...agendaStyles.messagesArea, 
+                        ...styles.messagesArea, 
                         maxHeight: { xs: '300px', sm: '500px' },
                         minHeight: { xs: '200px', sm: '300px' },
                         display: 'flex',
                         flexDirection: 'column-reverse',
-                        gap: 1
+                        gap: 1,
+                        backgroundColor: colorPalette.backgroundColor,
                       }}>
                         {getContactMessages(selectedContact.id).length === 0 ? (
-                          <Box sx={{ textAlign: 'center', p: 3, color: 'text.secondary' }}>
+                          <Box sx={{ textAlign: 'center', p: 3, color: colorPalette.textSecondaryColor }}>
                             <Typography variant="body2">
                               Nenhuma mensagem encontrada
                             </Typography>
@@ -383,13 +431,13 @@ const AgendaPresentational = ({
                             <Card
                               key={msg.id}
                               sx={{
-                                ...agendaStyles.messageCard,
-                                ...(msg.sent ? agendaStyles.sentMessage : agendaStyles.receivedMessage)
+                                ...styles.messageCard,
+                                ...(msg.sent ? { ...styles.sentMessage, backgroundColor: colorPalette.primaryColor, color: colorPalette.textColor } : { ...styles.receivedMessage, backgroundColor: colorPalette.secondaryColor, color: colorPalette.textColor })
                               }}
                             >
                               <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
                                 <Typography variant="body2">{msg.message}</Typography>
-                                <Typography variant="caption" color="textSecondary">
+                                <Typography variant="caption" sx={{ color: colorPalette.textSecondaryColor }}>
                                   {msg.timestamp}
                                 </Typography>
                               </CardContent>
@@ -412,8 +460,22 @@ const AgendaPresentational = ({
                           onChange={(e) => setMessageText(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                           sx={{
-                            ...agendaStyles.messageInput,
-                            mb: { xs: 1, sm: 0 }
+                            ...styles.messageInput,
+                            mb: { xs: 1, sm: 0 },
+                             '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: colorPalette.primaryColor,
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: colorPalette.secondaryColor,
+                                },
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: colorPalette.textColor,
+                            },
+                            '& .MuiInputBase-input': {
+                                color: colorPalette.textColor,
+                            }
                           }}
                           multiline
                           maxRows={3}
@@ -424,12 +486,13 @@ const AgendaPresentational = ({
                           onClick={handleSendMessage}
                           disabled={!messageText.trim()}
                           sx={{
-                            ...agendaStyles.sendButton,
+                            ...styles.sendButton,
                             minWidth: { xs: '100%', sm: 'auto' },
                             height: { xs: '40px', sm: 'auto' },
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: `linear-gradient(135deg, ${colorPalette.primaryColor} 0%, ${colorPalette.secondaryColor} 100%)`,
+                            color: colorPalette.textColor,
                             '&:hover': {
-                              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                              background: `linear-gradient(135deg, ${colorPalette.secondaryColor} 0%, ${colorPalette.primaryColor} 100%)`
                             }
                           }}
                         >
@@ -440,17 +503,18 @@ const AgendaPresentational = ({
                     </Box>
                   ) : (
                     <Box sx={{
-                      ...agendaStyles.emptyChat,
+                      ...styles.emptyChat,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       minHeight: '400px',
                       textAlign: 'center',
-                      color: 'text.secondary'
+                      color: colorPalette.textSecondaryColor,
+                      backgroundColor: colorPalette.backgroundColor,
                     }}>
                       <Box>
                         <WhatsApp sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
-                        <Typography variant="h6" gutterBottom>
+                        <Typography variant="h6" gutterBottom sx={{ color: colorPalette.textColor }}>
                           Selecione um contato
                         </Typography>
                         <Typography variant="body2">
@@ -462,7 +526,7 @@ const AgendaPresentational = ({
                 </Grid>
               </Grid>
 
-              <Box sx={agendaStyles.tip}>
+              <Box sx={{...styles.tip, color: colorPalette.textColor, backgroundColor: colorPalette.backgroundColor }}>
                 💡 Configure notificações automáticas para eventos da agenda
               </Box>
             </Card>

@@ -4,8 +4,10 @@ import ServicosPresentational from '../../components/presentational/ServicosPres
 import ServicoModal from '../../components/presentational/ServicoModal';
 import Footer from '../../components/presentational/Footer';
 import { serviceService } from '../../services/serviceService';
+import { useTheme } from '../../services/ThemeContext';
 
 const ServicosContainer = () => {
+  const { palette } = useTheme();
   const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -93,7 +95,7 @@ const ServicosContainer = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: palette.background }}>
       <Box sx={{ flexGrow: 1 }}>
         <ServicosPresentational
           servicos={servicos}
@@ -101,6 +103,7 @@ const ServicosContainer = () => {
           onOpenModal={handleOpenModal}
           onEditServico={handleEditServico}
           onDeleteServico={handleDeleteServico}
+          palette={palette}
         />
       </Box>
       
@@ -109,6 +112,7 @@ const ServicosContainer = () => {
         onClose={handleCloseModal}
         onSave={handleSaveServico}
         editingServico={editingServico}
+        palette={palette}
       />
       
       <Snackbar
