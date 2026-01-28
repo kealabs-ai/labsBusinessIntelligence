@@ -588,11 +588,7 @@ const AgendaContainer = () => {
     { id: 'configuracoes', label: 'Configurações da Unidade', icon: <Settings /> }
   ];
 
-  const menuItems = allMenuItems.filter(item => {
-    const hasAccess = hasPermission(item.id);
-    console.log(`Menu item ${item.id}: hasPermission = ${hasAccess}`);
-    return hasAccess;
-  });
+  const menuItems = allMenuItems.filter(item => hasPermission(item.id));
 
   return (
     <Box sx={{ display: 'flex' }}>
