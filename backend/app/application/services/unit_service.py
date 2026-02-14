@@ -8,6 +8,10 @@ class UnitService:
         self.unit_repository = UnitRepository()
 
     def create_unit(self, user_id: int, role_id: int, unit_data: dict) -> Unit:
+        # Verificar se o usuário tem permissão para criar unidades (Admin=1 ou Gerente=2)
+        if role_id not in [1, 2]:
+            raise Exception("Usuário não tem permissão para criar unidades")
+            
         # Parse time strings
         opening_time = time.fromisoformat(unit_data.get('opening_time', '08:00:00'))
         closing_time = time.fromisoformat(unit_data.get('closing_time', '18:00:00'))
@@ -35,6 +39,10 @@ class UnitService:
         return self.unit_repository.get_unit_by_id(unit_id)
 
     def update_unit(self, user_id: int, role_id: int, unit_id: int, unit_data: dict) -> Unit:
+        # Verificar se o usuário tem permissão para editar unidades (Admin=1 ou Gerente=2)
+        if role_id not in [1, 2]:
+            raise Exception("Usuário não tem permissão para editar unidades")
+            
         # Parse time strings
         opening_time = time.fromisoformat(unit_data.get('opening_time', '08:00:00'))
         closing_time = time.fromisoformat(unit_data.get('closing_time', '18:00:00'))

@@ -1,7 +1,7 @@
 -- MySQL version
 CREATE TABLE IF NOT EXISTS unit_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
+    user_id INT NOT NULL,
     unit_name VARCHAR(255) NOT NULL,
     address TEXT,
     phone VARCHAR(20),
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS unit_settings (
 /*
 CREATE TABLE unit_settings (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
+    user_id INT NOT NULL,
     unit_name NVARCHAR(255) NOT NULL,
     address NTEXT,
     phone NVARCHAR(20),
