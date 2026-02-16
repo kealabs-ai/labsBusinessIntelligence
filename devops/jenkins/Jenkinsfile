@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'any'
+        }
+    }
     
     environment {
         DOCKER_REGISTRY = 'kealabsai'
@@ -35,25 +39,27 @@ pipeline {
         stage('Build Images') {
             steps {
                 script {
-                    sh '''
+                    // Usar sudo para comandos Docker se necessário
+                    def dockerCmd = sh(script: 'docker --version', returnStatus: true) == 0 ? 'docker' : 'sudo docker'
+                    
+                    sh """
                         # Verificar Docker
-                        which docker || { echo "Docker não encontrado"; exit 1; }
-                        docker --version
+                        ${dockerCmd} --version
                         
                         # Cleanup de imagens antigas
-                        docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend 2>/dev/null || true
+                        ${dockerCmd} rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend 2>/dev/null || true
                         
                         # Build Backend
                         echo "Building Backend..."
-                        docker build -t labsbusinessintelligence_backend ./backend
+                        ${dockerCmd} build -t labsbusinessintelligence_backend ./backend
                         
                         # Build Frontend
                         echo "Building Frontend..."
-                        docker build -t labsbusinessintelligence_frontend ./frontend
+                        ${dockerCmd} build -t labsbusinessintelligence_frontend ./frontend
                         
                         # Verificar imagens criadas
-                        docker images | grep labsbusinessintelligence
-                    '''
+                        ${dockerCmd} images | grep labsbusinessintelligence
+                    """
                 }
             }
         }
