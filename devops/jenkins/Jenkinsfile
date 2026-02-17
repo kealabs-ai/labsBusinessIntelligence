@@ -37,21 +37,21 @@ pipeline {
                 script {
                     sh """
                         # Verificar Docker
-                        docker --version
+                        sudo docker --version
                         
                         # Cleanup de imagens antigas
-                        docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend 2>/dev/null || true
+                        sudo docker rmi labsbusinessintelligence_backend labsbusinessintelligence_frontend 2>/dev/null || true
                         
                         # Build Backend
                         echo "Building Backend..."
-                        docker build -t labsbusinessintelligence_backend ./backend
+                        sudo docker build -t labsbusinessintelligence_backend ./backend
                         
                         # Build Frontend
                         echo "Building Frontend..."
-                        docker build -t labsbusinessintelligence_frontend ./frontend
+                        sudo docker build -t labsbusinessintelligence_frontend ./frontend
                         
                         # Verificar imagens criadas
-                        docker images | grep labsbusinessintelligence
+                        sudo docker images | grep labsbusinessintelligence
                     """
                 }
             }
@@ -76,7 +76,7 @@ pipeline {
                         echo "Executando testes básicos..."
                         
                         # Teste básico do backend
-                        docker run --rm \
+                        sudo docker run --rm \
                             -e DB_ENGINE=mysql \
                             -e MYSQL_HOST=72.60.140.128 \
                             -e MYSQL_PORT=33060 \
@@ -113,14 +113,14 @@ pipeline {
                         echo "Iniciando deploy para DEV..."
                         
                         # Criar network se não existir
-                        docker network create labsbi_network 2>/dev/null || echo "Network já existe"
+                        sudo docker network create labsbi_network 2>/dev/null || echo "Network já existe"
                         
                         # Parar containers existentes
-                        docker stop labsbi_backend labsbi_frontend 2>/dev/null || true
-                        docker rm labsbi_backend labsbi_frontend 2>/dev/null || true
+                        sudo docker stop labsbi_backend labsbi_frontend 2>/dev/null || true
+                        sudo docker rm labsbi_backend labsbi_frontend 2>/dev/null || true
                         
                         # Iniciar Backend
-                        docker run -d --name labsbi_backend \
+                        sudo docker run -d --name labsbi_backend \
                             --network labsbi_network \
                             --restart unless-stopped \
                             -e DB_ENGINE=mysql \
@@ -140,7 +140,7 @@ pipeline {
                         sleep 15
                         
                         # Iniciar Frontend
-                        docker run -d --name labsbi_frontend \
+                        sudo docker run -d --name labsbi_frontend \
                             --network labsbi_network \
                             --restart unless-stopped \
                             -e REACT_APP_API_URL=http://72.60.140.128:6002 \
@@ -153,13 +153,13 @@ pipeline {
                         
                         # Verificação de status
                         echo "=== STATUS DOS CONTAINERS ==="
-                        docker ps --filter name=labsbi
+                        sudo docker ps --filter name=labsbi
                         
                         echo "=== LOGS DO BACKEND ==="
-                        docker logs labsbi_backend --tail=15
+                        sudo docker logs labsbi_backend --tail=15
                         
                         echo "=== LOGS DO FRONTEND ==="
-                        docker logs labsbi_frontend --tail=15
+                        sudo docker logs labsbi_frontend --tail=15
                         
                         # Teste de conectividade
                         echo "=== TESTE DE CONECTIVIDADE ==="
